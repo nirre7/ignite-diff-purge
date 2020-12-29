@@ -1,5 +1,5 @@
 # project
-#IgniteDiffApp/
+IgniteDiffApp/
 .idea/
 
 # macOS
@@ -9,5 +9,5 @@
 node_modules/
 
 # git worktree
-#wt-app/
-#wt-diffs/
+wt-app/
+wt-diffs/
