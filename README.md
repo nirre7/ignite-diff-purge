@@ -5,7 +5,7 @@
 ## What?
 
 This repository exposes an untouched Ignite based app generated with the ignite-cli
-`npx ignite new IgniteDiffApp -b ignite-bowser --detox`. Each new Ignite release causes a new project to be created, removing the old one, and getting a diff between them. This way, the diff is always clean, always in sync with the changes of the init template.
+`npx ignite-cli new IgniteDiffApp`. Each new Ignite release causes a new project to be created, removing the old one, and getting a diff between them. This way, the diff is always clean, always in sync with the changes of the init template.
 
 ## Diff table
 
