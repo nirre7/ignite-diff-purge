@@ -9,9 +9,10 @@ This repository exposes an untouched Ignite based app generated with the ignite-
 
 ## Diff table
 
-| From->To | I   |     | L   | O   | V   | E   |     | D   | I   | F   | F   | S   |
-| -------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 5.4.1    | X   |     |     |     |     |     |     |     |     |     |     |     |
+| From->To | I                                                                                           |     | L   | O   | V   | E   |     | D   | I   | F   | F   | S   |
+| -------- | ------------------------------------------------------------------------------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 6.0.0    | X                                                                                           | -   |     |     |     |     |     |     |     |     |     |     |
+| 5.4.1    | [->6.0.0](https://github.com/nirre7/ignite-diff-purge/compare/release/5.4.1..release/6.0.0) | X   |     |     |     |     |     |     |     |     |     |     |
 
 ## To see the full table containing all releases click [HERE](https://nirre7.github.io/ignite-diff-purge/)
 
