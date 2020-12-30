@@ -19,6 +19,7 @@ This repository exposes an untouched Ignite based app generated with the ignite-
 ## Notes
 
 - The diffs start with the latest version of ignite-bowser, 5.4.1 all versions after this version is based on the updated ignite-cli which has an integrated boilerplate
+- For Ignite Bowser diffs please click [HERE](https://github.com/nirre7/ignite-bowser-diff-purge)
 
 ### How did you do this?
 
