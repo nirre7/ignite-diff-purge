@@ -1,6 +1,8 @@
 # Ignite diff PURGE
 
-[ignite](https://github.com/infinitered/ignite) based customized version of [rn-diff-purge](https://github.com/react-native-community/rn-diff-purge/), all credit should go to the authors of that great tool!
+[Ignite](https://github.com/infinitered/ignite) based customized version of [rn-diff-purge](https://github.com/react-native-community/rn-diff-purge/), all credit should go to the authors of that great tool!
+
+For Ignite with Expo please click [HERE](https://github.com/nirre7/ignite-expo-diff-purge)
 
 ## What?
 
