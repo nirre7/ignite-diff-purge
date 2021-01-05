@@ -1,0 +1,59 @@
+diff --git a/IgniteDiffApp/app/screens/demo/demo-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+index d282fc9..c0bcc31 100644
+--- a/IgniteDiffApp/app/screens/demo/demo-screen.tsx
++++ b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+@@ -77,6 +77,11 @@ const HINT: TextStyle = {
+   marginVertical: spacing[2],
+ }
+ 
++const platformCommand = Platform.select({
++  ios: "Cmd + D",
++  android: "Cmd/Ctrl + M",
++})
++
+ export const DemoScreen = observer(function DemoScreen() {
+   const navigation = useNavigation()
+   const goBack = () => navigation.goBack()
+@@ -134,8 +139,11 @@ export const DemoScreen = observer(function DemoScreen() {
+         />
+         <Text style={TITLE} preset="header" tx="demoScreen.title" />
+         <Text style={TAGLINE} tx="demoScreen.tagLine" />
+-        <BulletItem text="Load up Reactotron!  You can inspect your app, view the events, interact, and so much more!" />
+         <BulletItem text="Integrated here, Navigation with State, TypeScript, Storybook, Solidarity, and i18n." />
++        <BulletItem
++          text={`To run Storybook, press ${platformCommand} or shake the device to show the developer menu, then select "Toggle Storybook"`}
++        />
++        <BulletItem text="Load up Reactotron!  You can inspect your app, view the events, interact, and so much more!" />
+         <View>
+           <Button
+             style={DEMO}
+diff --git a/IgniteDiffApp/assets/fonts/custom-fonts.md b/IgniteDiffApp/assets/fonts/custom-fonts.md
+index 5f71780..da69cba 100644
+--- a/IgniteDiffApp/assets/fonts/custom-fonts.md
++++ b/IgniteDiffApp/assets/fonts/custom-fonts.md
+@@ -1,10 +1,10 @@
+-# Instructions for adding custom fonts to your ignite-boswer app:
++# Instructions for adding custom fonts to your ignite app:
+ 
+ ## For Expo Projects
+ 
+ You're lucky. Most of the work is done for you. Just download the `TTF` or `OTF` files you want to use, place them in `./app/theme/fonts/` and load them in the `index.ts` file in that same directory.
+ 
+-ignote integrated `expo-fonts` according to [this guide](https://docs.expo.io/versions/latest/sdk/font/).
++ignite integrated `expo-fonts` according to [this guide](https://docs.expo.io/versions/latest/sdk/font/).
+ 
+ ## For Non-Expo Projects
+ 
+diff --git a/IgniteDiffApp/test/i18n.test.ts b/IgniteDiffApp/test/i18n.test.ts
+index 7559790..61a4963 100644
+--- a/IgniteDiffApp/test/i18n.test.ts
++++ b/IgniteDiffApp/test/i18n.test.ts
+@@ -44,7 +44,7 @@ describe("i18n", () => {
+   test("There are no missing keys", (done) => {
+     // Actual command output:
+     // grep "Tx=\"\S*\"\|tx=\"\S*\"\|translate(\"\S*\"" -ohr './app' | grep -o "\".*\""
+-    const command = `grep "Tx=\\"\\S*\\"\\|tx=\\"\\S*\\"\\|translate(\\"\\S*\\"" -ohr '../app' | grep -o "\\".*\\""`
++    const command = `grep "Tx=\\"\\S*\\"\\|tx=\\"\\S*\\"\\|translate(\\"\\S*\\"" -ohr './app' | grep -o "\\".*\\""`
+     exec(command, (_, stdout) => {
+       const allTranslationsDefined = iterate(en, "", [])
+       const allTranslationsUsed = stdout.replace(/"/g, "").split("\n")
