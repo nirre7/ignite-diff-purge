@@ -1,0 +1,78 @@
+diff --git a/IgniteDiffApp/app/screens/demo/demo-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+index c0bcc31..d282fc9 100644
+--- a/IgniteDiffApp/app/screens/demo/demo-screen.tsx
++++ b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+@@ -77,11 +77,6 @@ const HINT: TextStyle = {
+   marginVertical: spacing[2],
+ }
+ 
+-const platformCommand = Platform.select({
+-  ios: "Cmd + D",
+-  android: "Cmd/Ctrl + M",
+-})
+-
+ export const DemoScreen = observer(function DemoScreen() {
+   const navigation = useNavigation()
+   const goBack = () => navigation.goBack()
+@@ -139,11 +134,8 @@ export const DemoScreen = observer(function DemoScreen() {
+         />
+         <Text style={TITLE} preset="header" tx="demoScreen.title" />
+         <Text style={TAGLINE} tx="demoScreen.tagLine" />
+-        <BulletItem text="Integrated here, Navigation with State, TypeScript, Storybook, Solidarity, and i18n." />
+-        <BulletItem
+-          text={`To run Storybook, press ${platformCommand} or shake the device to show the developer menu, then select "Toggle Storybook"`}
+-        />
+         <BulletItem text="Load up Reactotron!  You can inspect your app, view the events, interact, and so much more!" />
++        <BulletItem text="Integrated here, Navigation with State, TypeScript, Storybook, Solidarity, and i18n." />
+         <View>
+           <Button
+             style={DEMO}
+diff --git a/IgniteDiffApp/assets/fonts/custom-fonts.md b/IgniteDiffApp/assets/fonts/custom-fonts.md
+index da69cba..5f71780 100644
+--- a/IgniteDiffApp/assets/fonts/custom-fonts.md
++++ b/IgniteDiffApp/assets/fonts/custom-fonts.md
+@@ -1,10 +1,10 @@
+-# Instructions for adding custom fonts to your ignite app:
++# Instructions for adding custom fonts to your ignite-boswer app:
+ 
+ ## For Expo Projects
+ 
+ You're lucky. Most of the work is done for you. Just download the `TTF` or `OTF` files you want to use, place them in `./app/theme/fonts/` and load them in the `index.ts` file in that same directory.
+ 
+-ignite integrated `expo-fonts` according to [this guide](https://docs.expo.io/versions/latest/sdk/font/).
++ignote integrated `expo-fonts` according to [this guide](https://docs.expo.io/versions/latest/sdk/font/).
+ 
+ ## For Non-Expo Projects
+ 
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index a64791e..a050c3b 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -9,10 +9,10 @@
+     "ci:build:e2e": "detox build -c ios.sim.release",
+     "compile": "tsc --noEmit -p . --pretty",
+     "format": "npm-run-all format:*",
+-    "format:js": "prettier --write \"**/*.js\"",
+-    "format:json": "prettier --write \"**/*.json\"",
+-    "format:md": "prettier --write \"**/*.md\"",
+-    "format:ts": "prettier --write \"**/*.ts{,x}\"",
++    "format:js": "prettier --write '**/*.js'",
++    "format:json": "prettier --write '**/*.json'",
++    "format:md": "prettier --write '**/*.md'",
++    "format:ts": "prettier --write '**/*.ts{,x}'",
+     "hack:types-react-navigation": "rimraf node_modules/@types/react-navigation/node_modules/@types",
+     "hack:types-react-native": "rimraf node_modules/@types/react-native/node_modules/@types",
+     "hack:types-react-test-renderer": "rimraf node_modules/@types/react-test-renderer/node_modules/@types",
+diff --git a/IgniteDiffApp/test/i18n.test.ts b/IgniteDiffApp/test/i18n.test.ts
+index 61a4963..7559790 100644
+--- a/IgniteDiffApp/test/i18n.test.ts
++++ b/IgniteDiffApp/test/i18n.test.ts
+@@ -44,7 +44,7 @@ describe("i18n", () => {
+   test("There are no missing keys", (done) => {
+     // Actual command output:
+     // grep "Tx=\"\S*\"\|tx=\"\S*\"\|translate(\"\S*\"" -ohr './app' | grep -o "\".*\""
+-    const command = `grep "Tx=\\"\\S*\\"\\|tx=\\"\\S*\\"\\|translate(\\"\\S*\\"" -ohr './app' | grep -o "\\".*\\""`
++    const command = `grep "Tx=\\"\\S*\\"\\|tx=\\"\\S*\\"\\|translate(\\"\\S*\\"" -ohr '../app' | grep -o "\\".*\\""`
+     exec(command, (_, stdout) => {
+       const allTranslationsDefined = iterate(en, "", [])
+       const allTranslationsUsed = stdout.replace(/"/g, "").split("\n")
