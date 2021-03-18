@@ -1,0 +1,95 @@
+diff --git a/IgniteDiffApp/README.md b/IgniteDiffApp/README.md
+index d3f75d3..aaeb18c 100644
+--- a/IgniteDiffApp/README.md
++++ b/IgniteDiffApp/README.md
+@@ -25,7 +25,7 @@ ignite-project
+ │   ├── i18n
+ │   ├── utils
+ │   ├── models
+-│   ├── navigation
++│   ├── navigators
+ │   ├── screens
+ │   ├── services
+ │   ├── theme
+@@ -79,7 +79,7 @@ app
+ │── components
+ │── i18n
+ ├── models
+-├── navigation
++├── navigators
+ ├── screens
+ ├── services
+ ├── theme
+@@ -96,7 +96,7 @@ This is where your translations will live if you are using `react-native-i18n`.
+ **models**
+ This is where your app's models will live. Each model has a directory which will contain the `mobx-state-tree` model file, test file, and any other supporting files like actions, types, etc.
+ 
+-**navigation**
++**navigators**
+ This is where your `react-navigation` navigators will live.
+ 
+ **screens**
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index d335b18..9d8e943 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -6,7 +6,7 @@
+  * it very often. But take some time to look through and understand
+  * what is going on here.
+  *
+- * The app navigation resides in ./app/navigation, so head over there
++ * The app navigation resides in ./app/navigators, so head over there
+  * if you're interested in adding screens and navigators.
+  */
+ import "./i18n"
+@@ -22,7 +22,7 @@ import {
+   canExit,
+   setRootNavigation,
+   useNavigationPersistence,
+-} from "./navigation"
++} from "./navigators"
+ import { RootStore, RootStoreProvider, setupRootStore } from "./models"
+ import { ToggleStorybook } from "../storybook/toggle-storybook"
+ 
+diff --git a/IgniteDiffApp/app/navigation/index.ts b/IgniteDiffApp/app/navigators/index.ts
+similarity index 100%
+rename from IgniteDiffApp/app/navigation/index.ts
+rename to IgniteDiffApp/app/navigators/index.ts
+diff --git a/IgniteDiffApp/app/navigation/main-navigator.tsx b/IgniteDiffApp/app/navigators/main-navigator.tsx
+similarity index 100%
+rename from IgniteDiffApp/app/navigation/main-navigator.tsx
+rename to IgniteDiffApp/app/navigators/main-navigator.tsx
+diff --git a/IgniteDiffApp/app/navigation/navigation-utilities.tsx b/IgniteDiffApp/app/navigators/navigation-utilities.tsx
+similarity index 100%
+rename from IgniteDiffApp/app/navigation/navigation-utilities.tsx
+rename to IgniteDiffApp/app/navigators/navigation-utilities.tsx
+diff --git a/IgniteDiffApp/app/navigation/root-navigator.tsx b/IgniteDiffApp/app/navigators/root-navigator.tsx
+similarity index 100%
+rename from IgniteDiffApp/app/navigation/root-navigator.tsx
+rename to IgniteDiffApp/app/navigators/root-navigator.tsx
+diff --git a/IgniteDiffApp/app/services/reactotron/reactotron.ts b/IgniteDiffApp/app/services/reactotron/reactotron.ts
+index 175746a..f696ca7 100644
+--- a/IgniteDiffApp/app/services/reactotron/reactotron.ts
++++ b/IgniteDiffApp/app/services/reactotron/reactotron.ts
+@@ -5,7 +5,7 @@ import { onSnapshot } from "mobx-state-tree"
+ import { ReactotronConfig, DEFAULT_REACTOTRON_CONFIG } from "./reactotron-config"
+ import { mst } from "reactotron-mst"
+ import { clear } from "../../utils/storage"
+-import { RootNavigation } from "../../navigation"
++import { RootNavigation } from "../../navigators"
+ 
+ // Teach TypeScript about the bad things we want to do.
+ declare global {
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 15a70f5..af94b28 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -122,7 +122,7 @@
+     "test-runner": "jest",
+     "configurations": {
+       "ios.sim.debug": {
+-        "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/IgniteDiffApp.app",
++        "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/ignitediffapp.app",
+         "build": "xcodebuild -workspace ios/IgniteDiffApp.xcworkspace -scheme IgniteDiffApp -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -destination 'name=iPhone 11'",
+         "type": "ios.simulator",
+         "name": "iPhone 11"
