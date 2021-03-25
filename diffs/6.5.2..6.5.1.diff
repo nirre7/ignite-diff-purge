@@ -1,0 +1,24 @@
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 6a9808a..d2be4af 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -14,6 +14,9 @@
+     "format:json": "prettier --write \"**/*.json\"",
+     "format:md": "prettier --write \"**/*.md\"",
+     "format:ts": "prettier --write \"**/*.ts{,x}\"",
++    "hack:types-react-navigation": "rimraf node_modules/@types/react-navigation/node_modules/@types",
++    "hack:types-react-native": "rimraf node_modules/@types/react-native/node_modules/@types",
++    "hack:types-react-test-renderer": "rimraf node_modules/@types/react-test-renderer/node_modules/@types",
+     "lint": "eslint index.js app storybook test --fix --ext .js,.ts,.tsx && yarn format",
+     "patch": "patch-package",
+     "storybook": "start-storybook -p 9001 -c ./storybook",
+@@ -21,7 +24,8 @@
+     "adb": "adb reverse tcp:9090 tcp:9090 && adb reverse tcp:3000 tcp:3000 && adb reverse tcp:9001 tcp:9001 && adb reverse tcp:8081 tcp:8081",
+     "postinstall": "node ./bin/postInstall",
+     "build-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
+-    "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
++    "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
++    "prepare": "npm-run-all patch hack:*"
+   },
+   "dependencies": {
+     "@react-native-async-storage/async-storage": "^1.14.1",
