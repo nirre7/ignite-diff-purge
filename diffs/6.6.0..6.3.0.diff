@@ -1,0 +1,897 @@
+diff --git a/IgniteDiffApp/README.md b/IgniteDiffApp/README.md
+index aaeb18c..d3f75d3 100644
+--- a/IgniteDiffApp/README.md
++++ b/IgniteDiffApp/README.md
+@@ -25,7 +25,7 @@ ignite-project
+ │   ├── i18n
+ │   ├── utils
+ │   ├── models
+-│   ├── navigators
++│   ├── navigation
+ │   ├── screens
+ │   ├── services
+ │   ├── theme
+@@ -79,7 +79,7 @@ app
+ │── components
+ │── i18n
+ ├── models
+-├── navigators
++├── navigation
+ ├── screens
+ ├── services
+ ├── theme
+@@ -96,7 +96,7 @@ This is where your translations will live if you are using `react-native-i18n`.
+ **models**
+ This is where your app's models will live. Each model has a directory which will contain the `mobx-state-tree` model file, test file, and any other supporting files like actions, types, etc.
+ 
+-**navigators**
++**navigation**
+ This is where your `react-navigation` navigators will live.
+ 
+ **screens**
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index 9d8e943..d335b18 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -6,7 +6,7 @@
+  * it very often. But take some time to look through and understand
+  * what is going on here.
+  *
+- * The app navigation resides in ./app/navigators, so head over there
++ * The app navigation resides in ./app/navigation, so head over there
+  * if you're interested in adding screens and navigators.
+  */
+ import "./i18n"
+@@ -22,7 +22,7 @@ import {
+   canExit,
+   setRootNavigation,
+   useNavigationPersistence,
+-} from "./navigators"
++} from "./navigation"
+ import { RootStore, RootStoreProvider, setupRootStore } from "./models"
+ import { ToggleStorybook } from "../storybook/toggle-storybook"
+ 
+diff --git a/IgniteDiffApp/app/components/button/button.props.ts b/IgniteDiffApp/app/components/button/button.props.ts
+index c7ce16d..3541d30 100644
+--- a/IgniteDiffApp/app/components/button/button.props.ts
++++ b/IgniteDiffApp/app/components/button/button.props.ts
+@@ -1,12 +1,11 @@
+ import { ViewStyle, TextStyle, TouchableOpacityProps } from "react-native"
+ import { ButtonPresetNames } from "./button.presets"
+-import { TxKeyPath } from "../../i18n"
+ 
+ export interface ButtonProps extends TouchableOpacityProps {
+   /**
+    * Text which is looked up via i18n.
+    */
+-  tx?: TxKeyPath
++  tx?: string
+ 
+   /**
+    * The text to display if not using `tx` or nested components.
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+index 9744c0f..7e20dcf 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+@@ -1,5 +1,4 @@
+ import { ViewStyle } from "react-native"
+-import { TxKeyPath } from "../../i18n"
+ 
+ export interface CheckboxProps {
+   /**
+@@ -30,7 +29,7 @@ export interface CheckboxProps {
+   /**
+    * The i18n lookup key.
+    */
+-  tx?: TxKeyPath
++  tx?: string
+ 
+   /**
+    * Multiline or clipped single line?
+diff --git a/IgniteDiffApp/app/components/header/header.props.ts b/IgniteDiffApp/app/components/header/header.props.ts
+index 7601e53..30f5da8 100644
+--- a/IgniteDiffApp/app/components/header/header.props.ts
++++ b/IgniteDiffApp/app/components/header/header.props.ts
+@@ -1,12 +1,11 @@
+ import { ViewStyle, TextStyle } from "react-native"
+ import { IconTypes } from "../icon/icons"
+-import { TxKeyPath } from "../../i18n"
+ 
+ export interface HeaderProps {
+   /**
+    * Main header, e.g. POWERED BY IGNITE
+    */
+-  headerTx?: TxKeyPath
++  headerTx?: string
+ 
+   /**
+    * header non-i18n
+diff --git a/IgniteDiffApp/app/components/text-field/text-field.tsx b/IgniteDiffApp/app/components/text-field/text-field.tsx
+index 2ebba59..717d1f5 100644
+--- a/IgniteDiffApp/app/components/text-field/text-field.tsx
++++ b/IgniteDiffApp/app/components/text-field/text-field.tsx
+@@ -1,7 +1,7 @@
+ import React from "react"
+ import { TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+ import { color, spacing, typography } from "../../theme"
+-import { translate, TxKeyPath } from "../../i18n"
++import { translate } from "../../i18n"
+ import { Text } from "../text/text"
+ import { mergeAll, flatten } from "ramda"
+ 
+@@ -28,7 +28,7 @@ export interface TextFieldProps extends TextInputProps {
+   /**
+    * The placeholder i18n key.
+    */
+-  placeholderTx?: TxKeyPath
++  placeholderTx?: string
+ 
+   /**
+    * The Placeholder text if no placeholderTx is provided.
+@@ -38,7 +38,7 @@ export interface TextFieldProps extends TextInputProps {
+   /**
+    * The label i18n key.
+    */
+-  labelTx?: TxKeyPath
++  labelTx?: string
+ 
+   /**
+    * The label text if no labelTx is provided.
+diff --git a/IgniteDiffApp/app/components/text/text.props.ts b/IgniteDiffApp/app/components/text/text.props.ts
+index 298ebc1..bad2c14 100644
+--- a/IgniteDiffApp/app/components/text/text.props.ts
++++ b/IgniteDiffApp/app/components/text/text.props.ts
+@@ -1,6 +1,5 @@
+ import { TextStyle, TextProps as TextProperties } from "react-native"
+ import { TextPresets } from "./text.presets"
+-import { TxKeyPath } from "../../i18n"
+ 
+ export interface TextProps extends TextProperties {
+   /**
+@@ -11,7 +10,7 @@ export interface TextProps extends TextProperties {
+   /**
+    * Text which is looked up via i18n.
+    */
+-  tx?: TxKeyPath
++  tx?: string
+ 
+   /**
+    * Optional options to pass to i18n. Useful for interpolation
+diff --git a/IgniteDiffApp/app/i18n/en.json b/IgniteDiffApp/app/i18n/en.json
+index be5c35c..c623dd7 100644
+--- a/IgniteDiffApp/app/i18n/en.json
++++ b/IgniteDiffApp/app/i18n/en.json
+@@ -17,15 +17,8 @@
+     "title": "What’s In This Stack?",
+     "tagLine": "Congratulations, you’ve got a very advanced React Native app template here.  Take advantage of this boilerplate!",
+     "reactotron": "Demo Reactotron",
+-    "demoList": "Demo List",
+     "androidReactotronHint": "If this doesn't work, ensure the Reactotron desktop app is running, run adb reverse tcp:9090 tcp:9090 from your terminal, and reload the app.",
+-    "iosReactotronHint": "If this doesn't work, ensure the Reactotron desktop app is running and reload app.",
+-    "macosReactotronHint": "If this doesn't work, ensure the Reactotron desktop app is running and reload app.",
+-    "webReactotronHint": "If this doesn't work, ensure the Reactotron desktop app is running and reload app.",
+-    "windowsReactotronHint": "If this doesn't work, ensure the Reactotron desktop app is running and reload app."
+-  },
+-  "demoListScreen": {
+-    "title": "Demo List"
++    "iosReactotronHint": "If this doesn't work, ensure the Reactotron desktop app is running and reload app."
+   },
+   "storybook": {
+     "placeholder": "Placeholder",
+diff --git a/IgniteDiffApp/app/i18n/i18n.ts b/IgniteDiffApp/app/i18n/i18n.ts
+index a563bbb..ffb28f5 100644
+--- a/IgniteDiffApp/app/i18n/i18n.ts
++++ b/IgniteDiffApp/app/i18n/i18n.ts
+@@ -1,22 +1,10 @@
+ import * as Localization from "expo-localization"
+ import i18n from "i18n-js"
+-import en from "./en.json"
+-import ja from "./ja.json"
++
++const en = require("./en")
++const ja = require("./ja")
+ 
+ i18n.fallbacks = true
+ i18n.translations = { en, ja }
+ 
+ i18n.locale = Localization.locale || "en"
+-
+-/**
+- * Builds up valid keypaths for translations.
+- * Update to your default locale of choice if not English.
+- */
+-type DefaultLocale = typeof en
+-export type TxKeyPath = RecursiveKeyOf<DefaultLocale>
+-
+-type RecursiveKeyOf<TObj extends Record<string, any>> = {
+-  [TKey in keyof TObj & string]: TObj[TKey] extends Record<string, any>
+-    ? `${TKey}` | `${TKey}.${RecursiveKeyOf<TObj[TKey]>}`
+-    : `${TKey}`
+-}[keyof TObj & string]
+diff --git a/IgniteDiffApp/app/i18n/index.ts b/IgniteDiffApp/app/i18n/index.ts
+index fbfba4e..e4a145a 100644
+--- a/IgniteDiffApp/app/i18n/index.ts
++++ b/IgniteDiffApp/app/i18n/index.ts
+@@ -1,3 +1,2 @@
+ import "./i18n"
+-export * from "./i18n"
+ export * from "./translate"
+diff --git a/IgniteDiffApp/app/i18n/translate.ts b/IgniteDiffApp/app/i18n/translate.ts
+index 52de684..95d5e0c 100644
+--- a/IgniteDiffApp/app/i18n/translate.ts
++++ b/IgniteDiffApp/app/i18n/translate.ts
+@@ -1,11 +1,10 @@
+ import i18n from "i18n-js"
+-import { TxKeyPath } from "./i18n"
+ 
+ /**
+  * Translates text.
+  *
+  * @param key The i18n key.
+  */
+-export function translate(key: TxKeyPath, options?: I18n.TranslateOptions) {
++export function translate(key: string, options?: I18n.TranslateOptions) {
+   return key ? i18n.t(key, options) : null
+ }
+diff --git a/IgniteDiffApp/app/models/character-store/character-store.test.ts b/IgniteDiffApp/app/models/character-store/character-store.test.ts
+deleted file mode 100644
+index 6d82079..0000000
+--- a/IgniteDiffApp/app/models/character-store/character-store.test.ts
++++ /dev/null
+@@ -1,7 +0,0 @@
+-import { CharacterStoreModel } from "./character-store"
+-
+-test("can be created", () => {
+-  const instance = CharacterStoreModel.create({})
+-
+-  expect(instance).toBeTruthy()
+-})
+diff --git a/IgniteDiffApp/app/models/character-store/character-store.ts b/IgniteDiffApp/app/models/character-store/character-store.ts
+deleted file mode 100644
+index bd92615..0000000
+--- a/IgniteDiffApp/app/models/character-store/character-store.ts
++++ /dev/null
+@@ -1,37 +0,0 @@
+-import { Instance, SnapshotOut, types } from "mobx-state-tree"
+-import { CharacterModel, CharacterSnapshot } from "../character/character"
+-import { CharacterApi } from "../../services/api/character-api"
+-import { withEnvironment } from "../extensions/with-environment"
+-
+-/**
+- * Example store containing Rick and Morty characters
+- */
+-export const CharacterStoreModel = types
+-  .model("CharacterStore")
+-  .props({
+-    characters: types.optional(types.array(CharacterModel), []),
+-  })
+-  .extend(withEnvironment)
+-  .actions((self) => ({
+-    saveCharacters: (characterSnapshots: CharacterSnapshot[]) => {
+-      self.characters.replace(characterSnapshots)
+-    },
+-  }))
+-  .actions((self) => ({
+-    getCharacters: async () => {
+-      const characterApi = new CharacterApi(self.environment.api)
+-      const result = await characterApi.getCharacters()
+-
+-      if (result.kind === "ok") {
+-        self.saveCharacters(result.characters)
+-      } else {
+-        __DEV__ && console.tron.log(result.kind)
+-      }
+-    },
+-  }))
+-
+-type CharacterStoreType = Instance<typeof CharacterStoreModel>
+-export interface CharacterStore extends CharacterStoreType {}
+-type CharacterStoreSnapshotType = SnapshotOut<typeof CharacterStoreModel>
+-export interface CharacterStoreSnapshot extends CharacterStoreSnapshotType {}
+-export const createCharacterStoreDefaultModel = () => types.optional(CharacterStoreModel, {})
+diff --git a/IgniteDiffApp/app/models/character/character.test.ts b/IgniteDiffApp/app/models/character/character.test.ts
+deleted file mode 100644
+index 2f330b4..0000000
+--- a/IgniteDiffApp/app/models/character/character.test.ts
++++ /dev/null
+@@ -1,10 +0,0 @@
+-import { CharacterModel } from "./character"
+-
+-test("can be created", () => {
+-  const instance = CharacterModel.create({
+-    id: 1,
+-    name: "Rick Sanchez",
+-  })
+-
+-  expect(instance).toBeTruthy()
+-})
+diff --git a/IgniteDiffApp/app/models/character/character.ts b/IgniteDiffApp/app/models/character/character.ts
+deleted file mode 100644
+index ca3cbc7..0000000
+--- a/IgniteDiffApp/app/models/character/character.ts
++++ /dev/null
+@@ -1,17 +0,0 @@
+-import { Instance, SnapshotOut, types } from "mobx-state-tree"
+-
+-/**
+- * Rick and Morty character model.
+- */
+-export const CharacterModel = types.model("Character").props({
+-  id: types.identifierNumber,
+-  name: types.maybe(types.string),
+-  status: types.maybe(types.string),
+-  image: types.maybe(types.string),
+-})
+-
+-type CharacterType = Instance<typeof CharacterModel>
+-export interface Character extends CharacterType {}
+-type CharacterSnapshotType = SnapshotOut<typeof CharacterModel>
+-export interface CharacterSnapshot extends CharacterSnapshotType {}
+-export const createCharacterDefaultModel = () => types.optional(CharacterModel, {})
+diff --git a/IgniteDiffApp/app/models/root-store/root-store.ts b/IgniteDiffApp/app/models/root-store/root-store.ts
+index 1131b48..3bc0eaa 100644
+--- a/IgniteDiffApp/app/models/root-store/root-store.ts
++++ b/IgniteDiffApp/app/models/root-store/root-store.ts
+@@ -1,12 +1,11 @@
+ import { Instance, SnapshotOut, types } from "mobx-state-tree"
+-import { CharacterStoreModel } from "../character-store/character-store"
+ 
+ /**
+  * A RootStore model.
+  */
+ // prettier-ignore
+ export const RootStoreModel = types.model("RootStore").props({
+-  characterStore: types.optional(CharacterStoreModel, {} as any),
++
+ })
+ 
+ /**
+diff --git a/IgniteDiffApp/app/navigators/index.ts b/IgniteDiffApp/app/navigation/index.ts
+similarity index 100%
+rename from IgniteDiffApp/app/navigators/index.ts
+rename to IgniteDiffApp/app/navigation/index.ts
+diff --git a/IgniteDiffApp/app/navigators/main-navigator.tsx b/IgniteDiffApp/app/navigation/main-navigator.tsx
+similarity index 91%
+rename from IgniteDiffApp/app/navigators/main-navigator.tsx
+rename to IgniteDiffApp/app/navigation/main-navigator.tsx
+index 9bb52d9..7d2c57c 100644
+--- a/IgniteDiffApp/app/navigators/main-navigator.tsx
++++ b/IgniteDiffApp/app/navigation/main-navigator.tsx
+@@ -6,7 +6,7 @@
+  */
+ import React from "react"
+ import { createStackNavigator } from "@react-navigation/stack"
+-import { WelcomeScreen, DemoScreen, DemoListScreen } from "../screens"
++import { WelcomeScreen, DemoScreen } from "../screens"
+ 
+ /**
+  * This type allows TypeScript to know what routes are defined in this navigator
+@@ -23,7 +23,6 @@ import { WelcomeScreen, DemoScreen, DemoListScreen } from "../screens"
+ export type PrimaryParamList = {
+   welcome: undefined
+   demo: undefined
+-  demoList: undefined
+ }
+ 
+ // Documentation: https://reactnavigation.org/docs/stack-navigator/
+@@ -38,7 +37,6 @@ export function MainNavigator() {
+     >
+       <Stack.Screen name="welcome" component={WelcomeScreen} />
+       <Stack.Screen name="demo" component={DemoScreen} />
+-      <Stack.Screen name="demoList" component={DemoListScreen} />
+     </Stack.Navigator>
+   )
+ }
+diff --git a/IgniteDiffApp/app/navigators/navigation-utilities.tsx b/IgniteDiffApp/app/navigation/navigation-utilities.tsx
+similarity index 100%
+rename from IgniteDiffApp/app/navigators/navigation-utilities.tsx
+rename to IgniteDiffApp/app/navigation/navigation-utilities.tsx
+diff --git a/IgniteDiffApp/app/navigators/root-navigator.tsx b/IgniteDiffApp/app/navigation/root-navigator.tsx
+similarity index 100%
+rename from IgniteDiffApp/app/navigators/root-navigator.tsx
+rename to IgniteDiffApp/app/navigation/root-navigator.tsx
+diff --git a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
+deleted file mode 100644
+index 90ce85c..0000000
+--- a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
++++ /dev/null
+@@ -1,86 +0,0 @@
+-import React, { useEffect } from "react"
+-import { Image, FlatList, TextStyle, View, ViewStyle, ImageStyle } from "react-native"
+-import { useNavigation } from "@react-navigation/native"
+-import { observer } from "mobx-react-lite"
+-import { Header, Screen, Text, Wallpaper } from "../../components"
+-import { color, spacing } from "../../theme"
+-import { useStores } from "../../models"
+-
+-const FULL: ViewStyle = {
+-  flex: 1,
+-}
+-const CONTAINER: ViewStyle = {
+-  backgroundColor: color.transparent,
+-}
+-const HEADER: TextStyle = {
+-  paddingBottom: spacing[5] - 1,
+-  paddingHorizontal: spacing[4],
+-  paddingTop: spacing[3],
+-}
+-const HEADER_TITLE: TextStyle = {
+-  fontSize: 12,
+-  fontWeight: "bold",
+-  letterSpacing: 1.5,
+-  lineHeight: 15,
+-  textAlign: "center",
+-}
+-const LIST_CONTAINER: ViewStyle = {
+-  alignItems: "center",
+-  flexDirection: "row",
+-  padding: 10,
+-}
+-const IMAGE: ImageStyle = {
+-  borderRadius: 35,
+-  height: 65,
+-  width: 65,
+-}
+-const LIST_TEXT: TextStyle = {
+-  marginLeft: 10,
+-}
+-const FLAT_LIST: ViewStyle = {
+-  paddingHorizontal: spacing[4],
+-}
+-
+-export const DemoListScreen = observer(function DemoListScreen() {
+-  const navigation = useNavigation()
+-  const goBack = () => navigation.goBack()
+-
+-  const { characterStore } = useStores()
+-  const { characters } = characterStore
+-
+-  useEffect(() => {
+-    async function fetchData() {
+-      await characterStore.getCharacters()
+-    }
+-
+-    fetchData()
+-  }, [])
+-
+-  return (
+-    <View testID="DemoListScreen" style={FULL}>
+-      <Wallpaper />
+-      <Screen style={CONTAINER} preset="fixed" backgroundColor={color.transparent}>
+-        <Header
+-          headerTx="demoListScreen.title"
+-          leftIcon="back"
+-          onLeftPress={goBack}
+-          style={HEADER}
+-          titleStyle={HEADER_TITLE}
+-        />
+-        <FlatList
+-          contentContainerStyle={FLAT_LIST}
+-          data={characters}
+-          keyExtractor={(item) => String(item.id)}
+-          renderItem={({ item }) => (
+-            <View style={LIST_CONTAINER}>
+-              <Image source={{ uri: item.image }} style={IMAGE} />
+-              <Text style={LIST_TEXT}>
+-                {item.name} ({item.status})
+-              </Text>
+-            </View>
+-          )}
+-        />
+-      </Screen>
+-    </View>
+-  )
+-})
+diff --git a/IgniteDiffApp/app/screens/demo/demo-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+index ece1b86..c0bcc31 100644
+--- a/IgniteDiffApp/app/screens/demo/demo-screen.tsx
++++ b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+@@ -151,14 +151,8 @@ export const DemoScreen = observer(function DemoScreen() {
+             tx="demoScreen.reactotron"
+             onPress={demoReactotron}
+           />
+-          <Text style={HINT} tx={`demoScreen.${Platform.OS}ReactotronHint` as const} />
++          <Text style={HINT} tx={`demoScreen.${Platform.OS}ReactotronHint`} />
+         </View>
+-        <Button
+-          style={DEMO}
+-          textStyle={DEMO_TEXT}
+-          tx="demoScreen.demoList"
+-          onPress={() => navigation.navigate("demoList")}
+-        />
+         <Image source={logoIgnite} style={IGNITE} />
+         <View style={LOVE_WRAPPER}>
+           <Text style={LOVE} text="Made with" />
+diff --git a/IgniteDiffApp/app/screens/index.ts b/IgniteDiffApp/app/screens/index.ts
+index 17c8ade..e435a77 100644
+--- a/IgniteDiffApp/app/screens/index.ts
++++ b/IgniteDiffApp/app/screens/index.ts
+@@ -1,4 +1,3 @@
+ export * from "./welcome/welcome-screen"
+ export * from "./demo/demo-screen"
+-export * from "./demo/demo-list-screen"
+ // export other screens here
+diff --git a/IgniteDiffApp/app/services/api/api.types.ts b/IgniteDiffApp/app/services/api/api.types.ts
+index dde58c0..21cf491 100644
+--- a/IgniteDiffApp/app/services/api/api.types.ts
++++ b/IgniteDiffApp/app/services/api/api.types.ts
+@@ -1,5 +1,4 @@
+ import { GeneralApiProblem } from "./api-problem"
+-import { Character } from "../../models/character/character"
+ 
+ export interface User {
+   id: number
+@@ -8,6 +7,3 @@ export interface User {
+ 
+ export type GetUsersResult = { kind: "ok"; users: User[] } | GeneralApiProblem
+ export type GetUserResult = { kind: "ok"; user: User } | GeneralApiProblem
+-
+-export type GetCharactersResult = { kind: "ok"; characters: Character[] } | GeneralApiProblem
+-export type GetCharacterResult = { kind: "ok"; character: Character } | GeneralApiProblem
+diff --git a/IgniteDiffApp/app/services/api/character-api.ts b/IgniteDiffApp/app/services/api/character-api.ts
+deleted file mode 100644
+index 7755006..0000000
+--- a/IgniteDiffApp/app/services/api/character-api.ts
++++ /dev/null
+@@ -1,37 +0,0 @@
+-import { ApiResponse } from "apisauce"
+-import { Api } from "./api"
+-import { GetCharactersResult } from "./api.types"
+-import { getGeneralApiProblem } from "./api-problem"
+-
+-const API_PAGE_SIZE = 50
+-
+-export class CharacterApi {
+-  private api: Api
+-
+-  constructor(api: Api) {
+-    this.api = api
+-  }
+-
+-  async getCharacters(): Promise<GetCharactersResult> {
+-    try {
+-      // make the api call
+-      const response: ApiResponse<any> = await this.api.apisauce.get(
+-        "https://raw.githubusercontent.com/infinitered/ignite/master/data/rick-and-morty.json",
+-        { amount: API_PAGE_SIZE },
+-      )
+-
+-      // the typical ways to die when calling an api
+-      if (!response.ok) {
+-        const problem = getGeneralApiProblem(response)
+-        if (problem) return problem
+-      }
+-
+-      const characters = response.data.results
+-
+-      return { kind: "ok", characters }
+-    } catch (e) {
+-      __DEV__ && console.tron.log(e.message)
+-      return { kind: "bad-data" }
+-    }
+-  }
+-}
+diff --git a/IgniteDiffApp/app/services/reactotron/reactotron.ts b/IgniteDiffApp/app/services/reactotron/reactotron.ts
+index 5135d73..175746a 100644
+--- a/IgniteDiffApp/app/services/reactotron/reactotron.ts
++++ b/IgniteDiffApp/app/services/reactotron/reactotron.ts
+@@ -1,11 +1,11 @@
+ import Tron from "reactotron-react-native"
+-import AsyncStorage from "@react-native-async-storage/async-storage"
++import AsyncStorage from "@react-native-community/async-storage"
+ import { RootStore } from "../../models/root-store/root-store"
+ import { onSnapshot } from "mobx-state-tree"
+ import { ReactotronConfig, DEFAULT_REACTOTRON_CONFIG } from "./reactotron-config"
+ import { mst } from "reactotron-mst"
+ import { clear } from "../../utils/storage"
+-import { RootNavigation } from "../../navigators"
++import { RootNavigation } from "../../navigation"
+ 
+ // Teach TypeScript about the bad things we want to do.
+ declare global {
+diff --git a/IgniteDiffApp/app/utils/storage/async-storage.ts b/IgniteDiffApp/app/utils/storage/async-storage.ts
+index 4882a17..1fe02b4 100644
+--- a/IgniteDiffApp/app/utils/storage/async-storage.ts
++++ b/IgniteDiffApp/app/utils/storage/async-storage.ts
+@@ -1,3 +1,3 @@
+-import AsyncStorage from "@react-native-async-storage/async-storage"
++import AsyncStorage from "@react-native-community/async-storage"
+ 
+ export { AsyncStorage }
+diff --git a/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj b/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj
+index 628050d..561e632 100644
+--- a/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj
++++ b/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj
+@@ -210,7 +210,6 @@
+ 				00E356EB1AD99517003FC87E /* Frameworks */,
+ 				00E356EC1AD99517003FC87E /* Resources */,
+ 				821B8C042C64835F8AA180E7 /* [CP] Copy Pods Resources */,
+-				0383829FCA59FA159DCC2589 /* [CP] Embed Pods Frameworks */,
+ 			);
+ 			buildRules = (
+ 			);
+@@ -233,7 +232,6 @@
+ 				13B07F8E1A680F5B00A75B9A /* Resources */,
+ 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+ 				105C9A386D6F7A14EE348052 /* [CP] Copy Pods Resources */,
+-				EEC804BC5B13E8CB8393A370 /* [CP] Embed Pods Frameworks */,
+ 			);
+ 			buildRules = (
+ 			);
+@@ -379,24 +377,6 @@
+ 			shellPath = /bin/sh;
+ 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+ 		};
+-		0383829FCA59FA159DCC2589 /* [CP] Embed Pods Frameworks */ = {
+-			isa = PBXShellScriptBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-			);
+-			inputPaths = (
+-				"${PODS_ROOT}/Target Support Files/Pods-IgniteDiffApp-IgniteDiffAppTests/Pods-IgniteDiffApp-IgniteDiffAppTests-frameworks.sh",
+-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL.framework/OpenSSL",
+-			);
+-			name = "[CP] Embed Pods Frameworks";
+-			outputPaths = (
+-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-			shellPath = /bin/sh;
+-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-IgniteDiffApp-IgniteDiffAppTests/Pods-IgniteDiffApp-IgniteDiffAppTests-frameworks.sh\"\n";
+-			showEnvVarsInLog = 0;
+-		};
+ 		105C9A386D6F7A14EE348052 /* [CP] Copy Pods Resources */ = {
+ 			isa = PBXShellScriptBuildPhase;
+ 			buildActionMask = 2147483647;
+@@ -535,24 +515,6 @@
+ 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+ 			showEnvVarsInLog = 0;
+ 		};
+-		EEC804BC5B13E8CB8393A370 /* [CP] Embed Pods Frameworks */ = {
+-			isa = PBXShellScriptBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-			);
+-			inputPaths = (
+-				"${PODS_ROOT}/Target Support Files/Pods-IgniteDiffApp/Pods-IgniteDiffApp-frameworks.sh",
+-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL.framework/OpenSSL",
+-			);
+-			name = "[CP] Embed Pods Frameworks";
+-			outputPaths = (
+-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-			shellPath = /bin/sh;
+-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-IgniteDiffApp/Pods-IgniteDiffApp-frameworks.sh\"\n";
+-			showEnvVarsInLog = 0;
+-		};
+ 		FD10A7F022414F080027D42C /* Start Packager */ = {
+ 			isa = PBXShellScriptBuildPhase;
+ 			buildActionMask = 2147483647;
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index d936731..cd3535a 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -1,6 +1,7 @@
+ PODS:
+   - boost-for-react-native (1.63.0)
+-  - CocoaAsyncSocket (7.6.5)
++  - CocoaAsyncSocket (7.6.4)
++  - CocoaLibEvent (1.0.0)
+   - DoubleConversion (1.1.6)
+   - EXConstants (9.2.0):
+     - UMConstantsInterface
+@@ -29,16 +30,16 @@ PODS:
+     - Flipper-Folly (~> 2.2)
+     - Flipper-RSocket (~> 1.1)
+   - Flipper-DoubleConversion (1.1.7)
+-  - Flipper-Folly (2.5.1):
++  - Flipper-Folly (2.2.0):
+     - boost-for-react-native
++    - CocoaLibEvent (~> 1.0)
+     - Flipper-DoubleConversion
+     - Flipper-Glog
+-    - libevent (~> 2.1.12)
+-    - OpenSSL-Universal (= 1.1.180)
++    - OpenSSL-Universal (= 1.0.2.19)
+   - Flipper-Glog (0.3.6)
+   - Flipper-PeerTalk (0.0.4)
+-  - Flipper-RSocket (1.3.1):
+-    - Flipper-Folly (~> 2.5)
++  - Flipper-RSocket (1.1.0):
++    - Flipper-Folly (~> 2.2)
+   - FlipperKit (0.54.0):
+     - FlipperKit/Core (= 0.54.0)
+   - FlipperKit/Core (0.54.0):
+@@ -81,8 +82,9 @@ PODS:
+     - DoubleConversion
+     - glog
+   - glog (0.3.5)
+-  - libevent (2.1.12)
+-  - OpenSSL-Universal (1.1.180)
++  - OpenSSL-Universal (1.0.2.19):
++    - OpenSSL-Universal/Static (= 1.0.2.19)
++  - OpenSSL-Universal/Static (1.0.2.19)
+   - RCTRequired (0.63.4)
+   - RCTTypeSafety (0.63.4):
+     - FBLazyVector (= 0.63.4)
+@@ -313,7 +315,7 @@ PODS:
+     - React-Core (= 0.63.4)
+     - React-cxxreact (= 0.63.4)
+     - React-jsi (= 0.63.4)
+-  - RNCAsyncStorage (1.14.1):
++  - RNCAsyncStorage (1.12.1):
+     - React-Core
+   - RNCMaskedView (0.1.10):
+     - React
+@@ -398,7 +400,7 @@ DEPENDENCIES:
+   - React-RCTText (from `../node_modules/react-native/Libraries/Text`)
+   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
+   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+-  - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
++  - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
+   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
+   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+   - RNKeychain (from `../node_modules/react-native-keychain`)
+@@ -422,6 +424,7 @@ SPEC REPOS:
+   trunk:
+     - boost-for-react-native
+     - CocoaAsyncSocket
++    - CocoaLibEvent
+     - Flipper
+     - Flipper-DoubleConversion
+     - Flipper-Folly
+@@ -429,7 +432,6 @@ SPEC REPOS:
+     - Flipper-PeerTalk
+     - Flipper-RSocket
+     - FlipperKit
+-    - libevent
+     - OpenSSL-Universal
+     - YogaKit
+ 
+@@ -499,7 +501,7 @@ EXTERNAL SOURCES:
+   ReactCommon:
+     :path: "../node_modules/react-native/ReactCommon"
+   RNCAsyncStorage:
+-    :path: "../node_modules/@react-native-async-storage/async-storage"
++    :path: "../node_modules/@react-native-community/async-storage"
+   RNCMaskedView:
+     :path: "../node_modules/@react-native-community/masked-view"
+   RNGestureHandler:
+@@ -539,7 +541,8 @@ EXTERNAL SOURCES:
+ 
+ SPEC CHECKSUMS:
+   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
+-  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
++  CocoaAsyncSocket: 694058e7c0ed05a9e217d1b3c7ded962f4180845
++  CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
+   DoubleConversion: cde416483dac037923206447da6e1454df403714
+   EXConstants: f486f6b4a36b86e47ab258d4d2b7b2699786fdce
+   EXFileSystem: afe9b1fd937d30270bf5108ba44e2f4a1d1ad694
+@@ -550,15 +553,14 @@ SPEC CHECKSUMS:
+   FBReactNativeSpec: f2c97f2529dd79c083355182cc158c9f98f4bd6e
+   Flipper: be611d4b742d8c87fbae2ca5f44603a02539e365
+   Flipper-DoubleConversion: 38631e41ef4f9b12861c67d17cb5518d06badc41
+-  Flipper-Folly: f7a3caafbd74bda4827954fd7a6e000e36355489
++  Flipper-Folly: c12092ea368353b58e992843a990a3225d4533c3
+   Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
+   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
+-  Flipper-RSocket: 127954abe8b162fcaf68d2134d34dc2bd7076154
++  Flipper-RSocket: 64e7431a55835eb953b0bf984ef3b90ae9fdddd7
+   FlipperKit: ab353d41aea8aae2ea6daaf813e67496642f3d7d
+   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
+   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
+-  libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+-  OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
++  OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
+   RCTRequired: 082f10cd3f905d6c124597fd1c14f6f2655ff65e
+   RCTTypeSafety: 8c9c544ecbf20337d069e4ae7fd9a377aadf504b
+   React: b0a957a2c44da4113b0c4c9853d8387f8e64e615
+@@ -581,7 +583,7 @@ SPEC CHECKSUMS:
+   React-RCTText: 5c51df3f08cb9dedc6e790161195d12bac06101c
+   React-RCTVibration: ae4f914cfe8de7d4de95ae1ea6cc8f6315d73d9d
+   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
+-  RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
++  RNCAsyncStorage: b03032fdbdb725bea0bd9e5ec5a7272865ae7398
+   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
+   RNGestureHandler: 7a5833d0f788dbd107fbb913e09aa0c1ff333c39
+   RNKeychain: b8e0711b959a19c5b057d1e970d3c83d159b6da5
+@@ -604,4 +606,4 @@ SPEC CHECKSUMS:
+ 
+ PODFILE CHECKSUM: f6d34447e5208e04721af565dd09f607f475bb25
+ 
+-COCOAPODS: 1.10.1
++COCOAPODS: 1.8.4
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 6a9808a..15a70f5 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -14,6 +14,9 @@
+     "format:json": "prettier --write \"**/*.json\"",
+     "format:md": "prettier --write \"**/*.md\"",
+     "format:ts": "prettier --write \"**/*.ts{,x}\"",
++    "hack:types-react-navigation": "rimraf node_modules/@types/react-navigation/node_modules/@types",
++    "hack:types-react-native": "rimraf node_modules/@types/react-native/node_modules/@types",
++    "hack:types-react-test-renderer": "rimraf node_modules/@types/react-test-renderer/node_modules/@types",
+     "lint": "eslint index.js app storybook test --fix --ext .js,.ts,.tsx && yarn format",
+     "patch": "patch-package",
+     "storybook": "start-storybook -p 9001 -c ./storybook",
+@@ -21,10 +24,11 @@
+     "adb": "adb reverse tcp:9090 tcp:9090 && adb reverse tcp:3000 tcp:3000 && adb reverse tcp:9001 tcp:9001 && adb reverse tcp:8081 tcp:8081",
+     "postinstall": "node ./bin/postInstall",
+     "build-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
+-    "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
++    "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
++    "prepare": "npm-run-all patch hack:*"
+   },
+   "dependencies": {
+-    "@react-native-async-storage/async-storage": "^1.14.1",
++    "@react-native-community/async-storage": "1.12.1",
+     "@react-native-community/masked-view": "0.1.10",
+     "@react-navigation/native": "5.8.10",
+     "@react-navigation/stack": "5.12.8",
+@@ -118,7 +122,7 @@
+     "test-runner": "jest",
+     "configurations": {
+       "ios.sim.debug": {
+-        "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/ignitediffapp.app",
++        "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/IgniteDiffApp.app",
+         "build": "xcodebuild -workspace ios/IgniteDiffApp.xcworkspace -scheme IgniteDiffApp -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -destination 'name=iPhone 11'",
+         "type": "ios.simulator",
+         "name": "iPhone 11"
+diff --git a/IgniteDiffApp/storybook/storybook.tsx b/IgniteDiffApp/storybook/storybook.tsx
+index 0479d4e..d2fab0f 100644
+--- a/IgniteDiffApp/storybook/storybook.tsx
++++ b/IgniteDiffApp/storybook/storybook.tsx
+@@ -12,7 +12,7 @@ const StorybookUI = getStorybookUI({
+   port: 9001,
+   host: "localhost",
+   onDeviceUI: true,
+-  asyncStorage: require("@react-native-async-storage/async-storage").default || null,
++  asyncStorage: require("@react-native-community/async-storage").default || null,
+ })
+ 
+ export function StorybookUIRoot() {
+diff --git a/IgniteDiffApp/test/mock-async-storage.ts b/IgniteDiffApp/test/mock-async-storage.ts
+index a4da056..e80202d 100644
+--- a/IgniteDiffApp/test/mock-async-storage.ts
++++ b/IgniteDiffApp/test/mock-async-storage.ts
+@@ -1,3 +1,3 @@
+-import mockAsyncStorage from "@react-native-async-storage/async-storage/jest/async-storage-mock"
++import mockAsyncStorage from "@react-native-community/async-storage/jest/async-storage-mock"
+ 
+-jest.mock("@react-native-async-storage/async-storage", () => mockAsyncStorage)
++jest.mock("@react-native-community/async-storage", () => mockAsyncStorage)
+diff --git a/IgniteDiffApp/tsconfig.json b/IgniteDiffApp/tsconfig.json
+index e710133..ea13117 100644
+--- a/IgniteDiffApp/tsconfig.json
++++ b/IgniteDiffApp/tsconfig.json
+@@ -13,8 +13,7 @@
+     "sourceMap": true,
+     "target": "esnext",
+     "lib": ["esnext"],
+-    "skipLibCheck": true,
+-    "resolveJsonModule": true
++    "skipLibCheck": true
+   },
+   "exclude": ["node_modules"],
+   "include": ["index.js", "app", "test", "storybook"]
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 50e44fb..45ac0fe 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -1612,10 +1612,10 @@
+     prop-types "^15.6.1"
+     react-lifecycles-compat "^3.0.4"
+ 
+-"@react-native-async-storage/async-storage@^1.14.1":
+-  version "1.14.1"
+-  resolved "https://registry.yarnpkg.com/@react-native-async-storage/async-storage/-/async-storage-1.14.1.tgz#3c2ff2b1a312df3b1c809a60fa88665e50a095b8"
+-  integrity sha512-UkLUox2q5DKNYB6IMUzsuwrTJeXGLySvtQlnrqd3fd+96JErCT4X3xD+W1cvQjes0nm0LbaELbwObKc+Tea7wA==
++"@react-native-community/async-storage@1.12.1":
++  version "1.12.1"
++  resolved "https://registry.yarnpkg.com/@react-native-community/async-storage/-/async-storage-1.12.1.tgz#25f821b4f6b13abe005ad67e47c6f1cee9f27b24"
++  integrity sha512-70WGaH3PKYASi4BThuEEKMkyAgE9k7VytBqmgPRx3MzJx9/MkspwqJGmn3QLCgHLIFUgF1pit2mWICbRJ3T3lg==
+   dependencies:
+     deep-assign "^3.0.0"
+ 
