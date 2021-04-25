@@ -1,0 +1,1048 @@
+diff --git a/IgniteDiffApp/app/components/button/button.presets.ts b/IgniteDiffApp/app/components/button/button.presets.ts
+index b140fd2..b8abbbe 100644
+--- a/IgniteDiffApp/app/components/button/button.presets.ts
++++ b/IgniteDiffApp/app/components/button/button.presets.ts
+@@ -21,7 +21,7 @@ const BASE_TEXT: TextStyle = {
+  *
+  * You want to customize these to whatever you need in your app.
+  */
+-export const viewPresets: Record<string, ViewStyle> = {
++export const viewPresets = {
+   /**
+    * A smaller piece of secondard information.
+    */
+@@ -38,7 +38,7 @@ export const viewPresets: Record<string, ViewStyle> = {
+   } as ViewStyle,
+ }
+ 
+-export const textPresets: Record<ButtonPresetNames, TextStyle> = {
++export const textPresets = {
+   primary: { ...BASE_TEXT, fontSize: 9, color: color.palette.white } as TextStyle,
+   link: {
+     ...BASE_TEXT,
+diff --git a/IgniteDiffApp/app/components/button/button.props.ts b/IgniteDiffApp/app/components/button/button.props.ts
+index 1377a7e..c7ce16d 100644
+--- a/IgniteDiffApp/app/components/button/button.props.ts
++++ b/IgniteDiffApp/app/components/button/button.props.ts
+@@ -1,4 +1,4 @@
+-import { StyleProp, TextStyle, TouchableOpacityProps, ViewStyle } from "react-native"
++import { ViewStyle, TextStyle, TouchableOpacityProps } from "react-native"
+ import { ButtonPresetNames } from "./button.presets"
+ import { TxKeyPath } from "../../i18n"
+ 
+@@ -16,12 +16,12 @@ export interface ButtonProps extends TouchableOpacityProps {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * An optional style override useful for the button text.
+    */
+-  textStyle?: StyleProp<TextStyle>
++  textStyle?: TextStyle | TextStyle[]
+ 
+   /**
+    * One of the different types of text presets.
+diff --git a/IgniteDiffApp/app/components/button/button.tsx b/IgniteDiffApp/app/components/button/button.tsx
+index 64cf795..d95709d 100644
+--- a/IgniteDiffApp/app/components/button/button.tsx
++++ b/IgniteDiffApp/app/components/button/button.tsx
+@@ -3,7 +3,7 @@ import { TouchableOpacity } from "react-native"
+ import { Text } from "../text/text"
+ import { viewPresets, textPresets } from "./button.presets"
+ import { ButtonProps } from "./button.props"
+-import { flatten } from "ramda"
++import { mergeAll, flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+@@ -22,15 +22,15 @@ export function Button(props: ButtonProps) {
+     ...rest
+   } = props
+ 
+-  const viewStyle = viewPresets[preset] || viewPresets.primary
+-  const viewStyles = flatten([viewStyle, styleOverride])
+-  const textStyle = textPresets[preset] || textPresets.primary
+-  const textStyles = flatten([textStyle, textStyleOverride])
++  const viewStyle = mergeAll(flatten([viewPresets[preset] || viewPresets.primary, styleOverride]))
++  const textStyle = mergeAll(
++    flatten([textPresets[preset] || textPresets.primary, textStyleOverride]),
++  )
+ 
+-  const content = children || <Text tx={tx} text={text} style={textStyles} />
++  const content = children || <Text tx={tx} text={text} style={textStyle} />
+ 
+   return (
+-    <TouchableOpacity style={viewStyles} {...rest}>
++    <TouchableOpacity style={viewStyle} {...rest}>
+       {content}
+     </TouchableOpacity>
+   )
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+index 01a13d0..9744c0f 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+@@ -1,21 +1,21 @@
+-import { StyleProp, ViewStyle } from "react-native"
++import { ViewStyle } from "react-native"
+ import { TxKeyPath } from "../../i18n"
+ 
+ export interface CheckboxProps {
+   /**
+    * Additional container style. Useful for margins.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Additional outline style.
+    */
+-  outlineStyle?: StyleProp<ViewStyle>
++  outlineStyle?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Additional fill style. Only visible when checked.
+    */
+-  fillStyle?: StyleProp<ViewStyle>
++  fillStyle?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Is the checkbox checked?
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.tsx b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+index 316da55..bdb9825 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.tsx
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+@@ -1,9 +1,9 @@
+ import * as React from "react"
+-import { TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
++import { TouchableOpacity, TextStyle, ViewStyle, View } from "react-native"
+ import { Text } from "../text/text"
+ import { color, spacing } from "../../theme"
+ import { CheckboxProps } from "./checkbox.props"
+-import { flatten } from "ramda"
++import { mergeAll, flatten } from "ramda"
+ 
+ const ROOT: ViewStyle = {
+   flexDirection: "row",
+@@ -34,9 +34,9 @@ const LABEL: TextStyle = { paddingLeft: spacing[2] }
+ export function Checkbox(props: CheckboxProps) {
+   const numberOfLines = props.multiline ? 0 : 1
+ 
+-  const rootStyle = flatten([ROOT, props.style])
+-  const outlineStyle = flatten([OUTLINE, props.outlineStyle])
+-  const fillStyle = flatten([FILL, props.fillStyle])
++  const rootStyle = mergeAll(flatten([ROOT, props.style]))
++  const outlineStyle = mergeAll(flatten([OUTLINE, props.outlineStyle]))
++  const fillStyle = mergeAll(flatten([FILL, props.fillStyle]))
+ 
+   const onPress = props.onToggle ? () => props.onToggle && props.onToggle(!props.value) : null
+ 
+diff --git a/IgniteDiffApp/app/components/form-row/form-row.props.tsx b/IgniteDiffApp/app/components/form-row/form-row.props.tsx
+index f010206..df6b5bc 100644
+--- a/IgniteDiffApp/app/components/form-row/form-row.props.tsx
++++ b/IgniteDiffApp/app/components/form-row/form-row.props.tsx
+@@ -1,5 +1,5 @@
+ import * as React from "react"
+-import { StyleProp, ViewStyle } from "react-native"
++import { ViewStyle } from "react-native"
+ import { FormRowPresets } from "./form-row.presets"
+ 
+ /**
+@@ -14,7 +14,7 @@ export interface FormRowProps {
+   /**
+    * Override the container style... useful for margins and padding.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * The type of border.
+diff --git a/IgniteDiffApp/app/components/form-row/form-row.tsx b/IgniteDiffApp/app/components/form-row/form-row.tsx
+index 1ab4994..bb4ff73 100644
+--- a/IgniteDiffApp/app/components/form-row/form-row.tsx
++++ b/IgniteDiffApp/app/components/form-row/form-row.tsx
+@@ -2,13 +2,13 @@ import * as React from "react"
+ import { View } from "react-native"
+ import { PRESETS } from "./form-row.presets"
+ import { FormRowProps } from "./form-row.props"
+-import { flatten } from "ramda"
++import { mergeAll, flatten } from "ramda"
+ 
+ /**
+  * A horizontal container component used to hold a row of a form.
+  */
+ export function FormRow(props: FormRowProps) {
+-  const viewStyle = flatten([PRESETS[props.preset], props.style])
++  const viewStyle = mergeAll(flatten([PRESETS[props.preset], props.style]))
+ 
+   return <View style={viewStyle}>{props.children}</View>
+ }
+diff --git a/IgniteDiffApp/app/components/header/header.props.ts b/IgniteDiffApp/app/components/header/header.props.ts
+index 07f2c4d..7601e53 100644
+--- a/IgniteDiffApp/app/components/header/header.props.ts
++++ b/IgniteDiffApp/app/components/header/header.props.ts
+@@ -1,4 +1,4 @@
+-import { StyleProp, TextStyle, ViewStyle } from "react-native"
++import { ViewStyle, TextStyle } from "react-native"
+ import { IconTypes } from "../icon/icons"
+ import { TxKeyPath } from "../../i18n"
+ 
+@@ -36,10 +36,10 @@ export interface HeaderProps {
+   /**
+    * Container style overrides.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle
+ 
+   /**
+    * Title style overrides.
+    */
+-  titleStyle?: StyleProp<TextStyle>
++  titleStyle?: TextStyle
+ }
+diff --git a/IgniteDiffApp/app/components/header/header.tsx b/IgniteDiffApp/app/components/header/header.tsx
+index b4a6634..2dbbaf3 100644
+--- a/IgniteDiffApp/app/components/header/header.tsx
++++ b/IgniteDiffApp/app/components/header/header.tsx
+@@ -38,7 +38,7 @@ export function Header(props: HeaderProps) {
+   const header = headerText || (headerTx && translate(headerTx)) || ""
+ 
+   return (
+-    <View style={[ROOT, style]}>
++    <View style={{ ...ROOT, ...style }}>
+       {leftIcon ? (
+         <Button preset="link" onPress={onLeftPress}>
+           <Icon icon={leftIcon} />
+@@ -47,7 +47,7 @@ export function Header(props: HeaderProps) {
+         <View style={LEFT} />
+       )}
+       <View style={TITLE_MIDDLE}>
+-        <Text style={[TITLE, titleStyle]} text={header} />
++        <Text style={{ ...TITLE, ...titleStyle }} text={header} />
+       </View>
+       {rightIcon ? (
+         <Button preset="link" onPress={onRightPress}>
+diff --git a/IgniteDiffApp/app/components/icon/icon.props.ts b/IgniteDiffApp/app/components/icon/icon.props.ts
+index 71ce0b7..6928ede 100644
+--- a/IgniteDiffApp/app/components/icon/icon.props.ts
++++ b/IgniteDiffApp/app/components/icon/icon.props.ts
+@@ -1,17 +1,17 @@
+-import { ImageStyle, StyleProp, ViewStyle } from "react-native"
++import { ImageStyle, ViewStyle } from "react-native"
+ import { IconTypes } from "./icons"
+ 
+ export interface IconProps {
+   /**
+    * Style overrides for the icon image
+    */
+-  style?: StyleProp<ImageStyle>
++  style?: ImageStyle
+ 
+   /**
+    * Style overrides for the icon container
+    */
+ 
+-  containerStyle?: StyleProp<ViewStyle>
++  containerStyle?: ViewStyle
+ 
+   /**
+    * The name of the icon
+diff --git a/IgniteDiffApp/app/components/icon/icon.tsx b/IgniteDiffApp/app/components/icon/icon.tsx
+index 4ef8fe8..c2d9723 100644
+--- a/IgniteDiffApp/app/components/icon/icon.tsx
++++ b/IgniteDiffApp/app/components/icon/icon.tsx
+@@ -9,10 +9,11 @@ const ROOT: ImageStyle = {
+ 
+ export function Icon(props: IconProps) {
+   const { style: styleOverride, icon, containerStyle } = props
++  const style: ImageStyle = { ...ROOT, ...styleOverride }
+ 
+   return (
+     <View style={containerStyle}>
+-      <Image style={[ROOT, styleOverride]} source={icons[icon]} />
++      <Image style={style} source={icons[icon]} />
+     </View>
+   )
+ }
+diff --git a/IgniteDiffApp/app/components/screen/screen.props.ts b/IgniteDiffApp/app/components/screen/screen.props.ts
+index 38f8216..19226b8 100644
+--- a/IgniteDiffApp/app/components/screen/screen.props.ts
++++ b/IgniteDiffApp/app/components/screen/screen.props.ts
+@@ -1,4 +1,4 @@
+-import { StyleProp, ViewStyle } from "react-native"
++import { ViewStyle } from "react-native"
+ import { KeyboardOffsets, ScreenPresets } from "./screen.presets"
+ 
+ export interface ScreenProps {
+@@ -10,7 +10,7 @@ export interface ScreenProps {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle
+ 
+   /**
+    * One of the different types of presets.
+@@ -36,10 +36,4 @@ export interface ScreenProps {
+    * By how much should we offset the keyboard? Defaults to none.
+    */
+   keyboardOffset?: KeyboardOffsets
+-
+-  /**
+-   * Should keyboard persist on screen tap. Defaults to handled.
+-   * Only applies to scroll preset.
+-   */
+-  keyboardShouldPersistTaps?: "handled" | "always" | "never"
+ }
+diff --git a/IgniteDiffApp/app/components/screen/screen.tsx b/IgniteDiffApp/app/components/screen/screen.tsx
+index ba84547..56b6896 100644
+--- a/IgniteDiffApp/app/components/screen/screen.tsx
++++ b/IgniteDiffApp/app/components/screen/screen.tsx
+@@ -16,7 +16,7 @@ function ScreenWithoutScrolling(props: ScreenProps) {
+   return (
+     <KeyboardAvoidingView
+       style={[preset.outer, backgroundStyle]}
+-      behavior={isIos ? "padding" : undefined}
++      behavior={isIos ? "padding" : null}
+       keyboardVerticalOffset={offsets[props.keyboardOffset || "none"]}
+     >
+       <StatusBar barStyle={props.statusBar || "light-content"} />
+@@ -35,7 +35,7 @@ function ScreenWithScrolling(props: ScreenProps) {
+   return (
+     <KeyboardAvoidingView
+       style={[preset.outer, backgroundStyle]}
+-      behavior={isIos ? "padding" : undefined}
++      behavior={isIos ? "padding" : null}
+       keyboardVerticalOffset={offsets[props.keyboardOffset || "none"]}
+     >
+       <StatusBar barStyle={props.statusBar || "light-content"} />
+@@ -43,7 +43,6 @@ function ScreenWithScrolling(props: ScreenProps) {
+         <ScrollView
+           style={[preset.outer, backgroundStyle]}
+           contentContainerStyle={[preset.inner, style]}
+-          keyboardShouldPersistTaps={props.keyboardShouldPersistTaps || "handled"}
+         >
+           {props.children}
+         </ScrollView>
+diff --git a/IgniteDiffApp/app/components/switch/switch.props.ts b/IgniteDiffApp/app/components/switch/switch.props.ts
+index 8235457..8a26636 100644
+--- a/IgniteDiffApp/app/components/switch/switch.props.ts
++++ b/IgniteDiffApp/app/components/switch/switch.props.ts
+@@ -1,4 +1,4 @@
+-import { StyleProp, ViewStyle } from "react-native"
++import { ViewStyle } from "react-native"
+ 
+ export interface SwitchProps {
+   /**
+@@ -15,25 +15,25 @@ export interface SwitchProps {
+   /**
+    * A style override to apply to the container.  Useful for margins and paddings.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Additional track styling when on.
+    */
+-  trackOnStyle?: StyleProp<ViewStyle>
++  trackOnStyle?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Additional track styling when off.
+    */
+-  trackOffStyle?: StyleProp<ViewStyle>
++  trackOffStyle?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Additional thumb styling when on.
+    */
+-  thumbOnStyle?: StyleProp<ViewStyle>
++  thumbOnStyle?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Additional thumb styling when off.
+    */
+-  thumbOffStyle?: StyleProp<ViewStyle>
++  thumbOffStyle?: ViewStyle | ViewStyle[]
+ }
+diff --git a/IgniteDiffApp/app/components/switch/switch.tsx b/IgniteDiffApp/app/components/switch/switch.tsx
+index 7288163..b1457bc 100644
+--- a/IgniteDiffApp/app/components/switch/switch.tsx
++++ b/IgniteDiffApp/app/components/switch/switch.tsx
+@@ -2,7 +2,7 @@ import React from "react"
+ import { ViewStyle, Animated, Easing, TouchableWithoutFeedback } from "react-native"
+ import { color } from "../../theme"
+ import { SwitchProps } from "./switch.props"
+-import { flatten } from "ramda"
++import { mergeAll, flatten } from "ramda"
+ 
+ // dimensions
+ const THUMB_SIZE = 30
+@@ -47,7 +47,7 @@ const THUMB: ViewStyle = {
+ }
+ 
+ const enhance = (style, newStyles): any => {
+-  return flatten([style, newStyles])
++  return mergeAll(flatten([style, newStyles]))
+ }
+ 
+ const makeAnimatedValue = (switchOn) => new Animated.Value(switchOn ? 1 : 0)
+diff --git a/IgniteDiffApp/app/components/text-field/text-field.tsx b/IgniteDiffApp/app/components/text-field/text-field.tsx
+index 4e9be82..2ebba59 100644
+--- a/IgniteDiffApp/app/components/text-field/text-field.tsx
++++ b/IgniteDiffApp/app/components/text-field/text-field.tsx
+@@ -1,9 +1,9 @@
+ import React from "react"
+-import { StyleProp, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
++import { TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+ import { color, spacing, typography } from "../../theme"
+ import { translate, TxKeyPath } from "../../i18n"
+ import { Text } from "../text/text"
+-import { flatten } from "ramda"
++import { mergeAll, flatten } from "ramda"
+ 
+ // the base styling for the container
+ const CONTAINER: ViewStyle = {
+@@ -48,12 +48,12 @@ export interface TextFieldProps extends TextInputProps {
+   /**
+    * Optional container style overrides useful for margins & padding.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle | ViewStyle[]
+ 
+   /**
+    * Optional style overrides for the input.
+    */
+-  inputStyle?: StyleProp<TextStyle>
++  inputStyle?: TextStyle | TextStyle[]
+ 
+   /**
+    * Various look & feels.
+@@ -63,6 +63,10 @@ export interface TextFieldProps extends TextInputProps {
+   forwardedRef?: any
+ }
+ 
++const enhance = (style, styleOverride) => {
++  return mergeAll(flatten([style, styleOverride]))
++}
++
+ /**
+  * A component which has a label and an input together.
+  */
+@@ -78,20 +82,22 @@ export function TextField(props: TextFieldProps) {
+     forwardedRef,
+     ...rest
+   } = props
++  let containerStyle: ViewStyle = { ...CONTAINER, ...PRESETS[preset] }
++  containerStyle = enhance(containerStyle, styleOverride)
+ 
+-  const containerStyles = flatten([CONTAINER, PRESETS[preset], styleOverride])
+-  const inputStyles = flatten([INPUT, inputStyleOverride])
++  let inputStyle: TextStyle = INPUT
++  inputStyle = enhance(inputStyle, inputStyleOverride)
+   const actualPlaceholder = placeholderTx ? translate(placeholderTx) : placeholder
+ 
+   return (
+-    <View style={containerStyles}>
++    <View style={containerStyle}>
+       <Text preset="fieldLabel" tx={labelTx} text={label} />
+       <TextInput
+         placeholder={actualPlaceholder}
+         placeholderTextColor={color.palette.lighterGrey}
+         underlineColorAndroid={color.transparent}
+         {...rest}
+-        style={inputStyles}
++        style={inputStyle}
+         ref={forwardedRef}
+       />
+     </View>
+diff --git a/IgniteDiffApp/app/components/text/text.props.ts b/IgniteDiffApp/app/components/text/text.props.ts
+index 10417c2..298ebc1 100644
+--- a/IgniteDiffApp/app/components/text/text.props.ts
++++ b/IgniteDiffApp/app/components/text/text.props.ts
+@@ -1,4 +1,4 @@
+-import { StyleProp, TextProps as TextProperties, TextStyle } from "react-native"
++import { TextStyle, TextProps as TextProperties } from "react-native"
+ import { TextPresets } from "./text.presets"
+ import { TxKeyPath } from "../../i18n"
+ 
+@@ -27,7 +27,7 @@ export interface TextProps extends TextProperties {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: StyleProp<TextStyle>
++  style?: TextStyle | TextStyle[]
+ 
+   /**
+    * One of the different types of text presets.
+diff --git a/IgniteDiffApp/app/components/text/text.tsx b/IgniteDiffApp/app/components/text/text.tsx
+index bb13def..4513cbd 100644
+--- a/IgniteDiffApp/app/components/text/text.tsx
++++ b/IgniteDiffApp/app/components/text/text.tsx
+@@ -3,7 +3,7 @@ import { Text as ReactNativeText } from "react-native"
+ import { presets } from "./text.presets"
+ import { TextProps } from "./text.props"
+ import { translate } from "../../i18n"
+-import { flatten } from "ramda"
++import { mergeAll, flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+@@ -18,11 +18,10 @@ export function Text(props: TextProps) {
+   const i18nText = tx && translate(tx, txOptions)
+   const content = i18nText || text || children
+ 
+-  const style = presets[preset] || presets.default
+-  const styles = flatten([style, styleOverride])
++  const style = mergeAll(flatten([presets[preset] || presets.default, styleOverride]))
+ 
+   return (
+-    <ReactNativeText {...rest} style={styles}>
++    <ReactNativeText {...rest} style={style}>
+       {content}
+     </ReactNativeText>
+   )
+diff --git a/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts b/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts
+index 592bac9..3ecc866 100644
+--- a/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts
++++ b/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts
+@@ -1,11 +1,11 @@
+-import { ImageStyle, StyleProp } from "react-native"
++import { ImageStyle } from "react-native"
+ import { WallpaperPresets } from "./wallpaper.presets"
+ 
+ export interface WallpaperProps {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: StyleProp<ImageStyle>
++  style?: ImageStyle
+ 
+   /**
+    * An optional background image to override the default image.
+diff --git a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+index a17dc9e..50e1367 100644
+--- a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
++++ b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+@@ -2,7 +2,6 @@ import React from "react"
+ import { Image } from "react-native"
+ import { presets } from "./wallpaper.presets"
+ import { WallpaperProps } from "./wallpaper.props"
+-import { flatten } from "ramda"
+ 
+ const defaultImage = require("./bg.png")
+ 
+@@ -17,10 +16,10 @@ export function Wallpaper(props: WallpaperProps) {
+ 
+   // assemble the style
+   const presetToUse = presets[preset] || presets.stretch
+-  const styles = flatten([presetToUse, styleOverride])
++  const style = { ...presetToUse, ...styleOverride }
+ 
+   // figure out which image to use
+   const source = backgroundImage || defaultImage
+ 
+-  return <Image source={source} style={styles} />
++  return <Image source={source} style={style} />
+ }
+diff --git a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+index fffaf7d..7f98aad 100644
+--- a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+@@ -1,9 +1,8 @@
+ import * as React from "react"
+-import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
++import { TextStyle, View, ViewStyle } from "react-native"
+ import { observer } from "mobx-react-lite"
+ import { color, typography } from "../../theme"
+ import { Text } from "../"
+-import { flatten } from "ramda"
+ 
+ const CONTAINER: ViewStyle = {
+   justifyContent: "center",
+@@ -19,7 +18,7 @@ export interface <%= props.pascalCaseName %>Props {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: StyleProp<ViewStyle>
++  style?: ViewStyle
+ }
+ 
+ /**
+@@ -27,10 +26,9 @@ export interface <%= props.pascalCaseName %>Props {
+  */
+ export const <%= props.pascalCaseName %> = observer(function <%= props.pascalCaseName %>(props: <%= props.pascalCaseName %>Props) {
+   const { style } = props
+-  const styles = flatten([CONTAINER, style])
+ 
+   return (
+-    <View style={styles}>
++    <View style={[CONTAINER, style]}>
+       <Text style={TEXT}>Hello</Text>
+     </View>
+   )
+diff --git a/IgniteDiffApp/ios/Podfile b/IgniteDiffApp/ios/Podfile
+index 2ffb0cd..628e96e 100644
+--- a/IgniteDiffApp/ios/Podfile
++++ b/IgniteDiffApp/ios/Podfile
+@@ -22,10 +22,10 @@ target 'IgniteDiffApp' do
+   # Enables Flipper.
+   #
+   # Note that if you have use_frameworks! enabled, Flipper will not work and
+-  # you should disable these next few lines.
+-  use_flipper!({ 'Flipper' => '0.75.1' })
++  # you should disable the next line.
++  use_flipper!()
++
+   post_install do |installer|
+-    flipper_post_install(installer)
+     react_native_post_install(installer)
+   end
+ end
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index 383eea2..0f24234 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -375,25 +375,25 @@ DEPENDENCIES:
+   - EXPermissions (from `../node_modules/expo-permissions/ios`)
+   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
+   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
+-  - Flipper (= 0.75.1)
++  - Flipper (~> 0.75.1)
+   - Flipper-DoubleConversion (= 1.1.7)
+   - Flipper-Folly (~> 2.5)
+   - Flipper-Glog (= 0.3.6)
+   - Flipper-PeerTalk (~> 0.0.4)
+   - Flipper-RSocket (~> 1.3)
+-  - FlipperKit (= 0.75.1)
+-  - FlipperKit/Core (= 0.75.1)
+-  - FlipperKit/CppBridge (= 0.75.1)
+-  - FlipperKit/FBCxxFollyDynamicConvert (= 0.75.1)
+-  - FlipperKit/FBDefines (= 0.75.1)
+-  - FlipperKit/FKPortForwarding (= 0.75.1)
+-  - FlipperKit/FlipperKitHighlightOverlay (= 0.75.1)
+-  - FlipperKit/FlipperKitLayoutPlugin (= 0.75.1)
+-  - FlipperKit/FlipperKitLayoutTextSearchable (= 0.75.1)
+-  - FlipperKit/FlipperKitNetworkPlugin (= 0.75.1)
+-  - FlipperKit/FlipperKitReactPlugin (= 0.75.1)
+-  - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.75.1)
+-  - FlipperKit/SKIOSNetworkPlugin (= 0.75.1)
++  - FlipperKit (~> 0.75.1)
++  - FlipperKit/Core (~> 0.75.1)
++  - FlipperKit/CppBridge (~> 0.75.1)
++  - FlipperKit/FBCxxFollyDynamicConvert (~> 0.75.1)
++  - FlipperKit/FBDefines (~> 0.75.1)
++  - FlipperKit/FKPortForwarding (~> 0.75.1)
++  - FlipperKit/FlipperKitHighlightOverlay (~> 0.75.1)
++  - FlipperKit/FlipperKitLayoutPlugin (~> 0.75.1)
++  - FlipperKit/FlipperKitLayoutTextSearchable (~> 0.75.1)
++  - FlipperKit/FlipperKitNetworkPlugin (~> 0.75.1)
++  - FlipperKit/FlipperKitReactPlugin (~> 0.75.1)
++  - FlipperKit/FlipperKitUserDefaultsPlugin (~> 0.75.1)
++  - FlipperKit/SKIOSNetworkPlugin (~> 0.75.1)
+   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
+   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
+@@ -632,6 +632,6 @@ SPEC CHECKSUMS:
+   Yoga: 8c8436d4171c87504c648ae23b1d81242bdf3bbf
+   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+ 
+-PODFILE CHECKSUM: c6f7f1ee26dfa0c3f2b4c888bb412f647c3fb377
++PODFILE CHECKSUM: 9cb11fe19431f6a1bc5fece3ddbbf06a26ea4682
+ 
+ COCOAPODS: 1.10.1
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index e2ea08f..9741e92 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -138,12 +138,11 @@
+     "root": true,
+     "parser": "@typescript-eslint/parser",
+     "extends": [
++      "prettier",
+       "plugin:@typescript-eslint/recommended",
+       "plugin:react/recommended",
+       "plugin:react-native/all",
+-      "standard",
+-      "prettier",
+-      "prettier/@typescript-eslint"
++      "standard"
+     ],
+     "plugins": [
+       "@typescript-eslint",
+diff --git a/IgniteDiffApp/storybook/views/story-screen.tsx b/IgniteDiffApp/storybook/views/story-screen.tsx
+index fc49ea9..862ed77 100644
+--- a/IgniteDiffApp/storybook/views/story-screen.tsx
++++ b/IgniteDiffApp/storybook/views/story-screen.tsx
+@@ -7,7 +7,7 @@ export interface StoryScreenProps {
+   children?: React.ReactNode
+ }
+ 
+-const behavior = Platform.OS === "ios" ? "padding" : undefined
++const behavior = Platform.OS === "ios" ? "padding" : null
+ export const StoryScreen = (props) => (
+   <KeyboardAvoidingView style={ROOT} behavior={behavior} keyboardVerticalOffset={50}>
+     {props.children}
+diff --git a/IgniteDiffApp/storybook/views/story.tsx b/IgniteDiffApp/storybook/views/story.tsx
+index c85f7f0..e479e4d 100644
+--- a/IgniteDiffApp/storybook/views/story.tsx
++++ b/IgniteDiffApp/storybook/views/story.tsx
+@@ -10,7 +10,7 @@ const ROOT: ViewStyle = { flex: 1 }
+ export function Story(props: StoryProps) {
+   return (
+     <View style={ROOT}>
+-      <ScrollView keyboardShouldPersistTaps="handled">{props.children}</ScrollView>
++      <ScrollView>{props.children}</ScrollView>
+     </View>
+   )
+ }
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index fb1b9d3..9483c13 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -30,7 +30,7 @@
+   dependencies:
+     "@babel/highlight" "^7.12.13"
+ 
+-"@babel/compat-data@^7.12.13", "@babel/compat-data@^7.13.15", "@babel/compat-data@^7.13.8":
++"@babel/compat-data@^7.12.13", "@babel/compat-data@^7.13.12", "@babel/compat-data@^7.13.8":
+   version "7.13.15"
+   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.13.15.tgz#7e8eea42d0b64fda2b375b22d06c605222e848f4"
+   integrity sha512-ltnibHKR1VnrU4ymHyQ/CXtNXI6yZC0oJThyW78Hft8XndANwi+9H+UIklBDraIjFEJzw8wmcM427oDd9KS5wA==
+@@ -84,19 +84,19 @@
+     source-map "^0.5.0"
+ 
+ "@babel/core@^7.1.6", "@babel/core@^7.12.9":
+-  version "7.13.16"
+-  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.13.16.tgz#7756ab24396cc9675f1c3fcd5b79fcce192ea96a"
+-  integrity sha512-sXHpixBiWWFti0AV2Zq7avpTasr6sIAu7Y396c608541qAU2ui4a193m0KSQmfPSKFZLnQ3cvlKDOm3XkuXm3Q==
++  version "7.13.15"
++  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.13.15.tgz#a6d40917df027487b54312202a06812c4f7792d0"
++  integrity sha512-6GXmNYeNjS2Uz+uls5jalOemgIhnTMeaXo+yBUA72kC2uX/8VW6XyhVIo2L8/q0goKQA3EVKx0KOQpVKSeWadQ==
+   dependencies:
+     "@babel/code-frame" "^7.12.13"
+-    "@babel/generator" "^7.13.16"
+-    "@babel/helper-compilation-targets" "^7.13.16"
++    "@babel/generator" "^7.13.9"
++    "@babel/helper-compilation-targets" "^7.13.13"
+     "@babel/helper-module-transforms" "^7.13.14"
+-    "@babel/helpers" "^7.13.16"
+-    "@babel/parser" "^7.13.16"
++    "@babel/helpers" "^7.13.10"
++    "@babel/parser" "^7.13.15"
+     "@babel/template" "^7.12.13"
+     "@babel/traverse" "^7.13.15"
+-    "@babel/types" "^7.13.16"
++    "@babel/types" "^7.13.14"
+     convert-source-map "^1.7.0"
+     debug "^4.1.0"
+     gensync "^1.0.0-beta.2"
+@@ -113,12 +113,12 @@
+     jsesc "^2.5.1"
+     source-map "^0.5.0"
+ 
+-"@babel/generator@^7.13.16":
+-  version "7.13.16"
+-  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.13.16.tgz#0befc287031a201d84cdfc173b46b320ae472d14"
+-  integrity sha512-grBBR75UnKOcUWMp8WoDxNsWCFl//XCK6HWTrBQKTr5SV9f5g0pNOjdyzi/DTBv12S9GnYPInIXQBTky7OXEMg==
++"@babel/generator@^7.13.9":
++  version "7.13.9"
++  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.13.9.tgz#3a7aa96f9efb8e2be42d38d80e2ceb4c64d8de39"
++  integrity sha512-mHOOmY0Axl/JCTkxTU6Lf5sWOg/v8nUa+Xkt4zMTftX0wqmb6Sh7J8gvcehBw7q0AhrhAR+FDacKjCZ2X8K+Sw==
+   dependencies:
+-    "@babel/types" "^7.13.16"
++    "@babel/types" "^7.13.0"
+     jsesc "^2.5.1"
+     source-map "^0.5.0"
+ 
+@@ -169,12 +169,12 @@
+     "@babel/helper-annotate-as-pure" "^7.10.4"
+     "@babel/types" "^7.10.4"
+ 
+-"@babel/helper-compilation-targets@^7.12.17", "@babel/helper-compilation-targets@^7.13.16", "@babel/helper-compilation-targets@^7.13.8":
+-  version "7.13.16"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-compilation-targets/-/helper-compilation-targets-7.13.16.tgz#6e91dccf15e3f43e5556dffe32d860109887563c"
+-  integrity sha512-3gmkYIrpqsLlieFwjkGgLaSHmhnvlAYzZLlYVjlW+QwI+1zE17kGxuJGmIqDQdYp56XdmGeD+Bswx0UTyG18xA==
++"@babel/helper-compilation-targets@^7.12.17", "@babel/helper-compilation-targets@^7.13.13", "@babel/helper-compilation-targets@^7.13.8":
++  version "7.13.13"
++  resolved "https://registry.yarnpkg.com/@babel/helper-compilation-targets/-/helper-compilation-targets-7.13.13.tgz#2b2972a0926474853f41e4adbc69338f520600e5"
++  integrity sha512-q1kcdHNZehBwD9jYPh3WyXcsFERi39X4I59I3NadciWtNDyZ6x+GboOxncFK0kXlKIv6BJm5acncehXWUjWQMQ==
+   dependencies:
+-    "@babel/compat-data" "^7.13.15"
++    "@babel/compat-data" "^7.13.12"
+     "@babel/helper-validator-option" "^7.12.17"
+     browserslist "^4.14.5"
+     semver "^6.3.0"
+@@ -290,12 +290,12 @@
+     "@babel/types" "^7.10.4"
+ 
+ "@babel/helper-hoist-variables@^7.13.0":
+-  version "7.13.16"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-hoist-variables/-/helper-hoist-variables-7.13.16.tgz#1b1651249e94b51f8f0d33439843e33e39775b30"
+-  integrity sha512-1eMtTrXtrwscjcAeO4BVK+vvkxaLJSPFz1w1KLawz6HLNi9bPFGBNwwDyVfiu1Tv/vRRFYfoGaKhmAQPGPn5Wg==
++  version "7.13.0"
++  resolved "https://registry.yarnpkg.com/@babel/helper-hoist-variables/-/helper-hoist-variables-7.13.0.tgz#5d5882e855b5c5eda91e0cadc26c6e7a2c8593d8"
++  integrity sha512-0kBzvXiIKfsCA0y6cFEIJf4OdzfpRuNk4+YTeHZpGGc666SATFKTz6sRncwFnQk7/ugJ4dSrCj6iJuvW4Qwr2g==
+   dependencies:
+-    "@babel/traverse" "^7.13.15"
+-    "@babel/types" "^7.13.16"
++    "@babel/traverse" "^7.13.0"
++    "@babel/types" "^7.13.0"
+ 
+ "@babel/helper-member-expression-to-functions@^7.12.1":
+   version "7.12.7"
+@@ -500,14 +500,14 @@
+     "@babel/traverse" "^7.12.5"
+     "@babel/types" "^7.12.5"
+ 
+-"@babel/helpers@^7.13.16":
+-  version "7.13.17"
+-  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.13.17.tgz#b497c7a00e9719d5b613b8982bda6ed3ee94caf6"
+-  integrity sha512-Eal4Gce4kGijo1/TGJdqp3WuhllaMLSrW6XcL0ulyUAQOuxHcCafZE8KHg9857gcTehsm/v7RcOx2+jp0Ryjsg==
++"@babel/helpers@^7.13.10":
++  version "7.13.10"
++  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.13.10.tgz#fd8e2ba7488533cdeac45cc158e9ebca5e3c7df8"
++  integrity sha512-4VO883+MWPDUVRF3PhiLBUFHoX/bsLTGFpFK/HqvvfBZz2D57u9XzPVNFVBTc0PW/CWR9BXTOKt8NF4DInUHcQ==
+   dependencies:
+     "@babel/template" "^7.12.13"
+-    "@babel/traverse" "^7.13.17"
+-    "@babel/types" "^7.13.17"
++    "@babel/traverse" "^7.13.0"
++    "@babel/types" "^7.13.0"
+ 
+ "@babel/highlight@^7.0.0", "@babel/highlight@^7.10.4", "@babel/highlight@^7.8.3":
+   version "7.10.4"
+@@ -532,10 +532,10 @@
+   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.12.10.tgz#824600d59e96aea26a5a2af5a9d812af05c3ae81"
+   integrity sha512-PJdRPwyoOqFAWfLytxrWwGrAxghCgh/yTNCYciOz8QgjflA7aZhECPZAa2VUedKg2+QMWkI0L9lynh2SNmNEgA==
+ 
+-"@babel/parser@^7.1.6", "@babel/parser@^7.12.13", "@babel/parser@^7.13.16":
+-  version "7.13.16"
+-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.13.16.tgz#0f18179b0448e6939b1f3f5c4c355a3a9bcdfd37"
+-  integrity sha512-6bAg36mCwuqLO0hbR+z7PHuqWiCeP7Dzg73OpQwsAB1Eb8HnGEz5xYBzCfbu+YjoaJsJs+qheDxVAuqbt3ILEw==
++"@babel/parser@^7.1.6", "@babel/parser@^7.12.13", "@babel/parser@^7.13.15":
++  version "7.13.15"
++  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.13.15.tgz#8e66775fb523599acb6a289e12929fa5ab0954d8"
++  integrity sha512-b9COtcAlVEQljy/9fbcMHpG+UIW9ReF+gpaxDHTlZd0c6/UU9ng8zdySAW9sRTzpvcdCHn6bUcbuYUgGzLAWVQ==
+ 
+ "@babel/plugin-proposal-async-generator-functions@^7.12.1":
+   version "7.12.1"
+@@ -993,11 +993,11 @@
+     "@babel/helper-plugin-utils" "^7.10.4"
+ 
+ "@babel/plugin-transform-block-scoping@^7.12.13":
+-  version "7.13.16"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.13.16.tgz#a9c0f10794855c63b1d629914c7dcfeddd185892"
+-  integrity sha512-ad3PHUxGnfWF4Efd3qFuznEtZKoBp0spS+DgqzVzRPV7urEBvPLue3y2j80w4Jf2YLzZHj8TOv/Lmvdmh3b2xg==
++  version "7.12.13"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.12.13.tgz#f36e55076d06f41dfd78557ea039c1b581642e61"
++  integrity sha512-Pxwe0iqWJX4fOOM2kEZeUuAxHMWb9nK+9oh5d11bsLoB0xMg+mkDpt0eYuDZB7ETrY9bbcVlKUGTOGWy7BHsMQ==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.13.0"
++    "@babel/helper-plugin-utils" "^7.12.13"
+ 
+ "@babel/plugin-transform-classes@^7.0.0", "@babel/plugin-transform-classes@^7.12.1":
+   version "7.12.1"
+@@ -1048,9 +1048,9 @@
+     "@babel/helper-plugin-utils" "^7.10.4"
+ 
+ "@babel/plugin-transform-destructuring@^7.12.13":
+-  version "7.13.17"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.13.17.tgz#678d96576638c19d5b36b332504d3fd6e06dea27"
+-  integrity sha512-UAUqiLv+uRLO+xuBKKMEpC+t7YRNVRqBsWWq1yKXbBZBje/t3IXCiSinZhjn/DC3qzBfICeYd2EFGEbHsh5RLA==
++  version "7.13.0"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.13.0.tgz#c5dce270014d4e1ebb1d806116694c12b7028963"
++  integrity sha512-zym5em7tePoNT9s964c0/KU3JPPnuq7VhIxPRefJ4/s82cD+q1mgKfuGRDMCPL0HTyKz4dISuQlCusfgCJ86HA==
+   dependencies:
+     "@babel/helper-plugin-utils" "^7.13.0"
+ 
+@@ -1794,17 +1794,17 @@
+     globals "^11.1.0"
+     lodash "^4.17.19"
+ 
+-"@babel/traverse@^7.13.0", "@babel/traverse@^7.13.13", "@babel/traverse@^7.13.15", "@babel/traverse@^7.13.17":
+-  version "7.13.17"
+-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.13.17.tgz#c85415e0c7d50ac053d758baec98b28b2ecfeea3"
+-  integrity sha512-BMnZn0R+X6ayqm3C3To7o1j7Q020gWdqdyP50KEoVqaCO2c/Im7sYZSmVgvefp8TTMQ+9CtwuBp0Z1CZ8V3Pvg==
++"@babel/traverse@^7.13.0", "@babel/traverse@^7.13.13", "@babel/traverse@^7.13.15":
++  version "7.13.15"
++  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.13.15.tgz#c38bf7679334ddd4028e8e1f7b3aa5019f0dada7"
++  integrity sha512-/mpZMNvj6bce59Qzl09fHEs8Bt8NnpEDQYleHUPZQ3wXUMvXi+HJPLars68oAbmp839fGoOkv2pSL2z9ajCIaQ==
+   dependencies:
+     "@babel/code-frame" "^7.12.13"
+-    "@babel/generator" "^7.13.16"
++    "@babel/generator" "^7.13.9"
+     "@babel/helper-function-name" "^7.12.13"
+     "@babel/helper-split-export-declaration" "^7.12.13"
+-    "@babel/parser" "^7.13.16"
+-    "@babel/types" "^7.13.17"
++    "@babel/parser" "^7.13.15"
++    "@babel/types" "^7.13.14"
+     debug "^4.1.0"
+     globals "^11.1.0"
+ 
+@@ -1817,12 +1817,13 @@
+     lodash "^4.17.19"
+     to-fast-properties "^2.0.0"
+ 
+-"@babel/types@^7.12.13", "@babel/types@^7.12.17", "@babel/types@^7.13.0", "@babel/types@^7.13.12", "@babel/types@^7.13.14", "@babel/types@^7.13.16", "@babel/types@^7.13.17":
+-  version "7.13.17"
+-  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.13.17.tgz#48010a115c9fba7588b4437dd68c9469012b38b4"
+-  integrity sha512-RawydLgxbOPDlTLJNtoIypwdmAy//uQIzlKt2+iBiJaRlVuI6QLUxVAyWGNfOzp8Yu4L4lLIacoCyTNtpb4wiA==
++"@babel/types@^7.12.13", "@babel/types@^7.12.17", "@babel/types@^7.13.0", "@babel/types@^7.13.12", "@babel/types@^7.13.14":
++  version "7.13.14"
++  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.13.14.tgz#c35a4abb15c7cd45a2746d78ab328e362cbace0d"
++  integrity sha512-A2aa3QTkWoyqsZZFl56MLUsfmh7O0gN41IPvXAE/++8ojpbz12SszD7JEGYVdn4f9Kt4amIei07swF1h4AqmmQ==
+   dependencies:
+     "@babel/helper-validator-identifier" "^7.12.11"
++    lodash "^4.17.19"
+     to-fast-properties "^2.0.0"
+ 
+ "@bcoe/v8-coverage@^0.2.3":
+@@ -1990,15 +1991,15 @@
+     "@babel/preset-env" "^7.4.4"
+     "@babel/preset-typescript" "^7.3.3"
+ 
+-"@expo/config-plugins@1.0.28":
+-  version "1.0.28"
+-  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.28.tgz#6c3911d493bc329bf9ef5c99585564539b1a57e1"
+-  integrity sha512-i5SpC6U3LjRQlwi1xM4SRj8dR2Qm+0dykPo0GeesByB7IvT36AT1ZjI7VjecuoZ6yKbLpaa5tWvU3JGObxIPSw==
++"@expo/config-plugins@1.0.25":
++  version "1.0.25"
++  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.25.tgz#a9dc4a00a49d8360b5ce85ea262d3a60fb4d00f0"
++  integrity sha512-iRoBWnkMsGxrSxfXUXWpVfxpGjTUipI60+w9vO/QdXH02wFrS4k/jcZ4OSlPJMxpU/Lv5kgvgjvcJ22/SJpRow==
+   dependencies:
+     "@expo/config-types" "^40.0.0-beta.2"
+     "@expo/configure-splash-screen" "0.3.4"
+-    "@expo/image-utils" "0.3.13"
+-    "@expo/json-file" "8.2.29"
++    "@expo/image-utils" "0.3.12"
++    "@expo/json-file" "8.2.28"
+     "@expo/plist" "0.0.12"
+     find-up "~5.0.0"
+     fs-extra "9.0.0"
+@@ -2034,17 +2035,17 @@
+     slugify "^1.3.4"
+ 
+ "@expo/config@^3.3.18":
+-  version "3.3.38"
+-  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.38.tgz#cdda7307600d185eb5d7b37ce8e47dcb8df6a4cd"
+-  integrity sha512-0SsvF7yTy+kdJaAc2W75yhwnaXIRasnA1Vygna83tlPhCx6ynIBzTbJAvdkddSk5euUTJpXc5nePaflGvNboXw==
++  version "3.3.35"
++  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.35.tgz#cc69703b9275fe6d6ef70ce6dcd217fa84d50807"
++  integrity sha512-0jYSYBCge8s9TqvUbky64lWvpdAHKB9V+e4OrKOmxF8MILmBq2fYHiHkywn5VU7OaWiJQJixhrNUEBHWLJm4ig==
+   dependencies:
+     "@babel/core" "7.9.0"
+     "@babel/plugin-proposal-class-properties" "~7.12.13"
+     "@babel/preset-env" "~7.12.13"
+     "@babel/preset-typescript" "~7.12.13"
+-    "@expo/config-plugins" "1.0.28"
++    "@expo/config-plugins" "1.0.25"
+     "@expo/config-types" "^40.0.0-beta.2"
+-    "@expo/json-file" "8.2.29"
++    "@expo/json-file" "8.2.28"
+     fs-extra "9.0.0"
+     getenv "^1.0.0"
+     glob "7.1.6"
+@@ -2069,10 +2070,10 @@
+     xcode "^3.0.0"
+     xml-js "^1.6.11"
+ 
+-"@expo/image-utils@0.3.13":
+-  version "0.3.13"
+-  resolved "https://registry.yarnpkg.com/@expo/image-utils/-/image-utils-0.3.13.tgz#cba070a61ce89e6c113b8e6afd5655cb83da6377"
+-  integrity sha512-BpKoFVJBjG9H5AU040Skrm3R2uDGpWXBU/4TivB5H10cyJphoJKp3GNJVPHYLOVc70OtAxjWDIhLMW6xsWfrgw==
++"@expo/image-utils@0.3.12":
++  version "0.3.12"
++  resolved "https://registry.yarnpkg.com/@expo/image-utils/-/image-utils-0.3.12.tgz#23a7dbf2cfe40fa9dd0c355fe7b4ca15ef83808e"
++  integrity sha512-QMMAjyCJUFXI8b6AOrVC40gubkt++qYfRJdKgbegf9JHQNul/O4Q1ENWTgid+PH0EUqlMLbv6kJ6ai0ZjO08kw==
+   dependencies:
+     "@expo/spawn-async" "1.5.0"
+     chalk "^4.0.0"
+@@ -2097,10 +2098,10 @@
+     lodash "^4.17.15"
+     write-file-atomic "^2.3.0"
+ 
+-"@expo/json-file@8.2.29":
+-  version "8.2.29"
+-  resolved "https://registry.yarnpkg.com/@expo/json-file/-/json-file-8.2.29.tgz#5e66c4c1dc531a583fe654d99fe417246d91741d"
+-  integrity sha512-9C8XwpJiJN9fyClnnNDSTh034zJU9hon6MCUqbBa4dZYQN7OZ00KFZEpbtjy+FndE7YD+KagDxRD6O1HS5vU0g==
++"@expo/json-file@8.2.28":
++  version "8.2.28"
++  resolved "https://registry.yarnpkg.com/@expo/json-file/-/json-file-8.2.28.tgz#9218bb70ad12d8be03c6376990b01fbeb4a15b72"
++  integrity sha512-C28McDuCIOmCmp6e2ZgIpNaT/fZG+L3/WFv5x2DCrooOQmamrkLSH/4Dib0NUmLgWVhgIhXL2hU4RB+LjzVvkQ==
+   dependencies:
+     "@babel/code-frame" "~7.10.4"
+     fs-extra "9.0.0"
+@@ -2124,9 +2125,9 @@
+     cross-spawn "^6.0.5"
+ 
+ "@hapi/hoek@^9.0.0":
+-  version "9.2.0"
+-  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.0.tgz#f3933a44e365864f4dad5db94158106d511e8131"
+-  integrity sha512-sqKVVVOe5ivCaXDWivIJYVSaEgdQK9ul7a4Kity5Iw7u9+wBAPbX1RMSnLLmp7O4Vzj0WOWwMAJsTL00xwaNug==
++  version "9.1.1"
++  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.1.1.tgz#9daf5745156fd84b8e9889a2dc721f0c58e894aa"
++  integrity sha512-CAEbWH7OIur6jEOzaai83jq3FmKmv4PmX1JYfs9IrYcGEVI/lyL1EXJGCj7eFVJ0bg5QR8LMxBlEtA+xKiLpFw==
+ 
+ "@hapi/topo@^5.0.0":
+   version "5.0.0"
+@@ -4445,9 +4446,9 @@ acorn@^7.1.0, acorn@^7.1.1, acorn@^7.4.0:
+   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
+ 
+ acorn@^8.1.0:
+-  version "8.2.1"
+-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.1.tgz#0d36af126fb6755095879c1dc6fd7edf7d60a5fb"
+-  integrity sha512-z716cpm5TX4uzOzILx8PavOE6C6DKshHDw1aQN52M/yNSqE9s5O8SMfyhCCfCJ3HmTL0NkVOi+8a/55T7YB3bg==
++  version "8.1.1"
++  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.1.1.tgz#fb0026885b9ac9f48bac1e185e4af472971149ff"
++  integrity sha512-xYiIVjNuqtKXMxlRMDc6mZUhXehod4a3gbZ1qRlM7icK4EbxUFNLhWoPblCvFtB2Y9CIqHP3CF/rdxLItaQv8g==
+ 
+ address@1.1.2, address@^1.0.1:
+   version "1.1.2"
+@@ -8757,9 +8758,9 @@ flatted@^3.1.0:
+   integrity sha512-tW+UkmtNg/jv9CSofAKvgVcO7c2URjhTdW1ZTkcAritblu8tajiYy7YisnIflEwtKssCtOxpnBRoCB7iap0/TA==
+ 
+ flow-parser@0.*:
+-  version "0.149.0"
+-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.149.0.tgz#6e5749ad832ba211968429accdb6a3858706e4f8"
+-  integrity sha512-ruUVkZuM9oFQjhSsLO/OJYRYpGnuXJpTnIZmgzna6DyLFb3CLpeO27oJbWyeXaa830hmKf0JRzpcdFsFS8lmpg==
++  version "0.148.0"
++  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.148.0.tgz#7f685b4f3cb7a23de63b065b20e37872351911d0"
++  integrity sha512-m7YX6L2y0bW+bC+lH8mq3bWNS8zLdfXSkZR1Rrd9313abmBjEVYLez+D3NhYx8TnVcpJiiT28jbRVTnz/eG4ug==
+ 
+ flow-parser@^0.121.0:
+   version "0.121.0"
+@@ -12992,16 +12993,11 @@ object-copy@^0.1.0:
+     define-property "^0.2.5"
+     kind-of "^3.0.3"
+ 
+-object-inspect@^1.8.0:
++object-inspect@^1.8.0, object-inspect@^1.9.0:
+   version "1.9.0"
+   resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.9.0.tgz#c90521d74e1127b67266ded3394ad6116986533a"
+   integrity sha512-i3Bp9iTqwhaLZBxGkRfo5ZbE07BQRT7MGu8+nNgwW9ItGp1TzCTw2DLEoWwjClxBjOFI/hWljTAmYGCEwmtnOw==
+ 
+-object-inspect@^1.9.0:
+-  version "1.10.2"
+-  resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.10.2.tgz#b6385a3e2b7cae0b5eafcf90cddf85d128767f30"
+-  integrity sha512-gz58rdPpadwztRrPjZE9DZLOABUpTGdcANUgOwBFO1C+HZZhePoP83M65WGDmbpwFYJSWqavbl4SgDn4k8RYTA==
+-
+ object-is@^1.0.1:
+   version "1.1.4"
+   resolved "https://registry.yarnpkg.com/object-is/-/object-is-1.1.4.tgz#63d6c83c00a43f4cbc9434eb9757c8a5b8565068"
+@@ -17801,9 +17797,9 @@ ws@^7, ws@^7.0.0, ws@^7.1.2:
+   integrity sha512-pTsP8UAfhy3sk1lSk/O/s4tjD0CRwvMnzvwr4OKGX7ZvqZtUyx4KIJB5JWbkykPoc55tixMGgTNoh3k4FkNGFQ==
+ 
+ ws@^7.4.4:
+-  version "7.4.5"
+-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.5.tgz#a484dd851e9beb6fdb420027e3885e8ce48986c1"
+-  integrity sha512-xzyu3hFvomRfXKH8vOFMU3OguG6oOvhXMo3xsGy3xWExqaM2dxBbVxuD99O7m3ZUFMvvscsZDqxfgMaRr/Nr1g==
++  version "7.4.4"
++  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.4.tgz#383bc9742cb202292c9077ceab6f6047b17f2d59"
++  integrity sha512-Qm8k8ojNQIMx7S+Zp8u/uHOx7Qazv3Yv4q68MiWWWOJhiwG5W3x7iqmRtJo8xxrciZUY4vRxUTJCKuRnF28ZZw==
+ 
+ xcode@^2.0.0:
+   version "2.1.0"
