@@ -1,0 +1,61 @@
+diff --git a/IgniteDiffApp/app/components/text/text.props.ts b/IgniteDiffApp/app/components/text/text.props.ts
+index 10417c2..d2c55dc 100644
+--- a/IgniteDiffApp/app/components/text/text.props.ts
++++ b/IgniteDiffApp/app/components/text/text.props.ts
+@@ -1,4 +1,5 @@
+ import { StyleProp, TextProps as TextProperties, TextStyle } from "react-native"
++import i18n from "i18n-js"
+ import { TextPresets } from "./text.presets"
+ import { TxKeyPath } from "../../i18n"
+ 
+@@ -17,7 +18,7 @@ export interface TextProps extends TextProperties {
+    * Optional options to pass to i18n. Useful for interpolation
+    * as well as explicitly setting locale or translation fallbacks.
+    */
+-  txOptions?: I18n.TranslateOptions
++  txOptions?: i18n.TranslateOptions
+ 
+   /**
+    * The text to display if not using `tx` or nested components.
+diff --git a/IgniteDiffApp/app/i18n/translate.ts b/IgniteDiffApp/app/i18n/translate.ts
+index 52de684..ef1a019 100644
+--- a/IgniteDiffApp/app/i18n/translate.ts
++++ b/IgniteDiffApp/app/i18n/translate.ts
+@@ -6,6 +6,6 @@ import { TxKeyPath } from "./i18n"
+  *
+  * @param key The i18n key.
+  */
+-export function translate(key: TxKeyPath, options?: I18n.TranslateOptions) {
++export function translate(key: TxKeyPath, options?: i18n.TranslateOptions) {
+   return key ? i18n.t(key, options) : null
+ }
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index fb1b9d3..2d8ecb4 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -4445,9 +4445,9 @@ acorn@^7.1.0, acorn@^7.1.1, acorn@^7.4.0:
+   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
+ 
+ acorn@^8.1.0:
+-  version "8.2.1"
+-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.1.tgz#0d36af126fb6755095879c1dc6fd7edf7d60a5fb"
+-  integrity sha512-z716cpm5TX4uzOzILx8PavOE6C6DKshHDw1aQN52M/yNSqE9s5O8SMfyhCCfCJ3HmTL0NkVOi+8a/55T7YB3bg==
++  version "8.2.2"
++  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.2.tgz#c4574e4fea298d6e6ed4b85ab844b06dd59f26d6"
++  integrity sha512-VrMS8kxT0e7J1EX0p6rI/E0FbfOVcvBpbIqHThFv+f8YrZIlMfVotYcXKVPmTvPW8sW5miJzfUFrrvthUZg8VQ==
+ 
+ address@1.1.2, address@^1.0.1:
+   version "1.1.2"
+@@ -8757,9 +8757,9 @@ flatted@^3.1.0:
+   integrity sha512-tW+UkmtNg/jv9CSofAKvgVcO7c2URjhTdW1ZTkcAritblu8tajiYy7YisnIflEwtKssCtOxpnBRoCB7iap0/TA==
+ 
+ flow-parser@0.*:
+-  version "0.149.0"
+-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.149.0.tgz#6e5749ad832ba211968429accdb6a3858706e4f8"
+-  integrity sha512-ruUVkZuM9oFQjhSsLO/OJYRYpGnuXJpTnIZmgzna6DyLFb3CLpeO27oJbWyeXaa830hmKf0JRzpcdFsFS8lmpg==
++  version "0.150.0"
++  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.150.0.tgz#69ba3e90b0d127bc2f0d7025854805eeb09fd2c1"
++  integrity sha512-kYoNG9BH4RlYwEt0A9+30ZiUiYBNB9KLDeDI4rSBb0QsoH5F12ywNUOHp5JD2KVYz6nhapbn/kCIZALSmd3q6w==
+ 
+ flow-parser@^0.121.0:
+   version "0.121.0"
