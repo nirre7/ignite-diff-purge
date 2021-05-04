@@ -1,0 +1,131 @@
+diff --git a/IgniteDiffApp/app/models/extensions/with-status.test.ts b/IgniteDiffApp/app/models/extensions/with-status.test.ts
+new file mode 100644
+index 0000000..ace9bf7
+--- /dev/null
++++ b/IgniteDiffApp/app/models/extensions/with-status.test.ts
+@@ -0,0 +1,54 @@
++import { withStatus } from "./with-status"
++import { types } from "mobx-state-tree"
++import { reaction, isObservableProp } from "mobx"
++
++const ThingModel = types
++  .model("Thing")
++  .props({
++    name: "",
++    age: 1000,
++  })
++  .extend(withStatus)
++  .actions((self) => ({
++    switchToError() {
++      self.status = "error"
++    },
++  }))
++
++it("starts off as idle", () => {
++  const thing = ThingModel.create()
++  expect(thing.status).toBe("idle")
++})
++
++it("can be set", () => {
++  const thing = ThingModel.create()
++  thing.setStatus("pending")
++  expect(thing.status).toBe("pending")
++})
++
++it("is an observable property", async () => {
++  const thing = ThingModel.create()
++  expect(isObservableProp(thing, "status")).toBe(true)
++})
++
++it("can be synchronously observed", () => {
++  const thing = ThingModel.create()
++  let changed: string
++  reaction(
++    () => thing.status,
++    (value) => {
++      changed = value
++    },
++  )
++  thing.setStatus("done")
++  expect(changed).toBe("done")
++  expect(thing.status).toBe("done")
++})
++
++it("has a setter", () => {
++  const thing = ThingModel.create()
++  thing.switchToError()
++  expect(thing.status).toBe("error")
++  thing.status = "pending"
++  expect(thing.status).toBe("pending")
++})
+diff --git a/IgniteDiffApp/app/models/extensions/with-status.ts b/IgniteDiffApp/app/models/extensions/with-status.ts
+new file mode 100644
+index 0000000..b20ea9e
+--- /dev/null
++++ b/IgniteDiffApp/app/models/extensions/with-status.ts
+@@ -0,0 +1,54 @@
++import { observable, IObservableValue } from "mobx"
++
++export type StatusType = "idle" | "pending" | "done" | "error"
++
++/**
++ * Adds a status field to the model often for tracking api access.
++ *
++ * This property is a string which can be observed, but will not
++ * participate in any serialization.
++ *
++ * Use this to extend your models:
++ *
++ * ```ts
++ *   types.model("MyModel")
++ *     .props({})
++ *     .actions(self => ({}))
++ *     .extend(withStatus) // <--- time to shine baby!!!
++ * ```
++ *
++ * This will give you these 3 options:
++ *
++ *   .status            // returns a string
++ *   .status = "done"   // change the status directly
++ *   .setStatus("done") // change the status and trigger an mst action
++ */
++export const withStatus = () => {
++  /**
++   * The observable backing store for the status field.
++   */
++  const status: IObservableValue<string> = observable.box("idle")
++
++  return {
++    views: {
++      // a getter
++      get status() {
++        return status.get() as StatusType
++      },
++      // as setter
++      set status(value: StatusType) {
++        status.set(value)
++      },
++    },
++    actions: {
++      /**
++       * Set the status to something new.
++       *
++       * @param value The new status.
++       */
++      setStatus(value: StatusType) {
++        status.set(value)
++      },
++    },
++  }
++}
+diff --git a/IgniteDiffApp/app/models/index.ts b/IgniteDiffApp/app/models/index.ts
+index 3538dbb..3819dcc 100644
+--- a/IgniteDiffApp/app/models/index.ts
++++ b/IgniteDiffApp/app/models/index.ts
+@@ -1,5 +1,6 @@
+ export * from "./extensions/with-environment"
+ export * from "./extensions/with-root-store"
++export * from "./extensions/with-status"
+ export * from "./root-store/root-store"
+ export * from "./root-store/root-store-context"
+ export * from "./root-store/setup-root-store"
