@@ -1,0 +1,1956 @@
+diff --git a/IgniteDiffApp/app/components/button/button.presets.ts b/IgniteDiffApp/app/components/button/button.presets.ts
+index b8abbbe..b140fd2 100644
+--- a/IgniteDiffApp/app/components/button/button.presets.ts
++++ b/IgniteDiffApp/app/components/button/button.presets.ts
+@@ -21,7 +21,7 @@ const BASE_TEXT: TextStyle = {
+  *
+  * You want to customize these to whatever you need in your app.
+  */
+-export const viewPresets = {
++export const viewPresets: Record<string, ViewStyle> = {
+   /**
+    * A smaller piece of secondard information.
+    */
+@@ -38,7 +38,7 @@ export const viewPresets = {
+   } as ViewStyle,
+ }
+ 
+-export const textPresets = {
++export const textPresets: Record<ButtonPresetNames, TextStyle> = {
+   primary: { ...BASE_TEXT, fontSize: 9, color: color.palette.white } as TextStyle,
+   link: {
+     ...BASE_TEXT,
+diff --git a/IgniteDiffApp/app/components/button/button.props.ts b/IgniteDiffApp/app/components/button/button.props.ts
+index c7ce16d..1377a7e 100644
+--- a/IgniteDiffApp/app/components/button/button.props.ts
++++ b/IgniteDiffApp/app/components/button/button.props.ts
+@@ -1,4 +1,4 @@
+-import { ViewStyle, TextStyle, TouchableOpacityProps } from "react-native"
++import { StyleProp, TextStyle, TouchableOpacityProps, ViewStyle } from "react-native"
+ import { ButtonPresetNames } from "./button.presets"
+ import { TxKeyPath } from "../../i18n"
+ 
+@@ -16,12 +16,12 @@ export interface ButtonProps extends TouchableOpacityProps {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: ViewStyle | ViewStyle[]
++  style?: StyleProp<ViewStyle>
+ 
+   /**
+    * An optional style override useful for the button text.
+    */
+-  textStyle?: TextStyle | TextStyle[]
++  textStyle?: StyleProp<TextStyle>
+ 
+   /**
+    * One of the different types of text presets.
+diff --git a/IgniteDiffApp/app/components/button/button.tsx b/IgniteDiffApp/app/components/button/button.tsx
+index d95709d..64cf795 100644
+--- a/IgniteDiffApp/app/components/button/button.tsx
++++ b/IgniteDiffApp/app/components/button/button.tsx
+@@ -3,7 +3,7 @@ import { TouchableOpacity } from "react-native"
+ import { Text } from "../text/text"
+ import { viewPresets, textPresets } from "./button.presets"
+ import { ButtonProps } from "./button.props"
+-import { mergeAll, flatten } from "ramda"
++import { flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+@@ -22,15 +22,15 @@ export function Button(props: ButtonProps) {
+     ...rest
+   } = props
+ 
+-  const viewStyle = mergeAll(flatten([viewPresets[preset] || viewPresets.primary, styleOverride]))
+-  const textStyle = mergeAll(
+-    flatten([textPresets[preset] || textPresets.primary, textStyleOverride]),
+-  )
++  const viewStyle = viewPresets[preset] || viewPresets.primary
++  const viewStyles = flatten([viewStyle, styleOverride])
++  const textStyle = textPresets[preset] || textPresets.primary
++  const textStyles = flatten([textStyle, textStyleOverride])
+ 
+-  const content = children || <Text tx={tx} text={text} style={textStyle} />
++  const content = children || <Text tx={tx} text={text} style={textStyles} />
+ 
+   return (
+-    <TouchableOpacity style={viewStyle} {...rest}>
++    <TouchableOpacity style={viewStyles} {...rest}>
+       {content}
+     </TouchableOpacity>
+   )
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+index 9744c0f..01a13d0 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+@@ -1,21 +1,21 @@
+-import { ViewStyle } from "react-native"
++import { StyleProp, ViewStyle } from "react-native"
+ import { TxKeyPath } from "../../i18n"
+ 
+ export interface CheckboxProps {
+   /**
+    * Additional container style. Useful for margins.
+    */
+-  style?: ViewStyle | ViewStyle[]
++  style?: StyleProp<ViewStyle>
+ 
+   /**
+    * Additional outline style.
+    */
+-  outlineStyle?: ViewStyle | ViewStyle[]
++  outlineStyle?: StyleProp<ViewStyle>
+ 
+   /**
+    * Additional fill style. Only visible when checked.
+    */
+-  fillStyle?: ViewStyle | ViewStyle[]
++  fillStyle?: StyleProp<ViewStyle>
+ 
+   /**
+    * Is the checkbox checked?
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.tsx b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+index bdb9825..316da55 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.tsx
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+@@ -1,9 +1,9 @@
+ import * as React from "react"
+-import { TouchableOpacity, TextStyle, ViewStyle, View } from "react-native"
++import { TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
+ import { Text } from "../text/text"
+ import { color, spacing } from "../../theme"
+ import { CheckboxProps } from "./checkbox.props"
+-import { mergeAll, flatten } from "ramda"
++import { flatten } from "ramda"
+ 
+ const ROOT: ViewStyle = {
+   flexDirection: "row",
+@@ -34,9 +34,9 @@ const LABEL: TextStyle = { paddingLeft: spacing[2] }
+ export function Checkbox(props: CheckboxProps) {
+   const numberOfLines = props.multiline ? 0 : 1
+ 
+-  const rootStyle = mergeAll(flatten([ROOT, props.style]))
+-  const outlineStyle = mergeAll(flatten([OUTLINE, props.outlineStyle]))
+-  const fillStyle = mergeAll(flatten([FILL, props.fillStyle]))
++  const rootStyle = flatten([ROOT, props.style])
++  const outlineStyle = flatten([OUTLINE, props.outlineStyle])
++  const fillStyle = flatten([FILL, props.fillStyle])
+ 
+   const onPress = props.onToggle ? () => props.onToggle && props.onToggle(!props.value) : null
+ 
+diff --git a/IgniteDiffApp/app/components/form-row/form-row.props.tsx b/IgniteDiffApp/app/components/form-row/form-row.props.tsx
+index df6b5bc..f010206 100644
+--- a/IgniteDiffApp/app/components/form-row/form-row.props.tsx
++++ b/IgniteDiffApp/app/components/form-row/form-row.props.tsx
+@@ -1,5 +1,5 @@
+ import * as React from "react"
+-import { ViewStyle } from "react-native"
++import { StyleProp, ViewStyle } from "react-native"
+ import { FormRowPresets } from "./form-row.presets"
+ 
+ /**
+@@ -14,7 +14,7 @@ export interface FormRowProps {
+   /**
+    * Override the container style... useful for margins and padding.
+    */
+-  style?: ViewStyle | ViewStyle[]
++  style?: StyleProp<ViewStyle>
+ 
+   /**
+    * The type of border.
+diff --git a/IgniteDiffApp/app/components/form-row/form-row.tsx b/IgniteDiffApp/app/components/form-row/form-row.tsx
+index bb4ff73..1ab4994 100644
+--- a/IgniteDiffApp/app/components/form-row/form-row.tsx
++++ b/IgniteDiffApp/app/components/form-row/form-row.tsx
+@@ -2,13 +2,13 @@ import * as React from "react"
+ import { View } from "react-native"
+ import { PRESETS } from "./form-row.presets"
+ import { FormRowProps } from "./form-row.props"
+-import { mergeAll, flatten } from "ramda"
++import { flatten } from "ramda"
+ 
+ /**
+  * A horizontal container component used to hold a row of a form.
+  */
+ export function FormRow(props: FormRowProps) {
+-  const viewStyle = mergeAll(flatten([PRESETS[props.preset], props.style]))
++  const viewStyle = flatten([PRESETS[props.preset], props.style])
+ 
+   return <View style={viewStyle}>{props.children}</View>
+ }
+diff --git a/IgniteDiffApp/app/components/header/header.props.ts b/IgniteDiffApp/app/components/header/header.props.ts
+index 7601e53..07f2c4d 100644
+--- a/IgniteDiffApp/app/components/header/header.props.ts
++++ b/IgniteDiffApp/app/components/header/header.props.ts
+@@ -1,4 +1,4 @@
+-import { ViewStyle, TextStyle } from "react-native"
++import { StyleProp, TextStyle, ViewStyle } from "react-native"
+ import { IconTypes } from "../icon/icons"
+ import { TxKeyPath } from "../../i18n"
+ 
+@@ -36,10 +36,10 @@ export interface HeaderProps {
+   /**
+    * Container style overrides.
+    */
+-  style?: ViewStyle
++  style?: StyleProp<ViewStyle>
+ 
+   /**
+    * Title style overrides.
+    */
+-  titleStyle?: TextStyle
++  titleStyle?: StyleProp<TextStyle>
+ }
+diff --git a/IgniteDiffApp/app/components/header/header.tsx b/IgniteDiffApp/app/components/header/header.tsx
+index 2dbbaf3..b4a6634 100644
+--- a/IgniteDiffApp/app/components/header/header.tsx
++++ b/IgniteDiffApp/app/components/header/header.tsx
+@@ -38,7 +38,7 @@ export function Header(props: HeaderProps) {
+   const header = headerText || (headerTx && translate(headerTx)) || ""
+ 
+   return (
+-    <View style={{ ...ROOT, ...style }}>
++    <View style={[ROOT, style]}>
+       {leftIcon ? (
+         <Button preset="link" onPress={onLeftPress}>
+           <Icon icon={leftIcon} />
+@@ -47,7 +47,7 @@ export function Header(props: HeaderProps) {
+         <View style={LEFT} />
+       )}
+       <View style={TITLE_MIDDLE}>
+-        <Text style={{ ...TITLE, ...titleStyle }} text={header} />
++        <Text style={[TITLE, titleStyle]} text={header} />
+       </View>
+       {rightIcon ? (
+         <Button preset="link" onPress={onRightPress}>
+diff --git a/IgniteDiffApp/app/components/icon/icon.props.ts b/IgniteDiffApp/app/components/icon/icon.props.ts
+index 6928ede..71ce0b7 100644
+--- a/IgniteDiffApp/app/components/icon/icon.props.ts
++++ b/IgniteDiffApp/app/components/icon/icon.props.ts
+@@ -1,17 +1,17 @@
+-import { ImageStyle, ViewStyle } from "react-native"
++import { ImageStyle, StyleProp, ViewStyle } from "react-native"
+ import { IconTypes } from "./icons"
+ 
+ export interface IconProps {
+   /**
+    * Style overrides for the icon image
+    */
+-  style?: ImageStyle
++  style?: StyleProp<ImageStyle>
+ 
+   /**
+    * Style overrides for the icon container
+    */
+ 
+-  containerStyle?: ViewStyle
++  containerStyle?: StyleProp<ViewStyle>
+ 
+   /**
+    * The name of the icon
+diff --git a/IgniteDiffApp/app/components/icon/icon.tsx b/IgniteDiffApp/app/components/icon/icon.tsx
+index c2d9723..4ef8fe8 100644
+--- a/IgniteDiffApp/app/components/icon/icon.tsx
++++ b/IgniteDiffApp/app/components/icon/icon.tsx
+@@ -9,11 +9,10 @@ const ROOT: ImageStyle = {
+ 
+ export function Icon(props: IconProps) {
+   const { style: styleOverride, icon, containerStyle } = props
+-  const style: ImageStyle = { ...ROOT, ...styleOverride }
+ 
+   return (
+     <View style={containerStyle}>
+-      <Image style={style} source={icons[icon]} />
++      <Image style={[ROOT, styleOverride]} source={icons[icon]} />
+     </View>
+   )
+ }
+diff --git a/IgniteDiffApp/app/components/screen/screen.props.ts b/IgniteDiffApp/app/components/screen/screen.props.ts
+index 19226b8..38f8216 100644
+--- a/IgniteDiffApp/app/components/screen/screen.props.ts
++++ b/IgniteDiffApp/app/components/screen/screen.props.ts
+@@ -1,4 +1,4 @@
+-import { ViewStyle } from "react-native"
++import { StyleProp, ViewStyle } from "react-native"
+ import { KeyboardOffsets, ScreenPresets } from "./screen.presets"
+ 
+ export interface ScreenProps {
+@@ -10,7 +10,7 @@ export interface ScreenProps {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: ViewStyle
++  style?: StyleProp<ViewStyle>
+ 
+   /**
+    * One of the different types of presets.
+@@ -36,4 +36,10 @@ export interface ScreenProps {
+    * By how much should we offset the keyboard? Defaults to none.
+    */
+   keyboardOffset?: KeyboardOffsets
++
++  /**
++   * Should keyboard persist on screen tap. Defaults to handled.
++   * Only applies to scroll preset.
++   */
++  keyboardShouldPersistTaps?: "handled" | "always" | "never"
+ }
+diff --git a/IgniteDiffApp/app/components/screen/screen.tsx b/IgniteDiffApp/app/components/screen/screen.tsx
+index 56b6896..ba84547 100644
+--- a/IgniteDiffApp/app/components/screen/screen.tsx
++++ b/IgniteDiffApp/app/components/screen/screen.tsx
+@@ -16,7 +16,7 @@ function ScreenWithoutScrolling(props: ScreenProps) {
+   return (
+     <KeyboardAvoidingView
+       style={[preset.outer, backgroundStyle]}
+-      behavior={isIos ? "padding" : null}
++      behavior={isIos ? "padding" : undefined}
+       keyboardVerticalOffset={offsets[props.keyboardOffset || "none"]}
+     >
+       <StatusBar barStyle={props.statusBar || "light-content"} />
+@@ -35,7 +35,7 @@ function ScreenWithScrolling(props: ScreenProps) {
+   return (
+     <KeyboardAvoidingView
+       style={[preset.outer, backgroundStyle]}
+-      behavior={isIos ? "padding" : null}
++      behavior={isIos ? "padding" : undefined}
+       keyboardVerticalOffset={offsets[props.keyboardOffset || "none"]}
+     >
+       <StatusBar barStyle={props.statusBar || "light-content"} />
+@@ -43,6 +43,7 @@ function ScreenWithScrolling(props: ScreenProps) {
+         <ScrollView
+           style={[preset.outer, backgroundStyle]}
+           contentContainerStyle={[preset.inner, style]}
++          keyboardShouldPersistTaps={props.keyboardShouldPersistTaps || "handled"}
+         >
+           {props.children}
+         </ScrollView>
+diff --git a/IgniteDiffApp/app/components/switch/switch.props.ts b/IgniteDiffApp/app/components/switch/switch.props.ts
+index 8a26636..8235457 100644
+--- a/IgniteDiffApp/app/components/switch/switch.props.ts
++++ b/IgniteDiffApp/app/components/switch/switch.props.ts
+@@ -1,4 +1,4 @@
+-import { ViewStyle } from "react-native"
++import { StyleProp, ViewStyle } from "react-native"
+ 
+ export interface SwitchProps {
+   /**
+@@ -15,25 +15,25 @@ export interface SwitchProps {
+   /**
+    * A style override to apply to the container.  Useful for margins and paddings.
+    */
+-  style?: ViewStyle | ViewStyle[]
++  style?: StyleProp<ViewStyle>
+ 
+   /**
+    * Additional track styling when on.
+    */
+-  trackOnStyle?: ViewStyle | ViewStyle[]
++  trackOnStyle?: StyleProp<ViewStyle>
+ 
+   /**
+    * Additional track styling when off.
+    */
+-  trackOffStyle?: ViewStyle | ViewStyle[]
++  trackOffStyle?: StyleProp<ViewStyle>
+ 
+   /**
+    * Additional thumb styling when on.
+    */
+-  thumbOnStyle?: ViewStyle | ViewStyle[]
++  thumbOnStyle?: StyleProp<ViewStyle>
+ 
+   /**
+    * Additional thumb styling when off.
+    */
+-  thumbOffStyle?: ViewStyle | ViewStyle[]
++  thumbOffStyle?: StyleProp<ViewStyle>
+ }
+diff --git a/IgniteDiffApp/app/components/switch/switch.tsx b/IgniteDiffApp/app/components/switch/switch.tsx
+index b1457bc..7288163 100644
+--- a/IgniteDiffApp/app/components/switch/switch.tsx
++++ b/IgniteDiffApp/app/components/switch/switch.tsx
+@@ -2,7 +2,7 @@ import React from "react"
+ import { ViewStyle, Animated, Easing, TouchableWithoutFeedback } from "react-native"
+ import { color } from "../../theme"
+ import { SwitchProps } from "./switch.props"
+-import { mergeAll, flatten } from "ramda"
++import { flatten } from "ramda"
+ 
+ // dimensions
+ const THUMB_SIZE = 30
+@@ -47,7 +47,7 @@ const THUMB: ViewStyle = {
+ }
+ 
+ const enhance = (style, newStyles): any => {
+-  return mergeAll(flatten([style, newStyles]))
++  return flatten([style, newStyles])
+ }
+ 
+ const makeAnimatedValue = (switchOn) => new Animated.Value(switchOn ? 1 : 0)
+diff --git a/IgniteDiffApp/app/components/text-field/text-field.tsx b/IgniteDiffApp/app/components/text-field/text-field.tsx
+index 2ebba59..4e9be82 100644
+--- a/IgniteDiffApp/app/components/text-field/text-field.tsx
++++ b/IgniteDiffApp/app/components/text-field/text-field.tsx
+@@ -1,9 +1,9 @@
+ import React from "react"
+-import { TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
++import { StyleProp, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+ import { color, spacing, typography } from "../../theme"
+ import { translate, TxKeyPath } from "../../i18n"
+ import { Text } from "../text/text"
+-import { mergeAll, flatten } from "ramda"
++import { flatten } from "ramda"
+ 
+ // the base styling for the container
+ const CONTAINER: ViewStyle = {
+@@ -48,12 +48,12 @@ export interface TextFieldProps extends TextInputProps {
+   /**
+    * Optional container style overrides useful for margins & padding.
+    */
+-  style?: ViewStyle | ViewStyle[]
++  style?: StyleProp<ViewStyle>
+ 
+   /**
+    * Optional style overrides for the input.
+    */
+-  inputStyle?: TextStyle | TextStyle[]
++  inputStyle?: StyleProp<TextStyle>
+ 
+   /**
+    * Various look & feels.
+@@ -63,10 +63,6 @@ export interface TextFieldProps extends TextInputProps {
+   forwardedRef?: any
+ }
+ 
+-const enhance = (style, styleOverride) => {
+-  return mergeAll(flatten([style, styleOverride]))
+-}
+-
+ /**
+  * A component which has a label and an input together.
+  */
+@@ -82,22 +78,20 @@ export function TextField(props: TextFieldProps) {
+     forwardedRef,
+     ...rest
+   } = props
+-  let containerStyle: ViewStyle = { ...CONTAINER, ...PRESETS[preset] }
+-  containerStyle = enhance(containerStyle, styleOverride)
+ 
+-  let inputStyle: TextStyle = INPUT
+-  inputStyle = enhance(inputStyle, inputStyleOverride)
++  const containerStyles = flatten([CONTAINER, PRESETS[preset], styleOverride])
++  const inputStyles = flatten([INPUT, inputStyleOverride])
+   const actualPlaceholder = placeholderTx ? translate(placeholderTx) : placeholder
+ 
+   return (
+-    <View style={containerStyle}>
++    <View style={containerStyles}>
+       <Text preset="fieldLabel" tx={labelTx} text={label} />
+       <TextInput
+         placeholder={actualPlaceholder}
+         placeholderTextColor={color.palette.lighterGrey}
+         underlineColorAndroid={color.transparent}
+         {...rest}
+-        style={inputStyle}
++        style={inputStyles}
+         ref={forwardedRef}
+       />
+     </View>
+diff --git a/IgniteDiffApp/app/components/text/text.props.ts b/IgniteDiffApp/app/components/text/text.props.ts
+index 298ebc1..d2c55dc 100644
+--- a/IgniteDiffApp/app/components/text/text.props.ts
++++ b/IgniteDiffApp/app/components/text/text.props.ts
+@@ -1,4 +1,5 @@
+-import { TextStyle, TextProps as TextProperties } from "react-native"
++import { StyleProp, TextProps as TextProperties, TextStyle } from "react-native"
++import i18n from "i18n-js"
+ import { TextPresets } from "./text.presets"
+ import { TxKeyPath } from "../../i18n"
+ 
+@@ -17,7 +18,7 @@ export interface TextProps extends TextProperties {
+    * Optional options to pass to i18n. Useful for interpolation
+    * as well as explicitly setting locale or translation fallbacks.
+    */
+-  txOptions?: I18n.TranslateOptions
++  txOptions?: i18n.TranslateOptions
+ 
+   /**
+    * The text to display if not using `tx` or nested components.
+@@ -27,7 +28,7 @@ export interface TextProps extends TextProperties {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: TextStyle | TextStyle[]
++  style?: StyleProp<TextStyle>
+ 
+   /**
+    * One of the different types of text presets.
+diff --git a/IgniteDiffApp/app/components/text/text.tsx b/IgniteDiffApp/app/components/text/text.tsx
+index 4513cbd..bb13def 100644
+--- a/IgniteDiffApp/app/components/text/text.tsx
++++ b/IgniteDiffApp/app/components/text/text.tsx
+@@ -3,7 +3,7 @@ import { Text as ReactNativeText } from "react-native"
+ import { presets } from "./text.presets"
+ import { TextProps } from "./text.props"
+ import { translate } from "../../i18n"
+-import { mergeAll, flatten } from "ramda"
++import { flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+@@ -18,10 +18,11 @@ export function Text(props: TextProps) {
+   const i18nText = tx && translate(tx, txOptions)
+   const content = i18nText || text || children
+ 
+-  const style = mergeAll(flatten([presets[preset] || presets.default, styleOverride]))
++  const style = presets[preset] || presets.default
++  const styles = flatten([style, styleOverride])
+ 
+   return (
+-    <ReactNativeText {...rest} style={style}>
++    <ReactNativeText {...rest} style={styles}>
+       {content}
+     </ReactNativeText>
+   )
+diff --git a/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts b/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts
+index 3ecc866..592bac9 100644
+--- a/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts
++++ b/IgniteDiffApp/app/components/wallpaper/wallpaper.props.ts
+@@ -1,11 +1,11 @@
+-import { ImageStyle } from "react-native"
++import { ImageStyle, StyleProp } from "react-native"
+ import { WallpaperPresets } from "./wallpaper.presets"
+ 
+ export interface WallpaperProps {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: ImageStyle
++  style?: StyleProp<ImageStyle>
+ 
+   /**
+    * An optional background image to override the default image.
+diff --git a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+index 50e1367..a17dc9e 100644
+--- a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
++++ b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+@@ -2,6 +2,7 @@ import React from "react"
+ import { Image } from "react-native"
+ import { presets } from "./wallpaper.presets"
+ import { WallpaperProps } from "./wallpaper.props"
++import { flatten } from "ramda"
+ 
+ const defaultImage = require("./bg.png")
+ 
+@@ -16,10 +17,10 @@ export function Wallpaper(props: WallpaperProps) {
+ 
+   // assemble the style
+   const presetToUse = presets[preset] || presets.stretch
+-  const style = { ...presetToUse, ...styleOverride }
++  const styles = flatten([presetToUse, styleOverride])
+ 
+   // figure out which image to use
+   const source = backgroundImage || defaultImage
+ 
+-  return <Image source={source} style={style} />
++  return <Image source={source} style={styles} />
+ }
+diff --git a/IgniteDiffApp/app/i18n/translate.ts b/IgniteDiffApp/app/i18n/translate.ts
+index 52de684..ef1a019 100644
+--- a/IgniteDiffApp/app/i18n/translate.ts
++++ b/IgniteDiffApp/app/i18n/translate.ts
+@@ -6,6 +6,6 @@ import { TxKeyPath } from "./i18n"
+  *
+  * @param key The i18n key.
+  */
+-export function translate(key: TxKeyPath, options?: I18n.TranslateOptions) {
++export function translate(key: TxKeyPath, options?: i18n.TranslateOptions) {
+   return key ? i18n.t(key, options) : null
+ }
+diff --git a/IgniteDiffApp/app/models/extensions/with-status.test.ts b/IgniteDiffApp/app/models/extensions/with-status.test.ts
+deleted file mode 100644
+index ace9bf7..0000000
+--- a/IgniteDiffApp/app/models/extensions/with-status.test.ts
++++ /dev/null
+@@ -1,54 +0,0 @@
+-import { withStatus } from "./with-status"
+-import { types } from "mobx-state-tree"
+-import { reaction, isObservableProp } from "mobx"
+-
+-const ThingModel = types
+-  .model("Thing")
+-  .props({
+-    name: "",
+-    age: 1000,
+-  })
+-  .extend(withStatus)
+-  .actions((self) => ({
+-    switchToError() {
+-      self.status = "error"
+-    },
+-  }))
+-
+-it("starts off as idle", () => {
+-  const thing = ThingModel.create()
+-  expect(thing.status).toBe("idle")
+-})
+-
+-it("can be set", () => {
+-  const thing = ThingModel.create()
+-  thing.setStatus("pending")
+-  expect(thing.status).toBe("pending")
+-})
+-
+-it("is an observable property", async () => {
+-  const thing = ThingModel.create()
+-  expect(isObservableProp(thing, "status")).toBe(true)
+-})
+-
+-it("can be synchronously observed", () => {
+-  const thing = ThingModel.create()
+-  let changed: string
+-  reaction(
+-    () => thing.status,
+-    (value) => {
+-      changed = value
+-    },
+-  )
+-  thing.setStatus("done")
+-  expect(changed).toBe("done")
+-  expect(thing.status).toBe("done")
+-})
+-
+-it("has a setter", () => {
+-  const thing = ThingModel.create()
+-  thing.switchToError()
+-  expect(thing.status).toBe("error")
+-  thing.status = "pending"
+-  expect(thing.status).toBe("pending")
+-})
+diff --git a/IgniteDiffApp/app/models/extensions/with-status.ts b/IgniteDiffApp/app/models/extensions/with-status.ts
+deleted file mode 100644
+index b20ea9e..0000000
+--- a/IgniteDiffApp/app/models/extensions/with-status.ts
++++ /dev/null
+@@ -1,54 +0,0 @@
+-import { observable, IObservableValue } from "mobx"
+-
+-export type StatusType = "idle" | "pending" | "done" | "error"
+-
+-/**
+- * Adds a status field to the model often for tracking api access.
+- *
+- * This property is a string which can be observed, but will not
+- * participate in any serialization.
+- *
+- * Use this to extend your models:
+- *
+- * ```ts
+- *   types.model("MyModel")
+- *     .props({})
+- *     .actions(self => ({}))
+- *     .extend(withStatus) // <--- time to shine baby!!!
+- * ```
+- *
+- * This will give you these 3 options:
+- *
+- *   .status            // returns a string
+- *   .status = "done"   // change the status directly
+- *   .setStatus("done") // change the status and trigger an mst action
+- */
+-export const withStatus = () => {
+-  /**
+-   * The observable backing store for the status field.
+-   */
+-  const status: IObservableValue<string> = observable.box("idle")
+-
+-  return {
+-    views: {
+-      // a getter
+-      get status() {
+-        return status.get() as StatusType
+-      },
+-      // as setter
+-      set status(value: StatusType) {
+-        status.set(value)
+-      },
+-    },
+-    actions: {
+-      /**
+-       * Set the status to something new.
+-       *
+-       * @param value The new status.
+-       */
+-      setStatus(value: StatusType) {
+-        status.set(value)
+-      },
+-    },
+-  }
+-}
+diff --git a/IgniteDiffApp/app/models/index.ts b/IgniteDiffApp/app/models/index.ts
+index 3819dcc..3538dbb 100644
+--- a/IgniteDiffApp/app/models/index.ts
++++ b/IgniteDiffApp/app/models/index.ts
+@@ -1,6 +1,5 @@
+ export * from "./extensions/with-environment"
+ export * from "./extensions/with-root-store"
+-export * from "./extensions/with-status"
+ export * from "./root-store/root-store"
+ export * from "./root-store/root-store-context"
+ export * from "./root-store/setup-root-store"
+diff --git a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+index 7f98aad..fffaf7d 100644
+--- a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+@@ -1,8 +1,9 @@
+ import * as React from "react"
+-import { TextStyle, View, ViewStyle } from "react-native"
++import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
+ import { observer } from "mobx-react-lite"
+ import { color, typography } from "../../theme"
+ import { Text } from "../"
++import { flatten } from "ramda"
+ 
+ const CONTAINER: ViewStyle = {
+   justifyContent: "center",
+@@ -18,7 +19,7 @@ export interface <%= props.pascalCaseName %>Props {
+   /**
+    * An optional style override useful for padding & margin.
+    */
+-  style?: ViewStyle
++  style?: StyleProp<ViewStyle>
+ }
+ 
+ /**
+@@ -26,9 +27,10 @@ export interface <%= props.pascalCaseName %>Props {
+  */
+ export const <%= props.pascalCaseName %> = observer(function <%= props.pascalCaseName %>(props: <%= props.pascalCaseName %>Props) {
+   const { style } = props
++  const styles = flatten([CONTAINER, style])
+ 
+   return (
+-    <View style={[CONTAINER, style]}>
++    <View style={styles}>
+       <Text style={TEXT}>Hello</Text>
+     </View>
+   )
+diff --git a/IgniteDiffApp/ios/Podfile b/IgniteDiffApp/ios/Podfile
+index 628e96e..2ffb0cd 100644
+--- a/IgniteDiffApp/ios/Podfile
++++ b/IgniteDiffApp/ios/Podfile
+@@ -22,10 +22,10 @@ target 'IgniteDiffApp' do
+   # Enables Flipper.
+   #
+   # Note that if you have use_frameworks! enabled, Flipper will not work and
+-  # you should disable the next line.
+-  use_flipper!()
+-
++  # you should disable these next few lines.
++  use_flipper!({ 'Flipper' => '0.75.1' })
+   post_install do |installer|
++    flipper_post_install(installer)
+     react_native_post_install(installer)
+   end
+ end
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index 0f24234..3451f0f 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -17,19 +17,19 @@ PODS:
+   - EXPermissions (10.0.0):
+     - UMCore
+     - UMPermissionsInterface
+-  - FBLazyVector (0.64.0)
+-  - FBReactNativeSpec (0.64.0):
++  - FBLazyVector (0.64.1)
++  - FBReactNativeSpec (0.64.1):
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTRequired (= 0.64.0)
+-    - RCTTypeSafety (= 0.64.0)
+-    - React-Core (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
++    - RCTRequired (= 0.64.1)
++    - RCTTypeSafety (= 0.64.1)
++    - React-Core (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
+   - Flipper (0.75.1):
+     - Flipper-Folly (~> 2.5)
+     - Flipper-RSocket (~> 1.3)
+   - Flipper-DoubleConversion (1.1.7)
+-  - Flipper-Folly (2.5.1):
++  - Flipper-Folly (2.5.3):
+     - boost-for-react-native
+     - Flipper-DoubleConversion
+     - Flipper-Glog
+@@ -83,258 +83,258 @@ PODS:
+     - boost-for-react-native
+     - DoubleConversion
+     - glog
+-  - RCTRequired (0.64.0)
+-  - RCTTypeSafety (0.64.0):
+-    - FBLazyVector (= 0.64.0)
++  - RCTRequired (0.64.1)
++  - RCTTypeSafety (0.64.1):
++    - FBLazyVector (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTRequired (= 0.64.0)
+-    - React-Core (= 0.64.0)
+-  - React (0.64.0):
+-    - React-Core (= 0.64.0)
+-    - React-Core/DevSupport (= 0.64.0)
+-    - React-Core/RCTWebSocket (= 0.64.0)
+-    - React-RCTActionSheet (= 0.64.0)
+-    - React-RCTAnimation (= 0.64.0)
+-    - React-RCTBlob (= 0.64.0)
+-    - React-RCTImage (= 0.64.0)
+-    - React-RCTLinking (= 0.64.0)
+-    - React-RCTNetwork (= 0.64.0)
+-    - React-RCTSettings (= 0.64.0)
+-    - React-RCTText (= 0.64.0)
+-    - React-RCTVibration (= 0.64.0)
+-  - React-callinvoker (0.64.0)
+-  - React-Core (0.64.0):
++    - RCTRequired (= 0.64.1)
++    - React-Core (= 0.64.1)
++  - React (0.64.1):
++    - React-Core (= 0.64.1)
++    - React-Core/DevSupport (= 0.64.1)
++    - React-Core/RCTWebSocket (= 0.64.1)
++    - React-RCTActionSheet (= 0.64.1)
++    - React-RCTAnimation (= 0.64.1)
++    - React-RCTBlob (= 0.64.1)
++    - React-RCTImage (= 0.64.1)
++    - React-RCTLinking (= 0.64.1)
++    - React-RCTNetwork (= 0.64.1)
++    - React-RCTSettings (= 0.64.1)
++    - React-RCTText (= 0.64.1)
++    - React-RCTVibration (= 0.64.1)
++  - React-callinvoker (0.64.1)
++  - React-Core (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/Default (= 0.64.0)
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-Core/Default (= 0.64.1)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/CoreModulesHeaders (0.64.0):
++  - React-Core/CoreModulesHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/Default (0.64.0):
++  - React-Core/Default (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/DevSupport (0.64.0):
++  - React-Core/DevSupport (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/Default (= 0.64.0)
+-    - React-Core/RCTWebSocket (= 0.64.0)
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-jsinspector (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-Core/Default (= 0.64.1)
++    - React-Core/RCTWebSocket (= 0.64.1)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-jsinspector (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTActionSheetHeaders (0.64.0):
++  - React-Core/RCTActionSheetHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTAnimationHeaders (0.64.0):
++  - React-Core/RCTAnimationHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTBlobHeaders (0.64.0):
++  - React-Core/RCTBlobHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTImageHeaders (0.64.0):
++  - React-Core/RCTImageHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTLinkingHeaders (0.64.0):
++  - React-Core/RCTLinkingHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTNetworkHeaders (0.64.0):
++  - React-Core/RCTNetworkHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTSettingsHeaders (0.64.0):
++  - React-Core/RCTSettingsHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTTextHeaders (0.64.0):
++  - React-Core/RCTTextHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTVibrationHeaders (0.64.0):
++  - React-Core/RCTVibrationHeaders (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-Core/RCTWebSocket (0.64.0):
++  - React-Core/RCTWebSocket (0.64.1):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/Default (= 0.64.0)
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsiexecutor (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-Core/Default (= 0.64.1)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsiexecutor (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+     - Yoga
+-  - React-CoreModules (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
++  - React-CoreModules (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.0)
+-    - React-Core/CoreModulesHeaders (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-RCTImage (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-cxxreact (0.64.0):
++    - RCTTypeSafety (= 0.64.1)
++    - React-Core/CoreModulesHeaders (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-RCTImage (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-cxxreact (0.64.1):
+     - boost-for-react-native (= 1.63.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-callinvoker (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-jsinspector (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
+-    - React-runtimeexecutor (= 0.64.0)
+-  - React-jsi (0.64.0):
++    - React-callinvoker (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-jsinspector (= 0.64.1)
++    - React-perflogger (= 0.64.1)
++    - React-runtimeexecutor (= 0.64.1)
++  - React-jsi (0.64.1):
+     - boost-for-react-native (= 1.63.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-jsi/Default (= 0.64.0)
+-  - React-jsi/Default (0.64.0):
++    - React-jsi/Default (= 0.64.1)
++  - React-jsi/Default (0.64.1):
+     - boost-for-react-native (= 1.63.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-  - React-jsiexecutor (0.64.0):
++  - React-jsiexecutor (0.64.1):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
+-  - React-jsinspector (0.64.0)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-perflogger (= 0.64.1)
++  - React-jsinspector (0.64.1)
+   - react-native-safe-area-context (3.1.8):
+     - React-Core
+   - react-native-splash-screen (3.2.0):
+     - React
+-  - React-perflogger (0.64.0)
+-  - React-RCTActionSheet (0.64.0):
+-    - React-Core/RCTActionSheetHeaders (= 0.64.0)
+-  - React-RCTAnimation (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
++  - React-perflogger (0.64.1)
++  - React-RCTActionSheet (0.64.1):
++    - React-Core/RCTActionSheetHeaders (= 0.64.1)
++  - React-RCTAnimation (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.0)
+-    - React-Core/RCTAnimationHeaders (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-RCTBlob (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
++    - RCTTypeSafety (= 0.64.1)
++    - React-Core/RCTAnimationHeaders (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-RCTBlob (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/RCTBlobHeaders (= 0.64.0)
+-    - React-Core/RCTWebSocket (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-RCTNetwork (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-RCTImage (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
++    - React-Core/RCTBlobHeaders (= 0.64.1)
++    - React-Core/RCTWebSocket (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-RCTNetwork (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-RCTImage (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.0)
+-    - React-Core/RCTImageHeaders (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-RCTNetwork (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-RCTLinking (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
+-    - React-Core/RCTLinkingHeaders (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-RCTNetwork (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
++    - RCTTypeSafety (= 0.64.1)
++    - React-Core/RCTImageHeaders (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-RCTNetwork (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-RCTLinking (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
++    - React-Core/RCTLinkingHeaders (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-RCTNetwork (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.0)
+-    - React-Core/RCTNetworkHeaders (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-RCTSettings (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
++    - RCTTypeSafety (= 0.64.1)
++    - React-Core/RCTNetworkHeaders (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-RCTSettings (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.0)
+-    - React-Core/RCTSettingsHeaders (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-RCTText (0.64.0):
+-    - React-Core/RCTTextHeaders (= 0.64.0)
+-  - React-RCTVibration (0.64.0):
+-    - FBReactNativeSpec (= 0.64.0)
++    - RCTTypeSafety (= 0.64.1)
++    - React-Core/RCTSettingsHeaders (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-RCTText (0.64.1):
++    - React-Core/RCTTextHeaders (= 0.64.1)
++  - React-RCTVibration (0.64.1):
++    - FBReactNativeSpec (= 0.64.1)
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/RCTVibrationHeaders (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - ReactCommon/turbomodule/core (= 0.64.0)
+-  - React-runtimeexecutor (0.64.0):
+-    - React-jsi (= 0.64.0)
+-  - ReactCommon/turbomodule/core (0.64.0):
++    - React-Core/RCTVibrationHeaders (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - ReactCommon/turbomodule/core (= 0.64.1)
++  - React-runtimeexecutor (0.64.1):
++    - React-jsi (= 0.64.1)
++  - ReactCommon/turbomodule/core (0.64.1):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-callinvoker (= 0.64.0)
+-    - React-Core (= 0.64.0)
+-    - React-cxxreact (= 0.64.0)
+-    - React-jsi (= 0.64.0)
+-    - React-perflogger (= 0.64.0)
++    - React-callinvoker (= 0.64.1)
++    - React-Core (= 0.64.1)
++    - React-cxxreact (= 0.64.1)
++    - React-jsi (= 0.64.1)
++    - React-perflogger (= 0.64.1)
+   - RNCAsyncStorage (1.14.1):
+     - React-Core
+   - RNCMaskedView (0.1.10):
+@@ -375,25 +375,25 @@ DEPENDENCIES:
+   - EXPermissions (from `../node_modules/expo-permissions/ios`)
+   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
+   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
+-  - Flipper (~> 0.75.1)
++  - Flipper (= 0.75.1)
+   - Flipper-DoubleConversion (= 1.1.7)
+-  - Flipper-Folly (~> 2.5)
++  - Flipper-Folly (~> 2.5.3)
+   - Flipper-Glog (= 0.3.6)
+   - Flipper-PeerTalk (~> 0.0.4)
+   - Flipper-RSocket (~> 1.3)
+-  - FlipperKit (~> 0.75.1)
+-  - FlipperKit/Core (~> 0.75.1)
+-  - FlipperKit/CppBridge (~> 0.75.1)
+-  - FlipperKit/FBCxxFollyDynamicConvert (~> 0.75.1)
+-  - FlipperKit/FBDefines (~> 0.75.1)
+-  - FlipperKit/FKPortForwarding (~> 0.75.1)
+-  - FlipperKit/FlipperKitHighlightOverlay (~> 0.75.1)
+-  - FlipperKit/FlipperKitLayoutPlugin (~> 0.75.1)
+-  - FlipperKit/FlipperKitLayoutTextSearchable (~> 0.75.1)
+-  - FlipperKit/FlipperKitNetworkPlugin (~> 0.75.1)
+-  - FlipperKit/FlipperKitReactPlugin (~> 0.75.1)
+-  - FlipperKit/FlipperKitUserDefaultsPlugin (~> 0.75.1)
+-  - FlipperKit/SKIOSNetworkPlugin (~> 0.75.1)
++  - FlipperKit (= 0.75.1)
++  - FlipperKit/Core (= 0.75.1)
++  - FlipperKit/CppBridge (= 0.75.1)
++  - FlipperKit/FBCxxFollyDynamicConvert (= 0.75.1)
++  - FlipperKit/FBDefines (= 0.75.1)
++  - FlipperKit/FKPortForwarding (= 0.75.1)
++  - FlipperKit/FlipperKitHighlightOverlay (= 0.75.1)
++  - FlipperKit/FlipperKitLayoutPlugin (= 0.75.1)
++  - FlipperKit/FlipperKitLayoutTextSearchable (= 0.75.1)
++  - FlipperKit/FlipperKitNetworkPlugin (= 0.75.1)
++  - FlipperKit/FlipperKitReactPlugin (= 0.75.1)
++  - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.75.1)
++  - FlipperKit/SKIOSNetworkPlugin (= 0.75.1)
+   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
+   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
+@@ -574,11 +574,11 @@ SPEC CHECKSUMS:
+   EXImageLoader: f96ec9992733a4224418bbd9382e5485c8948944
+   EXLocalization: 8b9463c81843da214476b541a27811dd885c9a76
+   EXPermissions: 17d4846ad1880f6891c74ae58ca1acb43e47ed47
+-  FBLazyVector: 49cbe4b43e445b06bf29199b6ad2057649e4c8f5
+-  FBReactNativeSpec: 9fa76334cefeaaa010a82f453b50faad47200f3f
++  FBLazyVector: 7b423f9e248eae65987838148c36eec1dbfe0b53
++  FBReactNativeSpec: c4cbe43e3c8029e17fa8d49ebc673e51fcc22cf2
+   Flipper: d3da1aa199aad94455ae725e9f3aa43f3ec17021
+   Flipper-DoubleConversion: 38631e41ef4f9b12861c67d17cb5518d06badc41
+-  Flipper-Folly: f7a3caafbd74bda4827954fd7a6e000e36355489
++  Flipper-Folly: 755929a4f851b2fb2c347d533a23f191b008554c
+   Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
+   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
+   Flipper-RSocket: 127954abe8b162fcaf68d2134d34dc2bd7076154
+@@ -587,30 +587,30 @@ SPEC CHECKSUMS:
+   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+   OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
+   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
+-  RCTRequired: 2f8cb5b7533219bf4218a045f92768129cf7050a
+-  RCTTypeSafety: 512728b73549e72ad7330b92f3d42936f2a4de5b
+-  React: 98eac01574128a790f0bbbafe2d1a8607291ac24
+-  React-callinvoker: def3f7fae16192df68d9b69fd4bbb59092ee36bc
+-  React-Core: 70a52aa5dbe9b83befae82038451a7df9fd54c5a
+-  React-CoreModules: 052edef46117862e2570eb3a0f06d81c61d2c4b8
+-  React-cxxreact: c1dc71b30653cfb4770efdafcbdc0ad6d388baab
+-  React-jsi: 74341196d9547cbcbcfa4b3bbbf03af56431d5a1
+-  React-jsiexecutor: 06a9c77b56902ae7ffcdd7a4905f664adc5d237b
+-  React-jsinspector: 0ae35a37b20d5e031eb020a69cc5afdbd6406301
++  RCTRequired: ec2ebc96b7bfba3ca5c32740f5a0c6a014a274d2
++  RCTTypeSafety: 22567f31e67c3e088c7ac23ea46ab6d4779c0ea5
++  React: a241e3dbb1e91d06332f1dbd2b3ab26e1a4c4b9d
++  React-callinvoker: da4d1c6141696a00163960906bc8a55b985e4ce4
++  React-Core: 46ba164c437d7dac607b470c83c8308b05799748
++  React-CoreModules: 217bd14904491c7b9940ff8b34a3fe08013c2f14
++  React-cxxreact: 0090588ae6660c4615d3629fdd5c768d0983add4
++  React-jsi: 5de8204706bd872b78ea646aee5d2561ca1214b6
++  React-jsiexecutor: 124e8f99992490d0d13e0649d950d3e1aae06fe9
++  React-jsinspector: 500a59626037be5b3b3d89c5151bc3baa9abf1a9
+   react-native-safe-area-context: 79fea126c6830c85f65947c223a5e3058a666937
+   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
+-  React-perflogger: 9c547d8f06b9bf00cb447f2b75e8d7f19b7e02af
+-  React-RCTActionSheet: 3080b6e12e0e1a5b313c8c0050699b5c794a1b11
+-  React-RCTAnimation: 3f96f21a497ae7dabf4d2f150ee43f906aaf516f
+-  React-RCTBlob: 283b8e5025e7f954176bc48164f846909002f3ed
+-  React-RCTImage: 5088a484faac78f2d877e1b79125d3bb1ea94a16
+-  React-RCTLinking: 5e8fbb3e9a8bc2e4e3eb15b1eb8bda5fcac27b8c
+-  React-RCTNetwork: 38ec277217b1e841d5e6a1fa78da65b9212ccb28
+-  React-RCTSettings: 242d6e692108c3de4f3bb74b7586a8799e9ab070
+-  React-RCTText: 8746736ac8eb5a4a74719aa695b7a236a93a83d2
+-  React-RCTVibration: 0fd6b21751a33cb72fce1a4a33ab9678416d307a
+-  React-runtimeexecutor: cad74a1eaa53ee6e7a3620231939d8fe2c6afcf0
+-  ReactCommon: cfe2b7fd20e0dbd2d1185cd7d8f99633fbc5ff05
++  React-perflogger: aad6d4b4a267936b3667260d1f649b6f6069a675
++  React-RCTActionSheet: fc376be462c9c8d6ad82c0905442fd77f82a9d2a
++  React-RCTAnimation: ba0a1c3a2738be224a08092fa7f1b444ab77d309
++  React-RCTBlob: f758d4403fc5828a326dc69e27b41e1a92f34947
++  React-RCTImage: ce57088705f4a8d03f6594b066a59c29143ba73e
++  React-RCTLinking: 852a3a95c65fa63f657a4b4e2d3d83a815e00a7c
++  React-RCTNetwork: 9d7ccb8a08d522d71700b4fb677d9fa28cccd118
++  React-RCTSettings: d8aaf4389ff06114dee8c42ef5f0f2915946011e
++  React-RCTText: 809c12ed6b261796ba056c04fcd20d8b90bcc81d
++  React-RCTVibration: 4b99a7f5c6c0abbc5256410cc5425fb8531986e1
++  React-runtimeexecutor: ff951a0c241bfaefc4940a3f1f1a229e7cb32fa6
++  ReactCommon: bedc99ed4dae329c4fcf128d0c31b9115e5365ca
+   RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
+   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
+   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
+@@ -629,9 +629,9 @@ SPEC CHECKSUMS:
+   UMReactNativeAdapter: 172def7895b2cb44a7dd021336e316d5fa8ea958
+   UMSensorsInterface: 4df9ec662134de5614ae61acc249d6912db87ca5
+   UMTaskManagerInterface: 4c60b43eaf3cb05a164bc9113258a171c18b7bf7
+-  Yoga: 8c8436d4171c87504c648ae23b1d81242bdf3bbf
++  Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393
+   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+ 
+-PODFILE CHECKSUM: 9cb11fe19431f6a1bc5fece3ddbbf06a26ea4682
++PODFILE CHECKSUM: c6f7f1ee26dfa0c3f2b4c888bb412f647c3fb377
+ 
+ COCOAPODS: 1.10.1
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 9741e92..0c494b7 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -37,7 +37,7 @@
+     "mobx-state-tree": "5.0.1",
+     "ramda": "0.27.1",
+     "react": "17.0.1",
+-    "react-native": "0.64.0",
++    "react-native": "0.64.1",
+     "react-native-gesture-handler": "1.10.3",
+     "react-native-keychain": "6.2.0",
+     "react-native-safe-area-context": "3.1.8",
+@@ -138,11 +138,12 @@
+     "root": true,
+     "parser": "@typescript-eslint/parser",
+     "extends": [
+-      "prettier",
+       "plugin:@typescript-eslint/recommended",
+       "plugin:react/recommended",
+       "plugin:react-native/all",
+-      "standard"
++      "standard",
++      "prettier",
++      "prettier/@typescript-eslint"
+     ],
+     "plugins": [
+       "@typescript-eslint",
+diff --git a/IgniteDiffApp/storybook/views/story-screen.tsx b/IgniteDiffApp/storybook/views/story-screen.tsx
+index 862ed77..fc49ea9 100644
+--- a/IgniteDiffApp/storybook/views/story-screen.tsx
++++ b/IgniteDiffApp/storybook/views/story-screen.tsx
+@@ -7,7 +7,7 @@ export interface StoryScreenProps {
+   children?: React.ReactNode
+ }
+ 
+-const behavior = Platform.OS === "ios" ? "padding" : null
++const behavior = Platform.OS === "ios" ? "padding" : undefined
+ export const StoryScreen = (props) => (
+   <KeyboardAvoidingView style={ROOT} behavior={behavior} keyboardVerticalOffset={50}>
+     {props.children}
+diff --git a/IgniteDiffApp/storybook/views/story.tsx b/IgniteDiffApp/storybook/views/story.tsx
+index e479e4d..c85f7f0 100644
+--- a/IgniteDiffApp/storybook/views/story.tsx
++++ b/IgniteDiffApp/storybook/views/story.tsx
+@@ -10,7 +10,7 @@ const ROOT: ViewStyle = { flex: 1 }
+ export function Story(props: StoryProps) {
+   return (
+     <View style={ROOT}>
+-      <ScrollView>{props.children}</ScrollView>
++      <ScrollView keyboardShouldPersistTaps="handled">{props.children}</ScrollView>
+     </View>
+   )
+ }
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 9483c13..a87a743 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -30,10 +30,10 @@
+   dependencies:
+     "@babel/highlight" "^7.12.13"
+ 
+-"@babel/compat-data@^7.12.13", "@babel/compat-data@^7.13.12", "@babel/compat-data@^7.13.8":
+-  version "7.13.15"
+-  resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.13.15.tgz#7e8eea42d0b64fda2b375b22d06c605222e848f4"
+-  integrity sha512-ltnibHKR1VnrU4ymHyQ/CXtNXI6yZC0oJThyW78Hft8XndANwi+9H+UIklBDraIjFEJzw8wmcM427oDd9KS5wA==
++"@babel/compat-data@^7.12.13", "@babel/compat-data@^7.13.15", "@babel/compat-data@^7.13.8":
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.14.0.tgz#a901128bce2ad02565df95e6ecbf195cf9465919"
++  integrity sha512-vu9V3uMM/1o5Hl5OekMUowo3FqXLJSw+s+66nt0fSWVWTtmosdzn45JHOB3cPtZoe6CTBDzvSw0RdOY85Q37+Q==
+ 
+ "@babel/compat-data@^7.12.5", "@babel/compat-data@^7.12.7":
+   version "7.12.7"
+@@ -84,19 +84,19 @@
+     source-map "^0.5.0"
+ 
+ "@babel/core@^7.1.6", "@babel/core@^7.12.9":
+-  version "7.13.15"
+-  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.13.15.tgz#a6d40917df027487b54312202a06812c4f7792d0"
+-  integrity sha512-6GXmNYeNjS2Uz+uls5jalOemgIhnTMeaXo+yBUA72kC2uX/8VW6XyhVIo2L8/q0goKQA3EVKx0KOQpVKSeWadQ==
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.14.0.tgz#47299ff3ec8d111b493f1a9d04bf88c04e728d88"
++  integrity sha512-8YqpRig5NmIHlMLw09zMlPTvUVMILjqCOtVgu+TVNWEBvy9b5I3RRyhqnrV4hjgEK7n8P9OqvkWJAFmEL6Wwfw==
+   dependencies:
+     "@babel/code-frame" "^7.12.13"
+-    "@babel/generator" "^7.13.9"
+-    "@babel/helper-compilation-targets" "^7.13.13"
+-    "@babel/helper-module-transforms" "^7.13.14"
+-    "@babel/helpers" "^7.13.10"
+-    "@babel/parser" "^7.13.15"
++    "@babel/generator" "^7.14.0"
++    "@babel/helper-compilation-targets" "^7.13.16"
++    "@babel/helper-module-transforms" "^7.14.0"
++    "@babel/helpers" "^7.14.0"
++    "@babel/parser" "^7.14.0"
+     "@babel/template" "^7.12.13"
+-    "@babel/traverse" "^7.13.15"
+-    "@babel/types" "^7.13.14"
++    "@babel/traverse" "^7.14.0"
++    "@babel/types" "^7.14.0"
+     convert-source-map "^1.7.0"
+     debug "^4.1.0"
+     gensync "^1.0.0-beta.2"
+@@ -113,12 +113,12 @@
+     jsesc "^2.5.1"
+     source-map "^0.5.0"
+ 
+-"@babel/generator@^7.13.9":
+-  version "7.13.9"
+-  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.13.9.tgz#3a7aa96f9efb8e2be42d38d80e2ceb4c64d8de39"
+-  integrity sha512-mHOOmY0Axl/JCTkxTU6Lf5sWOg/v8nUa+Xkt4zMTftX0wqmb6Sh7J8gvcehBw7q0AhrhAR+FDacKjCZ2X8K+Sw==
++"@babel/generator@^7.14.0":
++  version "7.14.1"
++  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.14.1.tgz#1f99331babd65700183628da186f36f63d615c93"
++  integrity sha512-TMGhsXMXCP/O1WtQmZjpEYDhCYC9vFhayWZPJSZCGkPJgUqX0rF0wwtrYvnzVxIjcF80tkUertXVk5cwqi5cAQ==
+   dependencies:
+-    "@babel/types" "^7.13.0"
++    "@babel/types" "^7.14.1"
+     jsesc "^2.5.1"
+     source-map "^0.5.0"
+ 
+@@ -169,12 +169,12 @@
+     "@babel/helper-annotate-as-pure" "^7.10.4"
+     "@babel/types" "^7.10.4"
+ 
+-"@babel/helper-compilation-targets@^7.12.17", "@babel/helper-compilation-targets@^7.13.13", "@babel/helper-compilation-targets@^7.13.8":
+-  version "7.13.13"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-compilation-targets/-/helper-compilation-targets-7.13.13.tgz#2b2972a0926474853f41e4adbc69338f520600e5"
+-  integrity sha512-q1kcdHNZehBwD9jYPh3WyXcsFERi39X4I59I3NadciWtNDyZ6x+GboOxncFK0kXlKIv6BJm5acncehXWUjWQMQ==
++"@babel/helper-compilation-targets@^7.12.17", "@babel/helper-compilation-targets@^7.13.16", "@babel/helper-compilation-targets@^7.13.8":
++  version "7.13.16"
++  resolved "https://registry.yarnpkg.com/@babel/helper-compilation-targets/-/helper-compilation-targets-7.13.16.tgz#6e91dccf15e3f43e5556dffe32d860109887563c"
++  integrity sha512-3gmkYIrpqsLlieFwjkGgLaSHmhnvlAYzZLlYVjlW+QwI+1zE17kGxuJGmIqDQdYp56XdmGeD+Bswx0UTyG18xA==
+   dependencies:
+-    "@babel/compat-data" "^7.13.12"
++    "@babel/compat-data" "^7.13.15"
+     "@babel/helper-validator-option" "^7.12.17"
+     browserslist "^4.14.5"
+     semver "^6.3.0"
+@@ -201,14 +201,15 @@
+     "@babel/helper-split-export-declaration" "^7.10.4"
+ 
+ "@babel/helper-create-class-features-plugin@^7.12.13", "@babel/helper-create-class-features-plugin@^7.13.0":
+-  version "7.13.11"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-create-class-features-plugin/-/helper-create-class-features-plugin-7.13.11.tgz#30d30a005bca2c953f5653fc25091a492177f4f6"
+-  integrity sha512-ays0I7XYq9xbjCSvT+EvysLgfc3tOkwCULHjrnscGT3A9qD4sk3wXnJ3of0MAWsWGjdinFvajHU2smYuqXKMrw==
++  version "7.14.1"
++  resolved "https://registry.yarnpkg.com/@babel/helper-create-class-features-plugin/-/helper-create-class-features-plugin-7.14.1.tgz#1fe11b376f3c41650ad9fedc665b0068722ea76c"
++  integrity sha512-r8rsUahG4ywm0QpGcCrLaUSOuNAISR3IZCg4Fx05Ozq31aCUrQsTLH6KPxy0N5ULoQ4Sn9qjNdGNtbPWAC6hYg==
+   dependencies:
++    "@babel/helper-annotate-as-pure" "^7.12.13"
+     "@babel/helper-function-name" "^7.12.13"
+-    "@babel/helper-member-expression-to-functions" "^7.13.0"
++    "@babel/helper-member-expression-to-functions" "^7.13.12"
+     "@babel/helper-optimise-call-expression" "^7.12.13"
+-    "@babel/helper-replace-supers" "^7.13.0"
++    "@babel/helper-replace-supers" "^7.13.12"
+     "@babel/helper-split-export-declaration" "^7.12.13"
+ 
+ "@babel/helper-create-regexp-features-plugin@^7.12.1":
+@@ -290,12 +291,12 @@
+     "@babel/types" "^7.10.4"
+ 
+ "@babel/helper-hoist-variables@^7.13.0":
+-  version "7.13.0"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-hoist-variables/-/helper-hoist-variables-7.13.0.tgz#5d5882e855b5c5eda91e0cadc26c6e7a2c8593d8"
+-  integrity sha512-0kBzvXiIKfsCA0y6cFEIJf4OdzfpRuNk4+YTeHZpGGc666SATFKTz6sRncwFnQk7/ugJ4dSrCj6iJuvW4Qwr2g==
++  version "7.13.16"
++  resolved "https://registry.yarnpkg.com/@babel/helper-hoist-variables/-/helper-hoist-variables-7.13.16.tgz#1b1651249e94b51f8f0d33439843e33e39775b30"
++  integrity sha512-1eMtTrXtrwscjcAeO4BVK+vvkxaLJSPFz1w1KLawz6HLNi9bPFGBNwwDyVfiu1Tv/vRRFYfoGaKhmAQPGPn5Wg==
+   dependencies:
+-    "@babel/traverse" "^7.13.0"
+-    "@babel/types" "^7.13.0"
++    "@babel/traverse" "^7.13.15"
++    "@babel/types" "^7.13.16"
+ 
+ "@babel/helper-member-expression-to-functions@^7.12.1":
+   version "7.12.7"
+@@ -304,7 +305,7 @@
+   dependencies:
+     "@babel/types" "^7.12.7"
+ 
+-"@babel/helper-member-expression-to-functions@^7.13.0", "@babel/helper-member-expression-to-functions@^7.13.12":
++"@babel/helper-member-expression-to-functions@^7.13.12":
+   version "7.13.12"
+   resolved "https://registry.yarnpkg.com/@babel/helper-member-expression-to-functions/-/helper-member-expression-to-functions-7.13.12.tgz#dfe368f26d426a07299d8d6513821768216e6d72"
+   integrity sha512-48ql1CLL59aKbU94Y88Xgb2VFy7a95ykGRbJJaaVv+LX5U8wFpLfiGXJJGUozsmA1oEh/o5Bp60Voq7ACyA/Sw==
+@@ -340,19 +341,19 @@
+     "@babel/types" "^7.12.1"
+     lodash "^4.17.19"
+ 
+-"@babel/helper-module-transforms@^7.13.0", "@babel/helper-module-transforms@^7.13.14":
+-  version "7.13.14"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-module-transforms/-/helper-module-transforms-7.13.14.tgz#e600652ba48ccb1641775413cb32cfa4e8b495ef"
+-  integrity sha512-QuU/OJ0iAOSIatyVZmfqB0lbkVP0kDRiKj34xy+QNsnVZi/PA6BoSoreeqnxxa9EHFAIL0R9XOaAR/G9WlIy5g==
++"@babel/helper-module-transforms@^7.13.0", "@babel/helper-module-transforms@^7.14.0":
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/helper-module-transforms/-/helper-module-transforms-7.14.0.tgz#8fcf78be220156f22633ee204ea81f73f826a8ad"
++  integrity sha512-L40t9bxIuGOfpIGA3HNkJhU9qYrf4y5A5LUSw7rGMSn+pcG8dfJ0g6Zval6YJGd2nEjI7oP00fRdnhLKndx6bw==
+   dependencies:
+     "@babel/helper-module-imports" "^7.13.12"
+     "@babel/helper-replace-supers" "^7.13.12"
+     "@babel/helper-simple-access" "^7.13.12"
+     "@babel/helper-split-export-declaration" "^7.12.13"
+-    "@babel/helper-validator-identifier" "^7.12.11"
++    "@babel/helper-validator-identifier" "^7.14.0"
+     "@babel/template" "^7.12.13"
+-    "@babel/traverse" "^7.13.13"
+-    "@babel/types" "^7.13.14"
++    "@babel/traverse" "^7.14.0"
++    "@babel/types" "^7.14.0"
+ 
+ "@babel/helper-optimise-call-expression@^7.10.4":
+   version "7.12.10"
+@@ -423,7 +424,7 @@
+   dependencies:
+     "@babel/types" "^7.12.1"
+ 
+-"@babel/helper-simple-access@^7.12.13", "@babel/helper-simple-access@^7.13.12":
++"@babel/helper-simple-access@^7.13.12":
+   version "7.13.12"
+   resolved "https://registry.yarnpkg.com/@babel/helper-simple-access/-/helper-simple-access-7.13.12.tgz#dd6c538afb61819d205a012c31792a39c7a5eaf6"
+   integrity sha512-7FEjbrx5SL9cWvXioDbnlYTppcZGuCY6ow3/D5vMggb2Ywgu4dMrpTJX0JdQAIcRRUElOIxF3yEooa9gUb9ZbA==
+@@ -456,10 +457,10 @@
+   resolved "https://registry.yarnpkg.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.10.4.tgz#a78c7a7251e01f616512d31b10adcf52ada5e0d2"
+   integrity sha512-3U9y+43hz7ZM+rzG24Qe2mufW5KhvFg/NhnNph+i9mgCtdTCtMJuI1TMkrIUiK7Ix4PYlRF9I5dhqaLYA/ADXw==
+ 
+-"@babel/helper-validator-identifier@^7.12.11":
+-  version "7.12.11"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.12.11.tgz#c9a1f021917dcb5ccf0d4e453e399022981fc9ed"
+-  integrity sha512-np/lG3uARFybkoHokJUmf1QfEvRVCPbmQeUQpKow5cQ3xWrV9i3rUHodKDJPQfTVX61qKi+UdYk8kik84n7XOw==
++"@babel/helper-validator-identifier@^7.12.11", "@babel/helper-validator-identifier@^7.14.0":
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.14.0.tgz#d26cad8a47c65286b15df1547319a5d0bcf27288"
++  integrity sha512-V3ts7zMSu5lfiwWDVWzRDGIN+lnCEUdaXgtVHJgLb1rGaA6jMrtB9EmE7L18foXJIE8Un/A/h6NJfGQp/e1J4A==
+ 
+ "@babel/helper-validator-option@^7.12.1":
+   version "7.12.1"
+@@ -500,14 +501,14 @@
+     "@babel/traverse" "^7.12.5"
+     "@babel/types" "^7.12.5"
+ 
+-"@babel/helpers@^7.13.10":
+-  version "7.13.10"
+-  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.13.10.tgz#fd8e2ba7488533cdeac45cc158e9ebca5e3c7df8"
+-  integrity sha512-4VO883+MWPDUVRF3PhiLBUFHoX/bsLTGFpFK/HqvvfBZz2D57u9XzPVNFVBTc0PW/CWR9BXTOKt8NF4DInUHcQ==
++"@babel/helpers@^7.14.0":
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.14.0.tgz#ea9b6be9478a13d6f961dbb5f36bf75e2f3b8f62"
++  integrity sha512-+ufuXprtQ1D1iZTO/K9+EBRn+qPWMJjZSw/S0KlFrxCw4tkrzv9grgpDHkY9MeQTjTY8i2sp7Jep8DfU6tN9Mg==
+   dependencies:
+     "@babel/template" "^7.12.13"
+-    "@babel/traverse" "^7.13.0"
+-    "@babel/types" "^7.13.0"
++    "@babel/traverse" "^7.14.0"
++    "@babel/types" "^7.14.0"
+ 
+ "@babel/highlight@^7.0.0", "@babel/highlight@^7.10.4", "@babel/highlight@^7.8.3":
+   version "7.10.4"
+@@ -519,11 +520,11 @@
+     js-tokens "^4.0.0"
+ 
+ "@babel/highlight@^7.12.13":
+-  version "7.13.10"
+-  resolved "https://registry.yarnpkg.com/@babel/highlight/-/highlight-7.13.10.tgz#a8b2a66148f5b27d666b15d81774347a731d52d1"
+-  integrity sha512-5aPpe5XQPzflQrFwL1/QoeHkP2MsA4JCntcXHRhEsdsfPVkvPi2w7Qix4iV7t5S/oC9OodGrggd8aco1g3SZFg==
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/highlight/-/highlight-7.14.0.tgz#3197e375711ef6bf834e67d0daec88e4f46113cf"
++  integrity sha512-YSCOwxvTYEIMSGaBQb5kDDsCopDdiUGsqpatp3fOlI4+2HQSkTmEVWnVuySdAC5EWCqSWWTv0ib63RjR7dTBdg==
+   dependencies:
+-    "@babel/helper-validator-identifier" "^7.12.11"
++    "@babel/helper-validator-identifier" "^7.14.0"
+     chalk "^2.0.0"
+     js-tokens "^4.0.0"
+ 
+@@ -532,10 +533,10 @@
+   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.12.10.tgz#824600d59e96aea26a5a2af5a9d812af05c3ae81"
+   integrity sha512-PJdRPwyoOqFAWfLytxrWwGrAxghCgh/yTNCYciOz8QgjflA7aZhECPZAa2VUedKg2+QMWkI0L9lynh2SNmNEgA==
+ 
+-"@babel/parser@^7.1.6", "@babel/parser@^7.12.13", "@babel/parser@^7.13.15":
+-  version "7.13.15"
+-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.13.15.tgz#8e66775fb523599acb6a289e12929fa5ab0954d8"
+-  integrity sha512-b9COtcAlVEQljy/9fbcMHpG+UIW9ReF+gpaxDHTlZd0c6/UU9ng8zdySAW9sRTzpvcdCHn6bUcbuYUgGzLAWVQ==
++"@babel/parser@^7.1.6", "@babel/parser@^7.12.13", "@babel/parser@^7.14.0":
++  version "7.14.1"
++  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.14.1.tgz#1bd644b5db3f5797c4479d89ec1817fe02b84c47"
++  integrity sha512-muUGEKu8E/ftMTPlNp+mc6zL3E9zKWmF5sDHZ5MSsoTP9Wyz64AhEf9kD08xYJ7w6Hdcu8H550ircnPyWSIF0Q==
+ 
+ "@babel/plugin-proposal-async-generator-functions@^7.12.1":
+   version "7.12.1"
+@@ -993,11 +994,11 @@
+     "@babel/helper-plugin-utils" "^7.10.4"
+ 
+ "@babel/plugin-transform-block-scoping@^7.12.13":
+-  version "7.12.13"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.12.13.tgz#f36e55076d06f41dfd78557ea039c1b581642e61"
+-  integrity sha512-Pxwe0iqWJX4fOOM2kEZeUuAxHMWb9nK+9oh5d11bsLoB0xMg+mkDpt0eYuDZB7ETrY9bbcVlKUGTOGWy7BHsMQ==
++  version "7.14.1"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.14.1.tgz#ac1b3a8e3d8cbb31efc6b9be2f74eb9823b74ab2"
++  integrity sha512-2mQXd0zBrwfp0O1moWIhPpEeTKDvxyHcnma3JATVP1l+CctWBuot6OJG8LQ4DnBj4ZZPSmlb/fm4mu47EOAnVA==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.12.13"
++    "@babel/helper-plugin-utils" "^7.13.0"
+ 
+ "@babel/plugin-transform-classes@^7.0.0", "@babel/plugin-transform-classes@^7.12.1":
+   version "7.12.1"
+@@ -1048,9 +1049,9 @@
+     "@babel/helper-plugin-utils" "^7.10.4"
+ 
+ "@babel/plugin-transform-destructuring@^7.12.13":
+-  version "7.13.0"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.13.0.tgz#c5dce270014d4e1ebb1d806116694c12b7028963"
+-  integrity sha512-zym5em7tePoNT9s964c0/KU3JPPnuq7VhIxPRefJ4/s82cD+q1mgKfuGRDMCPL0HTyKz4dISuQlCusfgCJ86HA==
++  version "7.13.17"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.13.17.tgz#678d96576638c19d5b36b332504d3fd6e06dea27"
++  integrity sha512-UAUqiLv+uRLO+xuBKKMEpC+t7YRNVRqBsWWq1yKXbBZBje/t3IXCiSinZhjn/DC3qzBfICeYd2EFGEbHsh5RLA==
+   dependencies:
+     "@babel/helper-plugin-utils" "^7.13.0"
+ 
+@@ -1184,11 +1185,11 @@
+     babel-plugin-dynamic-import-node "^2.3.3"
+ 
+ "@babel/plugin-transform-modules-amd@^7.12.13":
+-  version "7.13.0"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-amd/-/plugin-transform-modules-amd-7.13.0.tgz#19f511d60e3d8753cc5a6d4e775d3a5184866cc3"
+-  integrity sha512-EKy/E2NHhY/6Vw5d1k3rgoobftcNUmp9fGjb9XZwQLtTctsRBOTRO7RHHxfIky1ogMN5BxN7p9uMA3SzPfotMQ==
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-amd/-/plugin-transform-modules-amd-7.14.0.tgz#589494b5b290ff76cf7f59c798011f6d77026553"
++  integrity sha512-CF4c5LX4LQ03LebQxJ5JZes2OYjzBuk1TdiF7cG7d5dK4lAdw9NZmaxq5K/mouUdNeqwz3TNjnW6v01UqUNgpQ==
+   dependencies:
+-    "@babel/helper-module-transforms" "^7.13.0"
++    "@babel/helper-module-transforms" "^7.14.0"
+     "@babel/helper-plugin-utils" "^7.13.0"
+     babel-plugin-dynamic-import-node "^2.3.3"
+ 
+@@ -1203,13 +1204,13 @@
+     babel-plugin-dynamic-import-node "^2.3.3"
+ 
+ "@babel/plugin-transform-modules-commonjs@^7.1.0", "@babel/plugin-transform-modules-commonjs@^7.12.13":
+-  version "7.13.8"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.13.8.tgz#7b01ad7c2dcf2275b06fa1781e00d13d420b3e1b"
+-  integrity sha512-9QiOx4MEGglfYZ4XOnU79OHr6vIWUakIj9b4mioN8eQIoEh+pf5p/zEB36JpDFWA12nNMiRf7bfoRvl9Rn79Bw==
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.14.0.tgz#52bc199cb581e0992edba0f0f80356467587f161"
++  integrity sha512-EX4QePlsTaRZQmw9BsoPeyh5OCtRGIhwfLquhxGp5e32w+dyL8htOcDwamlitmNFK6xBZYlygjdye9dbd9rUlQ==
+   dependencies:
+-    "@babel/helper-module-transforms" "^7.13.0"
++    "@babel/helper-module-transforms" "^7.14.0"
+     "@babel/helper-plugin-utils" "^7.13.0"
+-    "@babel/helper-simple-access" "^7.12.13"
++    "@babel/helper-simple-access" "^7.13.12"
+     babel-plugin-dynamic-import-node "^2.3.3"
+ 
+ "@babel/plugin-transform-modules-systemjs@^7.12.1":
+@@ -1243,11 +1244,11 @@
+     "@babel/helper-plugin-utils" "^7.10.4"
+ 
+ "@babel/plugin-transform-modules-umd@^7.12.13":
+-  version "7.13.0"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-umd/-/plugin-transform-modules-umd-7.13.0.tgz#8a3d96a97d199705b9fd021580082af81c06e70b"
+-  integrity sha512-D/ILzAh6uyvkWjKKyFE/W0FzWwasv6vPTSqPcjxFqn6QpX3u8DjRVliq4F2BamO2Wee/om06Vyy+vPkNrd4wxw==
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-umd/-/plugin-transform-modules-umd-7.14.0.tgz#2f8179d1bbc9263665ce4a65f305526b2ea8ac34"
++  integrity sha512-nPZdnWtXXeY7I87UZr9VlsWme3Y0cfFFE41Wbxz4bbaexAjNMInXPFUpRRUJ8NoMm0Cw+zxbqjdPmLhcjfazMw==
+   dependencies:
+-    "@babel/helper-module-transforms" "^7.13.0"
++    "@babel/helper-module-transforms" "^7.14.0"
+     "@babel/helper-plugin-utils" "^7.13.0"
+ 
+ "@babel/plugin-transform-named-capturing-groups-regex@^7.12.1":
+@@ -1794,17 +1795,17 @@
+     globals "^11.1.0"
+     lodash "^4.17.19"
+ 
+-"@babel/traverse@^7.13.0", "@babel/traverse@^7.13.13", "@babel/traverse@^7.13.15":
+-  version "7.13.15"
+-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.13.15.tgz#c38bf7679334ddd4028e8e1f7b3aa5019f0dada7"
+-  integrity sha512-/mpZMNvj6bce59Qzl09fHEs8Bt8NnpEDQYleHUPZQ3wXUMvXi+HJPLars68oAbmp839fGoOkv2pSL2z9ajCIaQ==
++"@babel/traverse@^7.13.0", "@babel/traverse@^7.13.15", "@babel/traverse@^7.14.0":
++  version "7.14.0"
++  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.14.0.tgz#cea0dc8ae7e2b1dec65f512f39f3483e8cc95aef"
++  integrity sha512-dZ/a371EE5XNhTHomvtuLTUyx6UEoJmYX+DT5zBCQN3McHemsuIaKKYqsc/fs26BEkHs/lBZy0J571LP5z9kQA==
+   dependencies:
+     "@babel/code-frame" "^7.12.13"
+-    "@babel/generator" "^7.13.9"
++    "@babel/generator" "^7.14.0"
+     "@babel/helper-function-name" "^7.12.13"
+     "@babel/helper-split-export-declaration" "^7.12.13"
+-    "@babel/parser" "^7.13.15"
+-    "@babel/types" "^7.13.14"
++    "@babel/parser" "^7.14.0"
++    "@babel/types" "^7.14.0"
+     debug "^4.1.0"
+     globals "^11.1.0"
+ 
+@@ -1817,13 +1818,12 @@
+     lodash "^4.17.19"
+     to-fast-properties "^2.0.0"
+ 
+-"@babel/types@^7.12.13", "@babel/types@^7.12.17", "@babel/types@^7.13.0", "@babel/types@^7.13.12", "@babel/types@^7.13.14":
+-  version "7.13.14"
+-  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.13.14.tgz#c35a4abb15c7cd45a2746d78ab328e362cbace0d"
+-  integrity sha512-A2aa3QTkWoyqsZZFl56MLUsfmh7O0gN41IPvXAE/++8ojpbz12SszD7JEGYVdn4f9Kt4amIei07swF1h4AqmmQ==
++"@babel/types@^7.12.13", "@babel/types@^7.12.17", "@babel/types@^7.13.0", "@babel/types@^7.13.12", "@babel/types@^7.13.16", "@babel/types@^7.14.0", "@babel/types@^7.14.1":
++  version "7.14.1"
++  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.14.1.tgz#095bd12f1c08ab63eff6e8f7745fa7c9cc15a9db"
++  integrity sha512-S13Qe85fzLs3gYRUnrpyeIrBJIMYv33qSTg1qoBwiG6nPKwUWAD9odSzWhEedpwOIzSEI6gbdQIWEMiCI42iBA==
+   dependencies:
+-    "@babel/helper-validator-identifier" "^7.12.11"
+-    lodash "^4.17.19"
++    "@babel/helper-validator-identifier" "^7.14.0"
+     to-fast-properties "^2.0.0"
+ 
+ "@bcoe/v8-coverage@^0.2.3":
+@@ -1991,15 +1991,15 @@
+     "@babel/preset-env" "^7.4.4"
+     "@babel/preset-typescript" "^7.3.3"
+ 
+-"@expo/config-plugins@1.0.25":
+-  version "1.0.25"
+-  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.25.tgz#a9dc4a00a49d8360b5ce85ea262d3a60fb4d00f0"
+-  integrity sha512-iRoBWnkMsGxrSxfXUXWpVfxpGjTUipI60+w9vO/QdXH02wFrS4k/jcZ4OSlPJMxpU/Lv5kgvgjvcJ22/SJpRow==
++"@expo/config-plugins@1.0.28":
++  version "1.0.28"
++  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.28.tgz#6c3911d493bc329bf9ef5c99585564539b1a57e1"
++  integrity sha512-i5SpC6U3LjRQlwi1xM4SRj8dR2Qm+0dykPo0GeesByB7IvT36AT1ZjI7VjecuoZ6yKbLpaa5tWvU3JGObxIPSw==
+   dependencies:
+     "@expo/config-types" "^40.0.0-beta.2"
+     "@expo/configure-splash-screen" "0.3.4"
+-    "@expo/image-utils" "0.3.12"
+-    "@expo/json-file" "8.2.28"
++    "@expo/image-utils" "0.3.13"
++    "@expo/json-file" "8.2.29"
+     "@expo/plist" "0.0.12"
+     find-up "~5.0.0"
+     fs-extra "9.0.0"
+@@ -2035,17 +2035,17 @@
+     slugify "^1.3.4"
+ 
+ "@expo/config@^3.3.18":
+-  version "3.3.35"
+-  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.35.tgz#cc69703b9275fe6d6ef70ce6dcd217fa84d50807"
+-  integrity sha512-0jYSYBCge8s9TqvUbky64lWvpdAHKB9V+e4OrKOmxF8MILmBq2fYHiHkywn5VU7OaWiJQJixhrNUEBHWLJm4ig==
++  version "3.3.38"
++  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.38.tgz#cdda7307600d185eb5d7b37ce8e47dcb8df6a4cd"
++  integrity sha512-0SsvF7yTy+kdJaAc2W75yhwnaXIRasnA1Vygna83tlPhCx6ynIBzTbJAvdkddSk5euUTJpXc5nePaflGvNboXw==
+   dependencies:
+     "@babel/core" "7.9.0"
+     "@babel/plugin-proposal-class-properties" "~7.12.13"
+     "@babel/preset-env" "~7.12.13"
+     "@babel/preset-typescript" "~7.12.13"
+-    "@expo/config-plugins" "1.0.25"
++    "@expo/config-plugins" "1.0.28"
+     "@expo/config-types" "^40.0.0-beta.2"
+-    "@expo/json-file" "8.2.28"
++    "@expo/json-file" "8.2.29"
+     fs-extra "9.0.0"
+     getenv "^1.0.0"
+     glob "7.1.6"
+@@ -2070,10 +2070,10 @@
+     xcode "^3.0.0"
+     xml-js "^1.6.11"
+ 
+-"@expo/image-utils@0.3.12":
+-  version "0.3.12"
+-  resolved "https://registry.yarnpkg.com/@expo/image-utils/-/image-utils-0.3.12.tgz#23a7dbf2cfe40fa9dd0c355fe7b4ca15ef83808e"
+-  integrity sha512-QMMAjyCJUFXI8b6AOrVC40gubkt++qYfRJdKgbegf9JHQNul/O4Q1ENWTgid+PH0EUqlMLbv6kJ6ai0ZjO08kw==
++"@expo/image-utils@0.3.13":
++  version "0.3.13"
++  resolved "https://registry.yarnpkg.com/@expo/image-utils/-/image-utils-0.3.13.tgz#cba070a61ce89e6c113b8e6afd5655cb83da6377"
++  integrity sha512-BpKoFVJBjG9H5AU040Skrm3R2uDGpWXBU/4TivB5H10cyJphoJKp3GNJVPHYLOVc70OtAxjWDIhLMW6xsWfrgw==
+   dependencies:
+     "@expo/spawn-async" "1.5.0"
+     chalk "^4.0.0"
+@@ -2098,10 +2098,10 @@
+     lodash "^4.17.15"
+     write-file-atomic "^2.3.0"
+ 
+-"@expo/json-file@8.2.28":
+-  version "8.2.28"
+-  resolved "https://registry.yarnpkg.com/@expo/json-file/-/json-file-8.2.28.tgz#9218bb70ad12d8be03c6376990b01fbeb4a15b72"
+-  integrity sha512-C28McDuCIOmCmp6e2ZgIpNaT/fZG+L3/WFv5x2DCrooOQmamrkLSH/4Dib0NUmLgWVhgIhXL2hU4RB+LjzVvkQ==
++"@expo/json-file@8.2.29":
++  version "8.2.29"
++  resolved "https://registry.yarnpkg.com/@expo/json-file/-/json-file-8.2.29.tgz#5e66c4c1dc531a583fe654d99fe417246d91741d"
++  integrity sha512-9C8XwpJiJN9fyClnnNDSTh034zJU9hon6MCUqbBa4dZYQN7OZ00KFZEpbtjy+FndE7YD+KagDxRD6O1HS5vU0g==
+   dependencies:
+     "@babel/code-frame" "~7.10.4"
+     fs-extra "9.0.0"
+@@ -2125,9 +2125,9 @@
+     cross-spawn "^6.0.5"
+ 
+ "@hapi/hoek@^9.0.0":
+-  version "9.1.1"
+-  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.1.1.tgz#9daf5745156fd84b8e9889a2dc721f0c58e894aa"
+-  integrity sha512-CAEbWH7OIur6jEOzaai83jq3FmKmv4PmX1JYfs9IrYcGEVI/lyL1EXJGCj7eFVJ0bg5QR8LMxBlEtA+xKiLpFw==
++  version "9.2.0"
++  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.0.tgz#f3933a44e365864f4dad5db94158106d511e8131"
++  integrity sha512-sqKVVVOe5ivCaXDWivIJYVSaEgdQK9ul7a4Kity5Iw7u9+wBAPbX1RMSnLLmp7O4Vzj0WOWwMAJsTL00xwaNug==
+ 
+ "@hapi/topo@^5.0.0":
+   version "5.0.0"
+@@ -4446,9 +4446,9 @@ acorn@^7.1.0, acorn@^7.1.1, acorn@^7.4.0:
+   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
+ 
+ acorn@^8.1.0:
+-  version "8.1.1"
+-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.1.1.tgz#fb0026885b9ac9f48bac1e185e4af472971149ff"
+-  integrity sha512-xYiIVjNuqtKXMxlRMDc6mZUhXehod4a3gbZ1qRlM7icK4EbxUFNLhWoPblCvFtB2Y9CIqHP3CF/rdxLItaQv8g==
++  version "8.2.4"
++  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.4.tgz#caba24b08185c3b56e3168e97d15ed17f4d31fd0"
++  integrity sha512-Ibt84YwBDDA890eDiDCEqcbwvHlBvzzDkU2cGBBDDI1QWT12jTiXIOn2CIw5KK4i6N5Z2HUxwYjzriDyqaqqZg==
+ 
+ address@1.1.2, address@^1.0.1:
+   version "1.1.2"
+@@ -8758,9 +8758,9 @@ flatted@^3.1.0:
+   integrity sha512-tW+UkmtNg/jv9CSofAKvgVcO7c2URjhTdW1ZTkcAritblu8tajiYy7YisnIflEwtKssCtOxpnBRoCB7iap0/TA==
+ 
+ flow-parser@0.*:
+-  version "0.148.0"
+-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.148.0.tgz#7f685b4f3cb7a23de63b065b20e37872351911d0"
+-  integrity sha512-m7YX6L2y0bW+bC+lH8mq3bWNS8zLdfXSkZR1Rrd9313abmBjEVYLez+D3NhYx8TnVcpJiiT28jbRVTnz/eG4ug==
++  version "0.150.0"
++  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.150.0.tgz#69ba3e90b0d127bc2f0d7025854805eeb09fd2c1"
++  integrity sha512-kYoNG9BH4RlYwEt0A9+30ZiUiYBNB9KLDeDI4rSBb0QsoH5F12ywNUOHp5JD2KVYz6nhapbn/kCIZALSmd3q6w==
+ 
+ flow-parser@^0.121.0:
+   version "0.121.0"
+@@ -10005,9 +10005,9 @@ is-arrayish@^0.3.1:
+   integrity sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==
+ 
+ is-bigint@^1.0.1:
+-  version "1.0.1"
+-  resolved "https://registry.yarnpkg.com/is-bigint/-/is-bigint-1.0.1.tgz#6923051dfcbc764278540b9ce0e6b3213aa5ebc2"
+-  integrity sha512-J0ELF4yHFxHy0cmSxZuheDOz2luOdVvqjwmEcj8H/L1JHeuEDSDbeRP+Dk9kFVk5RTFzbucJ2Kb9F7ixY2QaCg==
++  version "1.0.2"
++  resolved "https://registry.yarnpkg.com/is-bigint/-/is-bigint-1.0.2.tgz#ffb381442503235ad245ea89e45b3dbff040ee5a"
++  integrity sha512-0JV5+SOCQkIdzjBK9buARcV804Ddu7A0Qet6sHi3FimE9ne6m4BGQZfRn+NZiXbBk4F4XmHfDZIipLj9pX8dSA==
+ 
+ is-binary-path@^1.0.0:
+   version "1.0.1"
+@@ -10073,11 +10073,16 @@ is-data-descriptor@^1.0.0:
+   dependencies:
+     kind-of "^6.0.0"
+ 
+-is-date-object@^1.0.1, is-date-object@^1.0.2:
++is-date-object@^1.0.1:
+   version "1.0.2"
+   resolved "https://registry.yarnpkg.com/is-date-object/-/is-date-object-1.0.2.tgz#bda736f2cd8fd06d32844e7743bfa7494c3bfd7e"
+   integrity sha512-USlDT524woQ08aoZFzh3/Z6ch9Y/EWXEHQ/AaRN0SkKq4t2Jw2R2339tSXmwuVoY7LLlBCbOIlx2myP/L5zk0g==
+ 
++is-date-object@^1.0.2:
++  version "1.0.3"
++  resolved "https://registry.yarnpkg.com/is-date-object/-/is-date-object-1.0.3.tgz#4c0802ae9c8097939ea8001eaae3c502f3dbe72f"
++  integrity sha512-tDpEUInNcy2Yw3lNSepK3Wdw1RnXLcIVienz6Ou631Acl15cJyRWK4dgA1vCmOEgIbtOV0W7MHg+AR2Gdg1NXQ==
++
+ is-decimal@^1.0.0:
+   version "1.0.4"
+   resolved "https://registry.yarnpkg.com/is-decimal/-/is-decimal-1.0.4.tgz#65a3a5958a1c5b63a706e1b333d7cd9f630d3fa5"
+@@ -12993,11 +12998,16 @@ object-copy@^0.1.0:
+     define-property "^0.2.5"
+     kind-of "^3.0.3"
+ 
+-object-inspect@^1.8.0, object-inspect@^1.9.0:
++object-inspect@^1.8.0:
+   version "1.9.0"
+   resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.9.0.tgz#c90521d74e1127b67266ded3394ad6116986533a"
+   integrity sha512-i3Bp9iTqwhaLZBxGkRfo5ZbE07BQRT7MGu8+nNgwW9ItGp1TzCTw2DLEoWwjClxBjOFI/hWljTAmYGCEwmtnOw==
+ 
++object-inspect@^1.9.0:
++  version "1.10.2"
++  resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.10.2.tgz#b6385a3e2b7cae0b5eafcf90cddf85d128767f30"
++  integrity sha512-gz58rdPpadwztRrPjZE9DZLOABUpTGdcANUgOwBFO1C+HZZhePoP83M65WGDmbpwFYJSWqavbl4SgDn4k8RYTA==
++
+ object-is@^1.0.1:
+   version "1.1.4"
+   resolved "https://registry.yarnpkg.com/object-is/-/object-is-1.1.4.tgz#63d6c83c00a43f4cbc9434eb9757c8a5b8565068"
+@@ -14738,10 +14748,10 @@ react-native-web@0.15.1:
+     prop-types "^15.6.0"
+     react-timer-mixin "^0.13.4"
+ 
+-react-native@0.64.0:
+-  version "0.64.0"
+-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.64.0.tgz#c3bde5b638bf8bcf12bae6e094930d39cb942ab7"
+-  integrity sha512-8dhSHBthgGwAjU+OjqUEA49229ThPMQH7URH0u8L0xoQFCnZO2sZ9Wc6KcbxI0x9KSmjCMFFZqRe3w3QsRv64g==
++react-native@0.64.1:
++  version "0.64.1"
++  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.64.1.tgz#cd38f5b47b085549686f34eb0c9dcd466f307635"
++  integrity sha512-jvSj+hNAfwvhaSmxd5KHJ5HidtG0pDXzoH6DaqNpU74g3CmAiA8vuk58B5yx/DYuffGq6PeMniAcwuh3Xp4biQ==
+   dependencies:
+     "@jest/create-cache-key-function" "^26.5.0"
+     "@react-native-community/cli" "^5.0.1-alpha.0"
+@@ -17363,9 +17373,9 @@ v8-to-istanbul@^4.1.3:
+     source-map "^0.7.3"
+ 
+ v8-to-istanbul@^7.0.0:
+-  version "7.1.1"
+-  resolved "https://registry.yarnpkg.com/v8-to-istanbul/-/v8-to-istanbul-7.1.1.tgz#04bfd1026ba4577de5472df4f5e89af49de5edda"
+-  integrity sha512-p0BB09E5FRjx0ELN6RgusIPsSPhtgexSRcKETybEs6IGOTXJSZqfwxp7r//55nnu0f1AxltY5VvdVqy2vZf9AA==
++  version "7.1.2"
++  resolved "https://registry.yarnpkg.com/v8-to-istanbul/-/v8-to-istanbul-7.1.2.tgz#30898d1a7fa0c84d225a2c1434fb958f290883c1"
++  integrity sha512-TxNb7YEUwkLXCQYeudi6lgQ/SZrzNO4kMdlqVxaZPUIUjCv6iSSypUQX70kNBSERpQ8fk48+d61FXk+tgqcWow==
+   dependencies:
+     "@types/istanbul-lib-coverage" "^2.0.1"
+     convert-source-map "^1.6.0"
+@@ -17797,9 +17807,9 @@ ws@^7, ws@^7.0.0, ws@^7.1.2:
+   integrity sha512-pTsP8UAfhy3sk1lSk/O/s4tjD0CRwvMnzvwr4OKGX7ZvqZtUyx4KIJB5JWbkykPoc55tixMGgTNoh3k4FkNGFQ==
+ 
+ ws@^7.4.4:
+-  version "7.4.4"
+-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.4.tgz#383bc9742cb202292c9077ceab6f6047b17f2d59"
+-  integrity sha512-Qm8k8ojNQIMx7S+Zp8u/uHOx7Qazv3Yv4q68MiWWWOJhiwG5W3x7iqmRtJo8xxrciZUY4vRxUTJCKuRnF28ZZw==
++  version "7.4.5"
++  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.5.tgz#a484dd851e9beb6fdb420027e3885e8ce48986c1"
++  integrity sha512-xzyu3hFvomRfXKH8vOFMU3OguG6oOvhXMo3xsGy3xWExqaM2dxBbVxuD99O7m3ZUFMvvscsZDqxfgMaRr/Nr1g==
+ 
+ xcode@^2.0.0:
+   version "2.1.0"
