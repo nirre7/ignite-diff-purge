@@ -1,0 +1,13 @@
+diff --git a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
+index 90ce85c..116dd9d 100644
+--- a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
++++ b/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
+@@ -69,7 +69,7 @@ export const DemoListScreen = observer(function DemoListScreen() {
+         />
+         <FlatList
+           contentContainerStyle={FLAT_LIST}
+-          data={characters}
++          data={[...characters]}
+           keyExtractor={(item) => String(item.id)}
+           renderItem={({ item }) => (
+             <View style={LIST_CONTAINER}>
