@@ -1,0 +1,63 @@
+diff --git a/IgniteDiffApp/app/components/screen/screen.presets.ts b/IgniteDiffApp/app/components/screen/screen.presets.ts
+index 8ba3b2e..ae75064 100644
+--- a/IgniteDiffApp/app/components/screen/screen.presets.ts
++++ b/IgniteDiffApp/app/components/screen/screen.presets.ts
+@@ -1,5 +1,4 @@
+ import { ViewStyle } from "react-native"
+-import { isNil } from "ramda"
+ import { color } from "../../theme"
+ 
+ /**
+@@ -63,5 +62,5 @@ export type ScreenPresets = keyof typeof presets
+  */
+ export function isNonScrolling(preset: ScreenPresets) {
+   // any of these things will make you scroll
+-  return isNil(preset) || !preset.length || isNil(presets[preset]) || preset === "fixed"
++  return !preset || !presets[preset] || preset === "fixed"
+ }
+diff --git a/IgniteDiffApp/app/utils/validate.ts b/IgniteDiffApp/app/utils/validate.ts
+index 22d42cb..91db9b6 100644
+--- a/IgniteDiffApp/app/utils/validate.ts
++++ b/IgniteDiffApp/app/utils/validate.ts
+@@ -1,4 +1,3 @@
+-import { contains } from "ramda"
+ const ValidateJS = require("validate.js")
+ 
+ // HACK(steve): wierd typescript situation because of strange typings
+@@ -9,7 +8,7 @@ const Validate: any = ValidateJS.default ? ValidateJS.default : ValidateJS
+  */
+ Validate.validators.excludes = function custom(value, options, key, attributes) {
+   const list = attributes[options.attribute] || []
+-  if (value && contains(value, list)) {
++  if (value && list.includes(value)) {
+     return options.message || `${value} is in the list`
+   }
+ }
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 694cb70..6f93672 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -37,7 +37,6 @@
+     "mobx": "6.1.8",
+     "mobx-react-lite": "3.2.0",
+     "mobx-state-tree": "5.0.1",
+-    "ramda": "0.27.1",
+     "react": "17.0.1",
+     "react-native": "0.64.1",
+     "react-native-gesture-handler": "1.10.3",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index d43c583..189d075 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -14413,11 +14413,6 @@ ramda@0.25.0, ramda@^0.25.0:
+   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.25.0.tgz#8fdf68231cffa90bc2f9460390a0cb74a29b29a9"
+   integrity sha512-GXpfrYVPwx3K7RQ6aYT8KPS8XViSXUVJT1ONhoKPE9VAleW42YE+U+8VEyGWt41EnEQW7gwecYJriTI0pKoecQ==
+ 
+-ramda@0.27.1:
+-  version "0.27.1"
+-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
+-  integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
+-
+ ramda@^0.21.0:
+   version "0.21.0"
+   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.21.0.tgz#a001abedb3ff61077d4ff1d577d44de77e8d0a35"
