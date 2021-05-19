@@ -1,0 +1,125 @@
+diff --git a/IgniteDiffApp/app/components/button/button.tsx b/IgniteDiffApp/app/components/button/button.tsx
+index 6572a53..64cf795 100644
+--- a/IgniteDiffApp/app/components/button/button.tsx
++++ b/IgniteDiffApp/app/components/button/button.tsx
+@@ -1,10 +1,9 @@
+ import * as React from "react"
+-import { TouchableOpacity, StyleSheet } from "react-native"
++import { TouchableOpacity } from "react-native"
+ import { Text } from "../text/text"
+ import { viewPresets, textPresets } from "./button.presets"
+ import { ButtonProps } from "./button.props"
+-
+-const { flatten } = StyleSheet
++import { flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.tsx b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+index 4dc4484..316da55 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.tsx
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+@@ -1,10 +1,9 @@
+ import * as React from "react"
+-import { TextStyle, TouchableOpacity, View, ViewStyle, StyleSheet } from "react-native"
++import { TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
+ import { Text } from "../text/text"
+ import { color, spacing } from "../../theme"
+ import { CheckboxProps } from "./checkbox.props"
+-
+-const { flatten } = StyleSheet
++import { flatten } from "ramda"
+ 
+ const ROOT: ViewStyle = {
+   flexDirection: "row",
+diff --git a/IgniteDiffApp/app/components/form-row/form-row.tsx b/IgniteDiffApp/app/components/form-row/form-row.tsx
+index c1c2ab7..1ab4994 100644
+--- a/IgniteDiffApp/app/components/form-row/form-row.tsx
++++ b/IgniteDiffApp/app/components/form-row/form-row.tsx
+@@ -1,9 +1,8 @@
+ import * as React from "react"
+-import { View, StyleSheet } from "react-native"
++import { View } from "react-native"
+ import { PRESETS } from "./form-row.presets"
+ import { FormRowProps } from "./form-row.props"
+-
+-const { flatten } = StyleSheet
++import { flatten } from "ramda"
+ 
+ /**
+  * A horizontal container component used to hold a row of a form.
+diff --git a/IgniteDiffApp/app/components/switch/switch.tsx b/IgniteDiffApp/app/components/switch/switch.tsx
+index a92c3de..7288163 100644
+--- a/IgniteDiffApp/app/components/switch/switch.tsx
++++ b/IgniteDiffApp/app/components/switch/switch.tsx
+@@ -1,9 +1,8 @@
+ import React from "react"
+-import { ViewStyle, Animated, Easing, TouchableWithoutFeedback, StyleSheet } from "react-native"
++import { ViewStyle, Animated, Easing, TouchableWithoutFeedback } from "react-native"
+ import { color } from "../../theme"
+ import { SwitchProps } from "./switch.props"
+-
+-const { flatten } = StyleSheet
++import { flatten } from "ramda"
+ 
+ // dimensions
+ const THUMB_SIZE = 30
+diff --git a/IgniteDiffApp/app/components/text-field/text-field.tsx b/IgniteDiffApp/app/components/text-field/text-field.tsx
+index 5c67892..4e9be82 100644
+--- a/IgniteDiffApp/app/components/text-field/text-field.tsx
++++ b/IgniteDiffApp/app/components/text-field/text-field.tsx
+@@ -1,18 +1,9 @@
+ import React from "react"
+-import {
+-  StyleProp,
+-  TextInput,
+-  TextInputProps,
+-  TextStyle,
+-  View,
+-  ViewStyle,
+-  StyleSheet,
+-} from "react-native"
++import { StyleProp, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+ import { color, spacing, typography } from "../../theme"
+ import { translate, TxKeyPath } from "../../i18n"
+ import { Text } from "../text/text"
+-
+-const { flatten } = StyleSheet
++import { flatten } from "ramda"
+ 
+ // the base styling for the container
+ const CONTAINER: ViewStyle = {
+diff --git a/IgniteDiffApp/app/components/text/text.tsx b/IgniteDiffApp/app/components/text/text.tsx
+index a8f5ba8..bb13def 100644
+--- a/IgniteDiffApp/app/components/text/text.tsx
++++ b/IgniteDiffApp/app/components/text/text.tsx
+@@ -1,10 +1,9 @@
+ import * as React from "react"
+-import { Text as ReactNativeText, StyleSheet } from "react-native"
++import { Text as ReactNativeText } from "react-native"
+ import { presets } from "./text.presets"
+ import { TextProps } from "./text.props"
+ import { translate } from "../../i18n"
+-
+-const { flatten } = StyleSheet
++import { flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+diff --git a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+index 99c3b8e..a17dc9e 100644
+--- a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
++++ b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+@@ -1,10 +1,10 @@
+ import React from "react"
+-import { Image, StyleSheet } from "react-native"
++import { Image } from "react-native"
+ import { presets } from "./wallpaper.presets"
+ import { WallpaperProps } from "./wallpaper.props"
++import { flatten } from "ramda"
+ 
+ const defaultImage = require("./bg.png")
+-const { flatten } = StyleSheet
+ 
+ /**
+  * For your text displaying needs.
