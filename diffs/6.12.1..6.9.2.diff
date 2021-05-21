@@ -1,0 +1,1080 @@
+diff --git a/IgniteDiffApp/app/components/button/button.tsx b/IgniteDiffApp/app/components/button/button.tsx
+index a5662ff..64cf795 100644
+--- a/IgniteDiffApp/app/components/button/button.tsx
++++ b/IgniteDiffApp/app/components/button/button.tsx
+@@ -3,6 +3,7 @@ import { TouchableOpacity } from "react-native"
+ import { Text } from "../text/text"
+ import { viewPresets, textPresets } from "./button.presets"
+ import { ButtonProps } from "./button.props"
++import { flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+@@ -22,9 +23,9 @@ export function Button(props: ButtonProps) {
+   } = props
+ 
+   const viewStyle = viewPresets[preset] || viewPresets.primary
+-  const viewStyles = [viewStyle, styleOverride]
++  const viewStyles = flatten([viewStyle, styleOverride])
+   const textStyle = textPresets[preset] || textPresets.primary
+-  const textStyles = [textStyle, textStyleOverride]
++  const textStyles = flatten([textStyle, textStyleOverride])
+ 
+   const content = children || <Text tx={tx} text={text} style={textStyles} />
+ 
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.tsx b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+index fc3992a..316da55 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.tsx
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+@@ -3,6 +3,7 @@ import { TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
+ import { Text } from "../text/text"
+ import { color, spacing } from "../../theme"
+ import { CheckboxProps } from "./checkbox.props"
++import { flatten } from "ramda"
+ 
+ const ROOT: ViewStyle = {
+   flexDirection: "row",
+@@ -33,9 +34,9 @@ const LABEL: TextStyle = { paddingLeft: spacing[2] }
+ export function Checkbox(props: CheckboxProps) {
+   const numberOfLines = props.multiline ? 0 : 1
+ 
+-  const rootStyle = [ROOT, props.style]
+-  const outlineStyle = [OUTLINE, props.outlineStyle]
+-  const fillStyle = [FILL, props.fillStyle]
++  const rootStyle = flatten([ROOT, props.style])
++  const outlineStyle = flatten([OUTLINE, props.outlineStyle])
++  const fillStyle = flatten([FILL, props.fillStyle])
+ 
+   const onPress = props.onToggle ? () => props.onToggle && props.onToggle(!props.value) : null
+ 
+diff --git a/IgniteDiffApp/app/components/form-row/form-row.tsx b/IgniteDiffApp/app/components/form-row/form-row.tsx
+index 2045336..1ab4994 100644
+--- a/IgniteDiffApp/app/components/form-row/form-row.tsx
++++ b/IgniteDiffApp/app/components/form-row/form-row.tsx
+@@ -2,12 +2,13 @@ import * as React from "react"
+ import { View } from "react-native"
+ import { PRESETS } from "./form-row.presets"
+ import { FormRowProps } from "./form-row.props"
++import { flatten } from "ramda"
+ 
+ /**
+  * A horizontal container component used to hold a row of a form.
+  */
+ export function FormRow(props: FormRowProps) {
+-  const viewStyle = [PRESETS[props.preset], props.style]
++  const viewStyle = flatten([PRESETS[props.preset], props.style])
+ 
+   return <View style={viewStyle}>{props.children}</View>
+ }
+diff --git a/IgniteDiffApp/app/components/screen/screen.presets.ts b/IgniteDiffApp/app/components/screen/screen.presets.ts
+index ae75064..8ba3b2e 100644
+--- a/IgniteDiffApp/app/components/screen/screen.presets.ts
++++ b/IgniteDiffApp/app/components/screen/screen.presets.ts
+@@ -1,4 +1,5 @@
+ import { ViewStyle } from "react-native"
++import { isNil } from "ramda"
+ import { color } from "../../theme"
+ 
+ /**
+@@ -62,5 +63,5 @@ export type ScreenPresets = keyof typeof presets
+  */
+ export function isNonScrolling(preset: ScreenPresets) {
+   // any of these things will make you scroll
+-  return !preset || !presets[preset] || preset === "fixed"
++  return isNil(preset) || !preset.length || isNil(presets[preset]) || preset === "fixed"
+ }
+diff --git a/IgniteDiffApp/app/components/switch/switch.tsx b/IgniteDiffApp/app/components/switch/switch.tsx
+index 0813747..7288163 100644
+--- a/IgniteDiffApp/app/components/switch/switch.tsx
++++ b/IgniteDiffApp/app/components/switch/switch.tsx
+@@ -2,6 +2,7 @@ import React from "react"
+ import { ViewStyle, Animated, Easing, TouchableWithoutFeedback } from "react-native"
+ import { color } from "../../theme"
+ import { SwitchProps } from "./switch.props"
++import { flatten } from "ramda"
+ 
+ // dimensions
+ const THUMB_SIZE = 30
+@@ -45,6 +46,10 @@ const THUMB: ViewStyle = {
+   elevation: 2,
+ }
+ 
++const enhance = (style, newStyles): any => {
++  return flatten([style, newStyles])
++}
++
+ const makeAnimatedValue = (switchOn) => new Animated.Value(switchOn ? 1 : 0)
+ 
+ export function Switch(props: SwitchProps) {
+@@ -85,24 +90,20 @@ export function Switch(props: SwitchProps) {
+     outputRange: [OFF_POSITION, ON_POSITION],
+   })
+ 
+-  const style = props.style
++  const style = enhance({}, props.style)
+ 
+-  const trackStyle = [
+-    TRACK,
+-    {
+-      backgroundColor: props.value ? ON_COLOR : OFF_COLOR,
+-      borderColor: props.value ? BORDER_ON_COLOR : BORDER_OFF_COLOR,
+-    },
+-    props.value ? props.trackOnStyle : props.trackOffStyle,
+-  ]
++  let trackStyle = TRACK
++  trackStyle = enhance(trackStyle, {
++    backgroundColor: props.value ? ON_COLOR : OFF_COLOR,
++    borderColor: props.value ? BORDER_ON_COLOR : BORDER_OFF_COLOR,
++  })
++  trackStyle = enhance(trackStyle, props.value ? props.trackOnStyle : props.trackOffStyle)
+ 
+-  const thumbStyle = [
+-    THUMB,
+-    {
+-      transform: [{ translateX }],
+-    },
+-    props.value ? props.thumbOnStyle : props.thumbOffStyle,
+-  ]
++  let thumbStyle = THUMB
++  thumbStyle = enhance(thumbStyle, {
++    transform: [{ translateX }],
++  })
++  thumbStyle = enhance(thumbStyle, props.value ? props.thumbOnStyle : props.thumbOffStyle)
+ 
+   return (
+     <TouchableWithoutFeedback onPress={handlePress} style={style}>
+diff --git a/IgniteDiffApp/app/components/text-field/text-field.tsx b/IgniteDiffApp/app/components/text-field/text-field.tsx
+index eea1a70..4e9be82 100644
+--- a/IgniteDiffApp/app/components/text-field/text-field.tsx
++++ b/IgniteDiffApp/app/components/text-field/text-field.tsx
+@@ -3,6 +3,7 @@ import { StyleProp, TextInput, TextInputProps, TextStyle, View, ViewStyle } from
+ import { color, spacing, typography } from "../../theme"
+ import { translate, TxKeyPath } from "../../i18n"
+ import { Text } from "../text/text"
++import { flatten } from "ramda"
+ 
+ // the base styling for the container
+ const CONTAINER: ViewStyle = {
+@@ -78,8 +79,8 @@ export function TextField(props: TextFieldProps) {
+     ...rest
+   } = props
+ 
+-  const containerStyles = [CONTAINER, PRESETS[preset], styleOverride]
+-  const inputStyles = [INPUT, inputStyleOverride]
++  const containerStyles = flatten([CONTAINER, PRESETS[preset], styleOverride])
++  const inputStyles = flatten([INPUT, inputStyleOverride])
+   const actualPlaceholder = placeholderTx ? translate(placeholderTx) : placeholder
+ 
+   return (
+diff --git a/IgniteDiffApp/app/components/text/text.tsx b/IgniteDiffApp/app/components/text/text.tsx
+index 3ea613b..bb13def 100644
+--- a/IgniteDiffApp/app/components/text/text.tsx
++++ b/IgniteDiffApp/app/components/text/text.tsx
+@@ -3,6 +3,7 @@ import { Text as ReactNativeText } from "react-native"
+ import { presets } from "./text.presets"
+ import { TextProps } from "./text.props"
+ import { translate } from "../../i18n"
++import { flatten } from "ramda"
+ 
+ /**
+  * For your text displaying needs.
+@@ -18,7 +19,7 @@ export function Text(props: TextProps) {
+   const content = i18nText || text || children
+ 
+   const style = presets[preset] || presets.default
+-  const styles = [style, styleOverride]
++  const styles = flatten([style, styleOverride])
+ 
+   return (
+     <ReactNativeText {...rest} style={styles}>
+diff --git a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+index 9aad1a1..a17dc9e 100644
+--- a/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
++++ b/IgniteDiffApp/app/components/wallpaper/wallpaper.tsx
+@@ -2,6 +2,7 @@ import React from "react"
+ import { Image } from "react-native"
+ import { presets } from "./wallpaper.presets"
+ import { WallpaperProps } from "./wallpaper.props"
++import { flatten } from "ramda"
+ 
+ const defaultImage = require("./bg.png")
+ 
+@@ -16,7 +17,7 @@ export function Wallpaper(props: WallpaperProps) {
+ 
+   // assemble the style
+   const presetToUse = presets[preset] || presets.stretch
+-  const styles = [presetToUse, styleOverride]
++  const styles = flatten([presetToUse, styleOverride])
+ 
+   // figure out which image to use
+   const source = backgroundImage || defaultImage
+diff --git a/IgniteDiffApp/app/models/extensions/with-status.test.ts b/IgniteDiffApp/app/models/extensions/with-status.test.ts
+new file mode 100644
+index 0000000..ace9bf7
+--- /dev/null
++++ b/IgniteDiffApp/app/models/extensions/with-status.test.ts
+@@ -0,0 +1,54 @@
++import { withStatus } from "./with-status"
++import { types } from "mobx-state-tree"
++import { reaction, isObservableProp } from "mobx"
++
++const ThingModel = types
++  .model("Thing")
++  .props({
++    name: "",
++    age: 1000,
++  })
++  .extend(withStatus)
++  .actions((self) => ({
++    switchToError() {
++      self.status = "error"
++    },
++  }))
++
++it("starts off as idle", () => {
++  const thing = ThingModel.create()
++  expect(thing.status).toBe("idle")
++})
++
++it("can be set", () => {
++  const thing = ThingModel.create()
++  thing.setStatus("pending")
++  expect(thing.status).toBe("pending")
++})
++
++it("is an observable property", async () => {
++  const thing = ThingModel.create()
++  expect(isObservableProp(thing, "status")).toBe(true)
++})
++
++it("can be synchronously observed", () => {
++  const thing = ThingModel.create()
++  let changed: string
++  reaction(
++    () => thing.status,
++    (value) => {
++      changed = value
++    },
++  )
++  thing.setStatus("done")
++  expect(changed).toBe("done")
++  expect(thing.status).toBe("done")
++})
++
++it("has a setter", () => {
++  const thing = ThingModel.create()
++  thing.switchToError()
++  expect(thing.status).toBe("error")
++  thing.status = "pending"
++  expect(thing.status).toBe("pending")
++})
+diff --git a/IgniteDiffApp/app/models/extensions/with-status.ts b/IgniteDiffApp/app/models/extensions/with-status.ts
+new file mode 100644
+index 0000000..b20ea9e
+--- /dev/null
++++ b/IgniteDiffApp/app/models/extensions/with-status.ts
+@@ -0,0 +1,54 @@
++import { observable, IObservableValue } from "mobx"
++
++export type StatusType = "idle" | "pending" | "done" | "error"
++
++/**
++ * Adds a status field to the model often for tracking api access.
++ *
++ * This property is a string which can be observed, but will not
++ * participate in any serialization.
++ *
++ * Use this to extend your models:
++ *
++ * ```ts
++ *   types.model("MyModel")
++ *     .props({})
++ *     .actions(self => ({}))
++ *     .extend(withStatus) // <--- time to shine baby!!!
++ * ```
++ *
++ * This will give you these 3 options:
++ *
++ *   .status            // returns a string
++ *   .status = "done"   // change the status directly
++ *   .setStatus("done") // change the status and trigger an mst action
++ */
++export const withStatus = () => {
++  /**
++   * The observable backing store for the status field.
++   */
++  const status: IObservableValue<string> = observable.box("idle")
++
++  return {
++    views: {
++      // a getter
++      get status() {
++        return status.get() as StatusType
++      },
++      // as setter
++      set status(value: StatusType) {
++        status.set(value)
++      },
++    },
++    actions: {
++      /**
++       * Set the status to something new.
++       *
++       * @param value The new status.
++       */
++      setStatus(value: StatusType) {
++        status.set(value)
++      },
++    },
++  }
++}
+diff --git a/IgniteDiffApp/app/models/index.ts b/IgniteDiffApp/app/models/index.ts
+index 3538dbb..3819dcc 100644
+--- a/IgniteDiffApp/app/models/index.ts
++++ b/IgniteDiffApp/app/models/index.ts
+@@ -1,5 +1,6 @@
+ export * from "./extensions/with-environment"
+ export * from "./extensions/with-root-store"
++export * from "./extensions/with-status"
+ export * from "./root-store/root-store"
+ export * from "./root-store/root-store-context"
+ export * from "./root-store/setup-root-store"
+diff --git a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
+index 116dd9d..90ce85c 100644
+--- a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
++++ b/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
+@@ -69,7 +69,7 @@ export const DemoListScreen = observer(function DemoListScreen() {
+         />
+         <FlatList
+           contentContainerStyle={FLAT_LIST}
+-          data={[...characters]}
++          data={characters}
+           keyExtractor={(item) => String(item.id)}
+           renderItem={({ item }) => (
+             <View style={LIST_CONTAINER}>
+diff --git a/IgniteDiffApp/app/utils/validate.ts b/IgniteDiffApp/app/utils/validate.ts
+index 91db9b6..22d42cb 100644
+--- a/IgniteDiffApp/app/utils/validate.ts
++++ b/IgniteDiffApp/app/utils/validate.ts
+@@ -1,3 +1,4 @@
++import { contains } from "ramda"
+ const ValidateJS = require("validate.js")
+ 
+ // HACK(steve): wierd typescript situation because of strange typings
+@@ -8,7 +9,7 @@ const Validate: any = ValidateJS.default ? ValidateJS.default : ValidateJS
+  */
+ Validate.validators.excludes = function custom(value, options, key, attributes) {
+   const list = attributes[options.attribute] || []
+-  if (value && list.includes(value)) {
++  if (value && contains(value, list)) {
+     return options.message || `${value} is in the list`
+   }
+ }
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index 3451f0f..383eea2 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -17,19 +17,19 @@ PODS:
+   - EXPermissions (10.0.0):
+     - UMCore
+     - UMPermissionsInterface
+-  - FBLazyVector (0.64.1)
+-  - FBReactNativeSpec (0.64.1):
++  - FBLazyVector (0.64.0)
++  - FBReactNativeSpec (0.64.0):
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTRequired (= 0.64.1)
+-    - RCTTypeSafety (= 0.64.1)
+-    - React-Core (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
++    - RCTRequired (= 0.64.0)
++    - RCTTypeSafety (= 0.64.0)
++    - React-Core (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
+   - Flipper (0.75.1):
+     - Flipper-Folly (~> 2.5)
+     - Flipper-RSocket (~> 1.3)
+   - Flipper-DoubleConversion (1.1.7)
+-  - Flipper-Folly (2.5.3):
++  - Flipper-Folly (2.5.1):
+     - boost-for-react-native
+     - Flipper-DoubleConversion
+     - Flipper-Glog
+@@ -83,258 +83,258 @@ PODS:
+     - boost-for-react-native
+     - DoubleConversion
+     - glog
+-  - RCTRequired (0.64.1)
+-  - RCTTypeSafety (0.64.1):
+-    - FBLazyVector (= 0.64.1)
++  - RCTRequired (0.64.0)
++  - RCTTypeSafety (0.64.0):
++    - FBLazyVector (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTRequired (= 0.64.1)
+-    - React-Core (= 0.64.1)
+-  - React (0.64.1):
+-    - React-Core (= 0.64.1)
+-    - React-Core/DevSupport (= 0.64.1)
+-    - React-Core/RCTWebSocket (= 0.64.1)
+-    - React-RCTActionSheet (= 0.64.1)
+-    - React-RCTAnimation (= 0.64.1)
+-    - React-RCTBlob (= 0.64.1)
+-    - React-RCTImage (= 0.64.1)
+-    - React-RCTLinking (= 0.64.1)
+-    - React-RCTNetwork (= 0.64.1)
+-    - React-RCTSettings (= 0.64.1)
+-    - React-RCTText (= 0.64.1)
+-    - React-RCTVibration (= 0.64.1)
+-  - React-callinvoker (0.64.1)
+-  - React-Core (0.64.1):
++    - RCTRequired (= 0.64.0)
++    - React-Core (= 0.64.0)
++  - React (0.64.0):
++    - React-Core (= 0.64.0)
++    - React-Core/DevSupport (= 0.64.0)
++    - React-Core/RCTWebSocket (= 0.64.0)
++    - React-RCTActionSheet (= 0.64.0)
++    - React-RCTAnimation (= 0.64.0)
++    - React-RCTBlob (= 0.64.0)
++    - React-RCTImage (= 0.64.0)
++    - React-RCTLinking (= 0.64.0)
++    - React-RCTNetwork (= 0.64.0)
++    - React-RCTSettings (= 0.64.0)
++    - React-RCTText (= 0.64.0)
++    - React-RCTVibration (= 0.64.0)
++  - React-callinvoker (0.64.0)
++  - React-Core (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/Default (= 0.64.1)
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-Core/Default (= 0.64.0)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/CoreModulesHeaders (0.64.1):
++  - React-Core/CoreModulesHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/Default (0.64.1):
++  - React-Core/Default (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/DevSupport (0.64.1):
++  - React-Core/DevSupport (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/Default (= 0.64.1)
+-    - React-Core/RCTWebSocket (= 0.64.1)
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-jsinspector (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-Core/Default (= 0.64.0)
++    - React-Core/RCTWebSocket (= 0.64.0)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-jsinspector (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTActionSheetHeaders (0.64.1):
++  - React-Core/RCTActionSheetHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTAnimationHeaders (0.64.1):
++  - React-Core/RCTAnimationHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTBlobHeaders (0.64.1):
++  - React-Core/RCTBlobHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTImageHeaders (0.64.1):
++  - React-Core/RCTImageHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTLinkingHeaders (0.64.1):
++  - React-Core/RCTLinkingHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTNetworkHeaders (0.64.1):
++  - React-Core/RCTNetworkHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTSettingsHeaders (0.64.1):
++  - React-Core/RCTSettingsHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTTextHeaders (0.64.1):
++  - React-Core/RCTTextHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTVibrationHeaders (0.64.1):
++  - React-Core/RCTVibrationHeaders (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-Core/RCTWebSocket (0.64.1):
++  - React-Core/RCTWebSocket (0.64.0):
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/Default (= 0.64.1)
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsiexecutor (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-Core/Default (= 0.64.0)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsiexecutor (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+     - Yoga
+-  - React-CoreModules (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
++  - React-CoreModules (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.1)
+-    - React-Core/CoreModulesHeaders (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-RCTImage (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-cxxreact (0.64.1):
++    - RCTTypeSafety (= 0.64.0)
++    - React-Core/CoreModulesHeaders (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-RCTImage (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-cxxreact (0.64.0):
+     - boost-for-react-native (= 1.63.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-callinvoker (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-jsinspector (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
+-    - React-runtimeexecutor (= 0.64.1)
+-  - React-jsi (0.64.1):
++    - React-callinvoker (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-jsinspector (= 0.64.0)
++    - React-perflogger (= 0.64.0)
++    - React-runtimeexecutor (= 0.64.0)
++  - React-jsi (0.64.0):
+     - boost-for-react-native (= 1.63.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-jsi/Default (= 0.64.1)
+-  - React-jsi/Default (0.64.1):
++    - React-jsi/Default (= 0.64.0)
++  - React-jsi/Default (0.64.0):
+     - boost-for-react-native (= 1.63.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-  - React-jsiexecutor (0.64.1):
++  - React-jsiexecutor (0.64.0):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
+-  - React-jsinspector (0.64.1)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-perflogger (= 0.64.0)
++  - React-jsinspector (0.64.0)
+   - react-native-safe-area-context (3.1.8):
+     - React-Core
+   - react-native-splash-screen (3.2.0):
+     - React
+-  - React-perflogger (0.64.1)
+-  - React-RCTActionSheet (0.64.1):
+-    - React-Core/RCTActionSheetHeaders (= 0.64.1)
+-  - React-RCTAnimation (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
++  - React-perflogger (0.64.0)
++  - React-RCTActionSheet (0.64.0):
++    - React-Core/RCTActionSheetHeaders (= 0.64.0)
++  - React-RCTAnimation (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.1)
+-    - React-Core/RCTAnimationHeaders (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-RCTBlob (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
++    - RCTTypeSafety (= 0.64.0)
++    - React-Core/RCTAnimationHeaders (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-RCTBlob (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/RCTBlobHeaders (= 0.64.1)
+-    - React-Core/RCTWebSocket (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-RCTNetwork (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-RCTImage (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
++    - React-Core/RCTBlobHeaders (= 0.64.0)
++    - React-Core/RCTWebSocket (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-RCTNetwork (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-RCTImage (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.1)
+-    - React-Core/RCTImageHeaders (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-RCTNetwork (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-RCTLinking (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
+-    - React-Core/RCTLinkingHeaders (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-RCTNetwork (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
++    - RCTTypeSafety (= 0.64.0)
++    - React-Core/RCTImageHeaders (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-RCTNetwork (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-RCTLinking (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
++    - React-Core/RCTLinkingHeaders (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-RCTNetwork (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.1)
+-    - React-Core/RCTNetworkHeaders (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-RCTSettings (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
++    - RCTTypeSafety (= 0.64.0)
++    - React-Core/RCTNetworkHeaders (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-RCTSettings (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - RCTTypeSafety (= 0.64.1)
+-    - React-Core/RCTSettingsHeaders (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-RCTText (0.64.1):
+-    - React-Core/RCTTextHeaders (= 0.64.1)
+-  - React-RCTVibration (0.64.1):
+-    - FBReactNativeSpec (= 0.64.1)
++    - RCTTypeSafety (= 0.64.0)
++    - React-Core/RCTSettingsHeaders (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-RCTText (0.64.0):
++    - React-Core/RCTTextHeaders (= 0.64.0)
++  - React-RCTVibration (0.64.0):
++    - FBReactNativeSpec (= 0.64.0)
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-Core/RCTVibrationHeaders (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - ReactCommon/turbomodule/core (= 0.64.1)
+-  - React-runtimeexecutor (0.64.1):
+-    - React-jsi (= 0.64.1)
+-  - ReactCommon/turbomodule/core (0.64.1):
++    - React-Core/RCTVibrationHeaders (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - ReactCommon/turbomodule/core (= 0.64.0)
++  - React-runtimeexecutor (0.64.0):
++    - React-jsi (= 0.64.0)
++  - ReactCommon/turbomodule/core (0.64.0):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2020.01.13.00)
+-    - React-callinvoker (= 0.64.1)
+-    - React-Core (= 0.64.1)
+-    - React-cxxreact (= 0.64.1)
+-    - React-jsi (= 0.64.1)
+-    - React-perflogger (= 0.64.1)
++    - React-callinvoker (= 0.64.0)
++    - React-Core (= 0.64.0)
++    - React-cxxreact (= 0.64.0)
++    - React-jsi (= 0.64.0)
++    - React-perflogger (= 0.64.0)
+   - RNCAsyncStorage (1.14.1):
+     - React-Core
+   - RNCMaskedView (0.1.10):
+@@ -377,7 +377,7 @@ DEPENDENCIES:
+   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
+   - Flipper (= 0.75.1)
+   - Flipper-DoubleConversion (= 1.1.7)
+-  - Flipper-Folly (~> 2.5.3)
++  - Flipper-Folly (~> 2.5)
+   - Flipper-Glog (= 0.3.6)
+   - Flipper-PeerTalk (~> 0.0.4)
+   - Flipper-RSocket (~> 1.3)
+@@ -574,11 +574,11 @@ SPEC CHECKSUMS:
+   EXImageLoader: f96ec9992733a4224418bbd9382e5485c8948944
+   EXLocalization: 8b9463c81843da214476b541a27811dd885c9a76
+   EXPermissions: 17d4846ad1880f6891c74ae58ca1acb43e47ed47
+-  FBLazyVector: 7b423f9e248eae65987838148c36eec1dbfe0b53
+-  FBReactNativeSpec: c4cbe43e3c8029e17fa8d49ebc673e51fcc22cf2
++  FBLazyVector: 49cbe4b43e445b06bf29199b6ad2057649e4c8f5
++  FBReactNativeSpec: 9fa76334cefeaaa010a82f453b50faad47200f3f
+   Flipper: d3da1aa199aad94455ae725e9f3aa43f3ec17021
+   Flipper-DoubleConversion: 38631e41ef4f9b12861c67d17cb5518d06badc41
+-  Flipper-Folly: 755929a4f851b2fb2c347d533a23f191b008554c
++  Flipper-Folly: f7a3caafbd74bda4827954fd7a6e000e36355489
+   Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
+   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
+   Flipper-RSocket: 127954abe8b162fcaf68d2134d34dc2bd7076154
+@@ -587,30 +587,30 @@ SPEC CHECKSUMS:
+   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+   OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
+   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
+-  RCTRequired: ec2ebc96b7bfba3ca5c32740f5a0c6a014a274d2
+-  RCTTypeSafety: 22567f31e67c3e088c7ac23ea46ab6d4779c0ea5
+-  React: a241e3dbb1e91d06332f1dbd2b3ab26e1a4c4b9d
+-  React-callinvoker: da4d1c6141696a00163960906bc8a55b985e4ce4
+-  React-Core: 46ba164c437d7dac607b470c83c8308b05799748
+-  React-CoreModules: 217bd14904491c7b9940ff8b34a3fe08013c2f14
+-  React-cxxreact: 0090588ae6660c4615d3629fdd5c768d0983add4
+-  React-jsi: 5de8204706bd872b78ea646aee5d2561ca1214b6
+-  React-jsiexecutor: 124e8f99992490d0d13e0649d950d3e1aae06fe9
+-  React-jsinspector: 500a59626037be5b3b3d89c5151bc3baa9abf1a9
++  RCTRequired: 2f8cb5b7533219bf4218a045f92768129cf7050a
++  RCTTypeSafety: 512728b73549e72ad7330b92f3d42936f2a4de5b
++  React: 98eac01574128a790f0bbbafe2d1a8607291ac24
++  React-callinvoker: def3f7fae16192df68d9b69fd4bbb59092ee36bc
++  React-Core: 70a52aa5dbe9b83befae82038451a7df9fd54c5a
++  React-CoreModules: 052edef46117862e2570eb3a0f06d81c61d2c4b8
++  React-cxxreact: c1dc71b30653cfb4770efdafcbdc0ad6d388baab
++  React-jsi: 74341196d9547cbcbcfa4b3bbbf03af56431d5a1
++  React-jsiexecutor: 06a9c77b56902ae7ffcdd7a4905f664adc5d237b
++  React-jsinspector: 0ae35a37b20d5e031eb020a69cc5afdbd6406301
+   react-native-safe-area-context: 79fea126c6830c85f65947c223a5e3058a666937
+   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
+-  React-perflogger: aad6d4b4a267936b3667260d1f649b6f6069a675
+-  React-RCTActionSheet: fc376be462c9c8d6ad82c0905442fd77f82a9d2a
+-  React-RCTAnimation: ba0a1c3a2738be224a08092fa7f1b444ab77d309
+-  React-RCTBlob: f758d4403fc5828a326dc69e27b41e1a92f34947
+-  React-RCTImage: ce57088705f4a8d03f6594b066a59c29143ba73e
+-  React-RCTLinking: 852a3a95c65fa63f657a4b4e2d3d83a815e00a7c
+-  React-RCTNetwork: 9d7ccb8a08d522d71700b4fb677d9fa28cccd118
+-  React-RCTSettings: d8aaf4389ff06114dee8c42ef5f0f2915946011e
+-  React-RCTText: 809c12ed6b261796ba056c04fcd20d8b90bcc81d
+-  React-RCTVibration: 4b99a7f5c6c0abbc5256410cc5425fb8531986e1
+-  React-runtimeexecutor: ff951a0c241bfaefc4940a3f1f1a229e7cb32fa6
+-  ReactCommon: bedc99ed4dae329c4fcf128d0c31b9115e5365ca
++  React-perflogger: 9c547d8f06b9bf00cb447f2b75e8d7f19b7e02af
++  React-RCTActionSheet: 3080b6e12e0e1a5b313c8c0050699b5c794a1b11
++  React-RCTAnimation: 3f96f21a497ae7dabf4d2f150ee43f906aaf516f
++  React-RCTBlob: 283b8e5025e7f954176bc48164f846909002f3ed
++  React-RCTImage: 5088a484faac78f2d877e1b79125d3bb1ea94a16
++  React-RCTLinking: 5e8fbb3e9a8bc2e4e3eb15b1eb8bda5fcac27b8c
++  React-RCTNetwork: 38ec277217b1e841d5e6a1fa78da65b9212ccb28
++  React-RCTSettings: 242d6e692108c3de4f3bb74b7586a8799e9ab070
++  React-RCTText: 8746736ac8eb5a4a74719aa695b7a236a93a83d2
++  React-RCTVibration: 0fd6b21751a33cb72fce1a4a33ab9678416d307a
++  React-runtimeexecutor: cad74a1eaa53ee6e7a3620231939d8fe2c6afcf0
++  ReactCommon: cfe2b7fd20e0dbd2d1185cd7d8f99633fbc5ff05
+   RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
+   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
+   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
+@@ -629,7 +629,7 @@ SPEC CHECKSUMS:
+   UMReactNativeAdapter: 172def7895b2cb44a7dd021336e316d5fa8ea958
+   UMSensorsInterface: 4df9ec662134de5614ae61acc249d6912db87ca5
+   UMTaskManagerInterface: 4c60b43eaf3cb05a164bc9113258a171c18b7bf7
+-  Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393
++  Yoga: 8c8436d4171c87504c648ae23b1d81242bdf3bbf
+   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+ 
+ PODFILE CHECKSUM: c6f7f1ee26dfa0c3f2b4c888bb412f647c3fb377
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 6f93672..e2ea08f 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -21,9 +21,7 @@
+     "adb": "adb reverse tcp:9090 tcp:9090 && adb reverse tcp:3000 tcp:3000 && adb reverse tcp:9001 tcp:9001 && adb reverse tcp:8081 tcp:8081",
+     "postinstall": "node ./bin/postInstall",
+     "build-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
+-    "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
+-    "clean": "react-native-clean-project",
+-    "clean-all": "npx react-native clean-project-auto"
++    "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
+   },
+   "dependencies": {
+     "@react-native-async-storage/async-storage": "^1.14.1",
+@@ -37,8 +35,9 @@
+     "mobx": "6.1.8",
+     "mobx-react-lite": "3.2.0",
+     "mobx-state-tree": "5.0.1",
++    "ramda": "0.27.1",
+     "react": "17.0.1",
+-    "react-native": "0.64.1",
++    "react-native": "0.64.0",
+     "react-native-gesture-handler": "1.10.3",
+     "react-native-keychain": "6.2.0",
+     "react-native-safe-area-context": "3.1.8",
+@@ -51,9 +50,9 @@
+   },
+   "devDependencies": {
+     "@babel/core": "^7.12.9",
++    "@babel/runtime": "^7.12.5",
+     "@babel/plugin-proposal-decorators": "7.12.1",
+     "@babel/plugin-proposal-optional-catch-binding": "7.12.1",
+-    "@babel/runtime": "^7.12.5",
+     "@storybook/addon-storyshots": "6.1.10",
+     "@storybook/react-native": "5.3.23",
+     "@storybook/react-native-server": "5.3.23",
+@@ -70,6 +69,7 @@
+     "bufferutil": "4.0.2",
+     "canvas": "2.6.1",
+     "detox": "17.14.5",
++    "fbjs-scripts": "3.0.0",
+     "eslint": "7.15.0",
+     "eslint-config-prettier": "7.0.0",
+     "eslint-config-standard": "16.0.2",
+@@ -78,7 +78,6 @@
+     "eslint-plugin-promise": "4.2.1",
+     "eslint-plugin-react": "7.21.5",
+     "eslint-plugin-react-native": "3.10.0",
+-    "fbjs-scripts": "3.0.0",
+     "jest": "^26.6.3",
+     "jest-circus": "25.5.4",
+     "jest-expo": "40.0.1",
+@@ -90,7 +89,6 @@
+     "prettier": "2.2.1",
+     "react-devtools-core": "4.10.1",
+     "react-dom": "16.14.0",
+-    "react-native-clean-project": "^3.6.3",
+     "react-native-web": "0.15.1",
+     "react-powerplug": "1.0.0",
+     "react-test-renderer": "17.0.1",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 189d075..0dd1e42 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -4446,9 +4446,9 @@ acorn@^7.1.0, acorn@^7.1.1, acorn@^7.4.0:
+   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
+ 
+ acorn@^8.1.0:
+-  version "8.2.4"
+-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.4.tgz#caba24b08185c3b56e3168e97d15ed17f4d31fd0"
+-  integrity sha512-Ibt84YwBDDA890eDiDCEqcbwvHlBvzzDkU2cGBBDDI1QWT12jTiXIOn2CIw5KK4i6N5Z2HUxwYjzriDyqaqqZg==
++  version "8.2.2"
++  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.2.tgz#c4574e4fea298d6e6ed4b85ab844b06dd59f26d6"
++  integrity sha512-VrMS8kxT0e7J1EX0p6rI/E0FbfOVcvBpbIqHThFv+f8YrZIlMfVotYcXKVPmTvPW8sW5miJzfUFrrvthUZg8VQ==
+ 
+ address@1.1.2, address@^1.0.1:
+   version "1.1.2"
+@@ -10005,9 +10005,9 @@ is-arrayish@^0.3.1:
+   integrity sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==
+ 
+ is-bigint@^1.0.1:
+-  version "1.0.2"
+-  resolved "https://registry.yarnpkg.com/is-bigint/-/is-bigint-1.0.2.tgz#ffb381442503235ad245ea89e45b3dbff040ee5a"
+-  integrity sha512-0JV5+SOCQkIdzjBK9buARcV804Ddu7A0Qet6sHi3FimE9ne6m4BGQZfRn+NZiXbBk4F4XmHfDZIipLj9pX8dSA==
++  version "1.0.1"
++  resolved "https://registry.yarnpkg.com/is-bigint/-/is-bigint-1.0.1.tgz#6923051dfcbc764278540b9ce0e6b3213aa5ebc2"
++  integrity sha512-J0ELF4yHFxHy0cmSxZuheDOz2luOdVvqjwmEcj8H/L1JHeuEDSDbeRP+Dk9kFVk5RTFzbucJ2Kb9F7ixY2QaCg==
+ 
+ is-binary-path@^1.0.0:
+   version "1.0.1"
+@@ -10073,16 +10073,11 @@ is-data-descriptor@^1.0.0:
+   dependencies:
+     kind-of "^6.0.0"
+ 
+-is-date-object@^1.0.1:
++is-date-object@^1.0.1, is-date-object@^1.0.2:
+   version "1.0.2"
+   resolved "https://registry.yarnpkg.com/is-date-object/-/is-date-object-1.0.2.tgz#bda736f2cd8fd06d32844e7743bfa7494c3bfd7e"
+   integrity sha512-USlDT524woQ08aoZFzh3/Z6ch9Y/EWXEHQ/AaRN0SkKq4t2Jw2R2339tSXmwuVoY7LLlBCbOIlx2myP/L5zk0g==
+ 
+-is-date-object@^1.0.2:
+-  version "1.0.3"
+-  resolved "https://registry.yarnpkg.com/is-date-object/-/is-date-object-1.0.3.tgz#4c0802ae9c8097939ea8001eaae3c502f3dbe72f"
+-  integrity sha512-tDpEUInNcy2Yw3lNSepK3Wdw1RnXLcIVienz6Ou631Acl15cJyRWK4dgA1vCmOEgIbtOV0W7MHg+AR2Gdg1NXQ==
+-
+ is-decimal@^1.0.0:
+   version "1.0.4"
+   resolved "https://registry.yarnpkg.com/is-decimal/-/is-decimal-1.0.4.tgz#65a3a5958a1c5b63a706e1b333d7cd9f630d3fa5"
+@@ -14413,6 +14408,11 @@ ramda@0.25.0, ramda@^0.25.0:
+   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.25.0.tgz#8fdf68231cffa90bc2f9460390a0cb74a29b29a9"
+   integrity sha512-GXpfrYVPwx3K7RQ6aYT8KPS8XViSXUVJT1ONhoKPE9VAleW42YE+U+8VEyGWt41EnEQW7gwecYJriTI0pKoecQ==
+ 
++ramda@0.27.1:
++  version "0.27.1"
++  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
++  integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
++
+ ramda@^0.21.0:
+   version "0.21.0"
+   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.21.0.tgz#a001abedb3ff61077d4ff1d577d44de77e8d0a35"
+@@ -14648,11 +14648,6 @@ react-lifecycles-compat@^3.0.4:
+   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
+   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
+ 
+-react-native-clean-project@^3.6.3:
+-  version "3.6.3"
+-  resolved "https://registry.yarnpkg.com/react-native-clean-project/-/react-native-clean-project-3.6.3.tgz#ad43b8e1491512f285b7f455ac56db3328b5a65f"
+-  integrity sha512-sBbv+Zl05O9LfQqamLu2Crb//W/d8+l59TICF8nKxQ0nJsvear06a1CB2+FaO3rCrPNHiSjDDNXZ/D6muHTUkw==
+-
+ react-native-codegen@^0.0.6:
+   version "0.0.6"
+   resolved "https://registry.yarnpkg.com/react-native-codegen/-/react-native-codegen-0.0.6.tgz#b3173faa879cf71bfade8d030f9c4698388f6909"
+@@ -14748,10 +14743,10 @@ react-native-web@0.15.1:
+     prop-types "^15.6.0"
+     react-timer-mixin "^0.13.4"
+ 
+-react-native@0.64.1:
+-  version "0.64.1"
+-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.64.1.tgz#cd38f5b47b085549686f34eb0c9dcd466f307635"
+-  integrity sha512-jvSj+hNAfwvhaSmxd5KHJ5HidtG0pDXzoH6DaqNpU74g3CmAiA8vuk58B5yx/DYuffGq6PeMniAcwuh3Xp4biQ==
++react-native@0.64.0:
++  version "0.64.0"
++  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.64.0.tgz#c3bde5b638bf8bcf12bae6e094930d39cb942ab7"
++  integrity sha512-8dhSHBthgGwAjU+OjqUEA49229ThPMQH7URH0u8L0xoQFCnZO2sZ9Wc6KcbxI0x9KSmjCMFFZqRe3w3QsRv64g==
+   dependencies:
+     "@jest/create-cache-key-function" "^26.5.0"
+     "@react-native-community/cli" "^5.0.1-alpha.0"
+@@ -17373,9 +17368,9 @@ v8-to-istanbul@^4.1.3:
+     source-map "^0.7.3"
+ 
+ v8-to-istanbul@^7.0.0:
+-  version "7.1.2"
+-  resolved "https://registry.yarnpkg.com/v8-to-istanbul/-/v8-to-istanbul-7.1.2.tgz#30898d1a7fa0c84d225a2c1434fb958f290883c1"
+-  integrity sha512-TxNb7YEUwkLXCQYeudi6lgQ/SZrzNO4kMdlqVxaZPUIUjCv6iSSypUQX70kNBSERpQ8fk48+d61FXk+tgqcWow==
++  version "7.1.1"
++  resolved "https://registry.yarnpkg.com/v8-to-istanbul/-/v8-to-istanbul-7.1.1.tgz#04bfd1026ba4577de5472df4f5e89af49de5edda"
++  integrity sha512-p0BB09E5FRjx0ELN6RgusIPsSPhtgexSRcKETybEs6IGOTXJSZqfwxp7r//55nnu0f1AxltY5VvdVqy2vZf9AA==
+   dependencies:
+     "@types/istanbul-lib-coverage" "^2.0.1"
+     convert-source-map "^1.6.0"
