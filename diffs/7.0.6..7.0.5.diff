@@ -1,0 +1,34 @@
+diff --git a/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainActivity.java b/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainActivity.java
+index 85040c5..3ca765f 100644
+--- a/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainActivity.java
++++ b/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainActivity.java
+@@ -2,10 +2,6 @@ package com.helloworld;
+ 
+ import com.facebook.react.ReactActivity;
+ 
+-import com.facebook.react.ReactActivityDelegate;
+-import com.facebook.react.ReactRootView;
+-import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
+-
+ public class MainActivity extends ReactActivity {
+ 
+   /**
+@@ -16,18 +12,4 @@ public class MainActivity extends ReactActivity {
+   protected String getMainComponentName() {
+     return "IgniteDiffApp";
+   }
+-
+-  /**
+-   * Required for proper react-native-gesture-handler touch handling
+-   * https://docs.swmansion.com/react-native-gesture-handler/docs/#updating-mainactivityjava
+-   */
+-  @Override
+-  protected ReactActivityDelegate createReactActivityDelegate() {
+-    return new ReactActivityDelegate(this, getMainComponentName()) {
+-      @Override
+-      protected ReactRootView createRootView() {
+-       return new RNGestureHandlerEnabledRootView(MainActivity.this);
+-      }
+-    };
+-  }
+ }
