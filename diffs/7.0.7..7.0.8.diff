@@ -1,0 +1,20 @@
+diff --git a/IgniteDiffApp/app/models/extensions/with-root-store.ts b/IgniteDiffApp/app/models/extensions/with-root-store.ts
+index eff769c..675e0a7 100644
+--- a/IgniteDiffApp/app/models/extensions/with-root-store.ts
++++ b/IgniteDiffApp/app/models/extensions/with-root-store.ts
+@@ -1,5 +1,5 @@
+ import { getRoot, IStateTreeNode } from "mobx-state-tree"
+-import { RootStoreModel } from "../root-store/root-store"
++import { RootStore, RootStoreModel } from "../root-store/root-store"
+ 
+ /**
+  * Adds a rootStore property to the node for a convenient
+@@ -10,7 +10,7 @@ export const withRootStore = (self: IStateTreeNode) => ({
+     /**
+      * The root store.
+      */
+-    get rootStore() {
++    get rootStore(): RootStore {
+       return getRoot<typeof RootStoreModel>(self)
+     },
+   },
