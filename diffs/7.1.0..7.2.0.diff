@@ -1,0 +1,1548 @@
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index 84cbf06..53705c4 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -11,18 +11,11 @@
+  */
+ import "./i18n"
+ import "./utils/ignore-warnings"
+-import React, { useState, useEffect, useRef } from "react"
+-import { NavigationContainerRef } from "@react-navigation/native"
++import React, { useState, useEffect } from "react"
+ import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
+ import { initFonts } from "./theme/fonts" // expo
+ import * as storage from "./utils/storage"
+-import {
+-  useBackButtonHandler,
+-  AppNavigator,
+-  canExit,
+-  setAppNavigation,
+-  useNavigationPersistence,
+-} from "./navigators"
++import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
+ import { RootStore, RootStoreProvider, setupRootStore } from "./models"
+ import { ToggleStorybook } from "../storybook/toggle-storybook"
+ 
+@@ -38,15 +31,14 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
+  * This is the root component of our app.
+  */
+ function App() {
+-  const navigationRef = useRef<NavigationContainerRef>(null)
+   const [rootStore, setRootStore] = useState<RootStore | undefined>(undefined)
+ 
+-  setAppNavigation(navigationRef)
+-  useBackButtonHandler(navigationRef, canExit)
+-  const { initialNavigationState, onNavigationStateChange } = useNavigationPersistence(
+-    storage,
+-    NAVIGATION_PERSISTENCE_KEY,
+-  )
++  useBackButtonHandler(canExit)
++  const {
++    initialNavigationState,
++    onNavigationStateChange,
++    isRestored: isNavigationStateRestored,
++  } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
+ 
+   // Kick off initial async loading actions, like loading fonts and RootStore
+   useEffect(() => {
+@@ -58,9 +50,11 @@ function App() {
+ 
+   // Before we show the app, we have to wait for our state to be ready.
+   // In the meantime, don't render anything. This will be the background
+-  // color set in native by rootView's background color. You can replace
+-  // with your own loading component if you wish.
+-  if (!rootStore) return null
++  // color set in native by rootView's background color.
++  // In iOS: application:didFinishLaunchingWithOptions:
++  // In Android: https://stackoverflow.com/a/45838109/204044
++  // You can replace with your own loading component if you wish.
++  if (!rootStore || !isNavigationStateRestored) return null
+ 
+   // otherwise, we're ready to render the app
+   return (
+@@ -68,7 +62,6 @@ function App() {
+       <RootStoreProvider value={rootStore}>
+         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+           <AppNavigator
+-            ref={navigationRef}
+             initialState={initialNavigationState}
+             onStateChange={onNavigationStateChange}
+           />
+diff --git a/IgniteDiffApp/app/components/gradient-background/gradient-background.story.tsx b/IgniteDiffApp/app/components/gradient-background/gradient-background.story.tsx
+new file mode 100644
+index 0000000..f828f1f
+--- /dev/null
++++ b/IgniteDiffApp/app/components/gradient-background/gradient-background.story.tsx
+@@ -0,0 +1,16 @@
++import * as React from "react"
++import { storiesOf } from "@storybook/react-native"
++import { StoryScreen, Story, UseCase } from "../../../storybook/views"
++import { GradientBackground } from "./gradient-background"
++
++declare let module
++
++storiesOf("GradientBackground", module)
++  .addDecorator((fn) => <StoryScreen>{fn()}</StoryScreen>)
++  .add("Style Presets", () => (
++    <Story>
++      <UseCase text="default/stretch" usage="Full screen background gradient.">
++        <GradientBackground colors={["#422443", "#281b34"]} />
++      </UseCase>
++    </Story>
++  ))
+diff --git a/IgniteDiffApp/app/components/gradient-background/gradient-background.tsx b/IgniteDiffApp/app/components/gradient-background/gradient-background.tsx
+new file mode 100644
+index 0000000..fa05baa
+--- /dev/null
++++ b/IgniteDiffApp/app/components/gradient-background/gradient-background.tsx
+@@ -0,0 +1,13 @@
++import * as React from "react"
++import { ViewStyle } from "react-native"
++import { LinearGradient } from "expo-linear-gradient"
++
++const BG_GRADIENT: ViewStyle = { position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }
++
++export interface GradientBackgroundProps {
++  colors: string[]
++}
++
++export function GradientBackground(props: GradientBackgroundProps) {
++  return <LinearGradient colors={props.colors} style={BG_GRADIENT} />
++}
+diff --git a/IgniteDiffApp/app/components/index.ts b/IgniteDiffApp/app/components/index.ts
+index 5ed4a28..a1118f3 100644
+--- a/IgniteDiffApp/app/components/index.ts
++++ b/IgniteDiffApp/app/components/index.ts
+@@ -3,6 +3,7 @@ export * from "./button/button"
+ export * from "./checkbox/checkbox"
+ export * from "./form-row/form-row"
+ export * from "./header/header"
++export * from "./gradient-background/gradient-background"
+ export * from "./icon/icon"
+ export * from "./screen/screen"
+ export * from "./switch/switch"
+diff --git a/IgniteDiffApp/app/navigators/app-navigator.tsx b/IgniteDiffApp/app/navigators/app-navigator.tsx
+index 382cbc3..a84bd6e 100644
+--- a/IgniteDiffApp/app/navigators/app-navigator.tsx
++++ b/IgniteDiffApp/app/navigators/app-navigator.tsx
+@@ -5,9 +5,11 @@
+  * and a "main" flow which the user will use once logged in.
+  */
+ import React from "react"
+-import { NavigationContainer, NavigationContainerRef } from "@react-navigation/native"
+-import { createStackNavigator } from "@react-navigation/stack"
++import { useColorScheme } from "react-native"
++import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
++import { createNativeStackNavigator } from "@react-navigation/native-stack"
+ import { WelcomeScreen, DemoScreen, DemoListScreen } from "../screens"
++import { navigationRef } from "./navigation-utilities"
+ 
+ /**
+  * This type allows TypeScript to know what routes are defined in this navigator
+@@ -28,7 +30,7 @@ export type NavigatorParamList = {
+ }
+ 
+ // Documentation: https://reactnavigation.org/docs/stack-navigator/
+-const Stack = createStackNavigator<NavigatorParamList>()
++const Stack = createNativeStackNavigator<NavigatorParamList>()
+ 
+ const AppStack = () => {
+   return (
+@@ -45,16 +47,20 @@ const AppStack = () => {
+   )
+ }
+ 
+-export const AppNavigator = React.forwardRef<
+-  NavigationContainerRef,
+-  Partial<React.ComponentProps<typeof NavigationContainer>>
+->((props, ref) => {
++interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
++
++export const AppNavigator = (props: NavigationProps) => {
++  const colorScheme = useColorScheme()
+   return (
+-    <NavigationContainer {...props} ref={ref}>
++    <NavigationContainer
++      ref={navigationRef}
++      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
++      {...props}
++    >
+       <AppStack />
+     </NavigationContainer>
+   )
+-})
++}
+ 
+ AppNavigator.displayName = "AppNavigator"
+ 
+diff --git a/IgniteDiffApp/app/navigators/navigation-utilities.tsx b/IgniteDiffApp/app/navigators/navigation-utilities.tsx
+index fcd12f7..b11432f 100644
+--- a/IgniteDiffApp/app/navigators/navigation-utilities.tsx
++++ b/IgniteDiffApp/app/navigators/navigation-utilities.tsx
+@@ -1,27 +1,12 @@
+-import React, { useState, useEffect, useRef } from "react"
++import { useState, useEffect, useRef } from "react"
+ import { BackHandler } from "react-native"
+-import { PartialState, NavigationState, NavigationContainerRef } from "@react-navigation/native"
+-
+-export const AppNavigation = {
+-  navigate(name: string) {
+-    name // eslint-disable-line no-unused-expressions
+-  },
+-  goBack() {}, // eslint-disable-line @typescript-eslint/no-empty-function
+-  resetRoot(state?: PartialState<NavigationState> | NavigationState) {}, // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+-  getRootState(): NavigationState {
+-    return {} as any
+-  },
+-}
++import {
++  PartialState,
++  NavigationState,
++  createNavigationContainerRef,
++} from "@react-navigation/native"
+ 
+-export const setAppNavigation = (ref: React.RefObject<NavigationContainerRef>) => {
+-  for (const method in AppNavigation) {
+-    AppNavigation[method] = (...args: any) => {
+-      if (ref.current) {
+-        return ref.current[method](...args)
+-      }
+-    }
+-  }
+-}
++export const navigationRef = createNavigationContainerRef()
+ 
+ /**
+  * Gets the current screen from any navigation state.
+@@ -40,10 +25,7 @@ export function getActiveRouteName(state: NavigationState | PartialState<Navigat
+  * Hook that handles Android back button presses and forwards those on to
+  * the navigation or allows exiting the app.
+  */
+-export function useBackButtonHandler(
+-  ref: React.RefObject<NavigationContainerRef>,
+-  canExit: (routeName: string) => boolean,
+-) {
++export function useBackButtonHandler(canExit: (routeName: string) => boolean) {
+   const canExitRef = useRef(canExit)
+ 
+   useEffect(() => {
+@@ -53,14 +35,12 @@ export function useBackButtonHandler(
+   useEffect(() => {
+     // We'll fire this when the back button is pressed on Android.
+     const onBackPress = () => {
+-      const navigation = ref.current
+-
+-      if (navigation == null) {
++      if (!navigationRef.isReady()) {
+         return false
+       }
+ 
+       // grab the current route
+-      const routeName = getActiveRouteName(navigation.getRootState())
++      const routeName = getActiveRouteName(navigationRef.getRootState())
+ 
+       // are we allowed to exit?
+       if (canExitRef.current(routeName)) {
+@@ -69,9 +49,8 @@ export function useBackButtonHandler(
+       }
+ 
+       // we can't exit, so let's turn this into a back action
+-      if (navigation.canGoBack()) {
+-        navigation.goBack()
+-
++      if (navigationRef.canGoBack()) {
++        navigationRef.goBack()
+         return true
+       }
+ 
+@@ -83,7 +62,7 @@ export function useBackButtonHandler(
+ 
+     // Unsubscribe when we're done
+     return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress)
+-  }, [ref])
++  }, [])
+ }
+ 
+ /**
+@@ -91,9 +70,15 @@ export function useBackButtonHandler(
+  */
+ export function useNavigationPersistence(storage: any, persistenceKey: string) {
+   const [initialNavigationState, setInitialNavigationState] = useState()
+-  const [isRestoringNavigationState, setIsRestoringNavigationState] = useState(true)
+ 
+-  const routeNameRef = useRef()
++  // This feature is particularly useful in development mode.
++  // It is selectively enabled in development mode with
++  // the following approach. If you'd like to use navigation persistence
++  // in production, remove the __DEV__ and set the state to true
++  const [isRestored, setIsRestored] = useState(!__DEV__)
++
++  const routeNameRef = useRef<string | undefined>()
++
+   const onNavigationStateChange = (state) => {
+     const previousRouteName = routeNameRef.current
+     const currentRouteName = getActiveRouteName(state)
+@@ -115,13 +100,36 @@ export function useNavigationPersistence(storage: any, persistenceKey: string) {
+       const state = await storage.load(persistenceKey)
+       if (state) setInitialNavigationState(state)
+     } finally {
+-      setIsRestoringNavigationState(false)
++      setIsRestored(true)
+     }
+   }
+ 
+   useEffect(() => {
+-    if (isRestoringNavigationState) restoreState()
+-  }, [isRestoringNavigationState])
++    if (!isRestored) restoreState()
++  }, [isRestored])
++
++  return { onNavigationStateChange, restoreState, isRestored, initialNavigationState }
++}
++
++/**
++ * use this to navigate to navigate without the navigation
++ * prop. If you have access to the navigation prop, do not use this.
++ * More info: https://reactnavigation.org/docs/navigating-without-navigation-prop/
++ */
++export function navigate(name: any, params?: any) {
++  if (navigationRef.isReady()) {
++    navigationRef.navigate(name as never, params as never)
++  }
++}
+ 
+-  return { onNavigationStateChange, restoreState, initialNavigationState }
++export function goBack() {
++  if (navigationRef.isReady() && navigationRef.canGoBack()) {
++    navigationRef.goBack()
++  }
++}
++
++export function resetRoot(params = { index: 0, routes: [] }) {
++  if (navigationRef.isReady()) {
++    navigationRef.resetRoot(params)
++  }
+ }
+diff --git a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
+index ae66307..56863d1 100644
+--- a/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
++++ b/IgniteDiffApp/app/screens/demo/demo-list-screen.tsx
+@@ -1,10 +1,11 @@
+-import React, { useEffect } from "react"
++import React, { useEffect, FC } from "react"
+ import { FlatList, TextStyle, View, ViewStyle, ImageStyle } from "react-native"
+-import { useNavigation } from "@react-navigation/native"
++import { StackScreenProps } from "@react-navigation/stack"
+ import { observer } from "mobx-react-lite"
+-import { Header, Screen, Text, Wallpaper, AutoImage as Image } from "../../components"
++import { Header, Screen, Text, AutoImage as Image, GradientBackground } from "../../components"
+ import { color, spacing } from "../../theme"
+ import { useStores } from "../../models"
++import { NavigatorParamList } from "../../navigators"
+ 
+ const FULL: ViewStyle = {
+   flex: 1,
+@@ -41,46 +42,47 @@ const FLAT_LIST: ViewStyle = {
+   paddingHorizontal: spacing[4],
+ }
+ 
+-export const DemoListScreen = observer(function DemoListScreen() {
+-  const navigation = useNavigation()
+-  const goBack = () => navigation.goBack()
++export const DemoListScreen: FC<StackScreenProps<NavigatorParamList, "demoList">> = observer(
++  ({ navigation }) => {
++    const goBack = () => navigation.goBack()
+ 
+-  const { characterStore } = useStores()
+-  const { characters } = characterStore
++    const { characterStore } = useStores()
++    const { characters } = characterStore
+ 
+-  useEffect(() => {
+-    async function fetchData() {
+-      await characterStore.getCharacters()
+-    }
++    useEffect(() => {
++      async function fetchData() {
++        await characterStore.getCharacters()
++      }
+ 
+-    fetchData()
+-  }, [])
++      fetchData()
++    }, [])
+ 
+-  return (
+-    <View testID="DemoListScreen" style={FULL}>
+-      <Wallpaper />
+-      <Screen style={CONTAINER} preset="fixed" backgroundColor={color.transparent}>
+-        <Header
+-          headerTx="demoListScreen.title"
+-          leftIcon="back"
+-          onLeftPress={goBack}
+-          style={HEADER}
+-          titleStyle={HEADER_TITLE}
+-        />
+-        <FlatList
+-          contentContainerStyle={FLAT_LIST}
+-          data={[...characters]}
+-          keyExtractor={(item) => String(item.id)}
+-          renderItem={({ item }) => (
+-            <View style={LIST_CONTAINER}>
+-              <Image source={{ uri: item.image }} style={IMAGE} />
+-              <Text style={LIST_TEXT}>
+-                {item.name} ({item.status})
+-              </Text>
+-            </View>
+-          )}
+-        />
+-      </Screen>
+-    </View>
+-  )
+-})
++    return (
++      <View testID="DemoListScreen" style={FULL}>
++        <GradientBackground colors={["#422443", "#281b34"]} />
++        <Screen style={CONTAINER} preset="fixed" backgroundColor={color.transparent}>
++          <Header
++            headerTx="demoListScreen.title"
++            leftIcon="back"
++            onLeftPress={goBack}
++            style={HEADER}
++            titleStyle={HEADER_TITLE}
++          />
++          <FlatList
++            contentContainerStyle={FLAT_LIST}
++            data={[...characters]}
++            keyExtractor={(item) => String(item.id)}
++            renderItem={({ item }) => (
++              <View style={LIST_CONTAINER}>
++                <Image source={{ uri: item.image }} style={IMAGE} />
++                <Text style={LIST_TEXT}>
++                  {item.name} ({item.status})
++                </Text>
++              </View>
++            )}
++          />
++        </Screen>
++      </View>
++    )
++  },
++)
+diff --git a/IgniteDiffApp/app/screens/demo/demo-screen.tsx b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+index 40e3830..79d8d5c 100644
+--- a/IgniteDiffApp/app/screens/demo/demo-screen.tsx
++++ b/IgniteDiffApp/app/screens/demo/demo-screen.tsx
+@@ -1,6 +1,6 @@
+-import React from "react"
++import React, { FC } from "react"
+ import { ImageStyle, Platform, TextStyle, View, ViewStyle } from "react-native"
+-import { useNavigation } from "@react-navigation/native"
++import { StackScreenProps } from "@react-navigation/stack"
+ import { observer } from "mobx-react-lite"
+ import {
+   BulletItem,
+@@ -8,9 +8,10 @@ import {
+   Header,
+   Text,
+   Screen,
+-  Wallpaper,
+   AutoImage as Image,
++  GradientBackground,
+ } from "../../components"
++import { NavigatorParamList } from "../../navigators"
+ import { color, spacing } from "../../theme"
+ import { Api } from "../../services/api"
+ import { save } from "../../utils/storage"
+@@ -92,90 +93,91 @@ const platformCommand = Platform.select({
+   android: "Cmd/Ctrl + M",
+ })
+ 
+-export const DemoScreen = observer(function DemoScreen() {
+-  const navigation = useNavigation()
+-  const goBack = () => navigation.goBack()
++export const DemoScreen: FC<StackScreenProps<NavigatorParamList, "demo">> = observer(
++  ({ navigation }) => {
++    const goBack = () => navigation.goBack()
+ 
+-  const demoReactotron = React.useMemo(
+-    () => async () => {
+-      console.tron.log("Your Friendly tron log message")
+-      console.tron.logImportant("I am important")
+-      console.tron.display({
+-        name: "DISPLAY",
+-        value: {
+-          numbers: 1,
+-          strings: "strings",
+-          booleans: true,
+-          arrays: [1, 2, 3],
+-          objects: {
+-            deeper: {
++    const demoReactotron = React.useMemo(
++      () => async () => {
++        console.tron.log("Your Friendly tron log message")
++        console.tron.logImportant("I am important")
++        console.tron.display({
++          name: "DISPLAY",
++          value: {
++            numbers: 1,
++            strings: "strings",
++            booleans: true,
++            arrays: [1, 2, 3],
++            objects: {
+               deeper: {
+-                yay: "👾",
++                deeper: {
++                  yay: "👾",
++                },
+               },
+             },
++            functionNames: function hello() {
++              /* dummy function */
++            },
+           },
+-          functionNames: function hello() {
+-            /* dummy function */
++          preview: "More control with display()",
++          important: true,
++          image: {
++            uri:
++              "https://avatars2.githubusercontent.com/u/3902527?s=200&u=a0d16b13ed719f35d95ca0f4440f5d07c32c349a&v=4",
+           },
+-        },
+-        preview: "More control with display()",
+-        important: true,
+-        image: {
+-          uri:
+-            "https://avatars2.githubusercontent.com/u/3902527?s=200&u=a0d16b13ed719f35d95ca0f4440f5d07c32c349a&v=4",
+-        },
+-      })
+-      // make an API call for the demo
+-      // Don't do API like this, use store's API
+-      const demo = new Api()
+-      demo.setup()
+-      demo.getUser("1")
+-      // Let's do some async storage stuff
+-      await save("Cool Name", "Boaty McBoatface")
+-    },
+-    [],
+-  )
++        })
++        // make an API call for the demo
++        // Don't do API like this, use store's API
++        const demo = new Api()
++        demo.setup()
++        demo.getUser("1")
++        // Let's do some async storage stuff
++        await save("Cool Name", "Boaty McBoatface")
++      },
++      [],
++    )
+ 
+-  return (
+-    <View testID="DemoScreen" style={FULL}>
+-      <Wallpaper />
+-      <Screen style={CONTAINER} preset="scroll" backgroundColor={color.transparent}>
+-        <Header
+-          headerTx="demoScreen.howTo"
+-          leftIcon="back"
+-          onLeftPress={goBack}
+-          style={HEADER}
+-          titleStyle={HEADER_TITLE}
+-        />
+-        <Text style={TITLE} preset="header" tx="demoScreen.title" />
+-        <Text style={TAGLINE} tx="demoScreen.tagLine" />
+-        <BulletItem text="Integrated here, Navigation with State, TypeScript, Storybook, Solidarity, and i18n." />
+-        <BulletItem
+-          text={`To run Storybook, press ${platformCommand} or shake the device to show the developer menu, then select "Toggle Storybook"`}
+-        />
+-        <BulletItem text="Load up Reactotron!  You can inspect your app, view the events, interact, and so much more!" />
+-        <View>
++    return (
++      <View testID="DemoScreen" style={FULL}>
++        <GradientBackground colors={["#422443", "#281b34"]} />
++        <Screen style={CONTAINER} preset="scroll" backgroundColor={color.transparent}>
++          <Header
++            headerTx="demoScreen.howTo"
++            leftIcon="back"
++            onLeftPress={goBack}
++            style={HEADER}
++            titleStyle={HEADER_TITLE}
++          />
++          <Text style={TITLE} preset="header" tx="demoScreen.title" />
++          <Text style={TAGLINE} tx="demoScreen.tagLine" />
++          <BulletItem text="Integrated here, Navigation with State, TypeScript, Storybook, Solidarity, and i18n." />
++          <BulletItem
++            text={`To run Storybook, press ${platformCommand} or shake the device to show the developer menu, then select "Toggle Storybook"`}
++          />
++          <BulletItem text="Load up Reactotron!  You can inspect your app, view the events, interact, and so much more!" />
++          <View>
++            <Button
++              style={DEMO}
++              textStyle={DEMO_TEXT}
++              tx="demoScreen.reactotron"
++              onPress={demoReactotron}
++            />
++            <Text style={HINT} tx={`demoScreen.${Platform.OS}ReactotronHint` as const} />
++          </View>
+           <Button
+             style={DEMO}
+             textStyle={DEMO_TEXT}
+-            tx="demoScreen.reactotron"
+-            onPress={demoReactotron}
++            tx="demoScreen.demoList"
++            onPress={() => navigation.navigate("demoList")}
+           />
+-          <Text style={HINT} tx={`demoScreen.${Platform.OS}ReactotronHint` as const} />
+-        </View>
+-        <Button
+-          style={DEMO}
+-          textStyle={DEMO_TEXT}
+-          tx="demoScreen.demoList"
+-          onPress={() => navigation.navigate("demoList")}
+-        />
+-        <Image source={logoIgnite} style={IGNITE} />
+-        <View style={LOVE_WRAPPER}>
+-          <Text style={LOVE} text="Made with" />
+-          <Image source={heart} style={HEART} />
+-          <Text style={LOVE} text="by Infinite Red" />
+-        </View>
+-      </Screen>
+-    </View>
+-  )
+-})
++          <Image source={logoIgnite} style={IGNITE} />
++          <View style={LOVE_WRAPPER}>
++            <Text style={LOVE} text="Made with" />
++            <Image source={heart} style={HEART} />
++            <Text style={LOVE} text="by Infinite Red" />
++          </View>
++        </Screen>
++      </View>
++    )
++  },
++)
+diff --git a/IgniteDiffApp/app/screens/welcome/welcome-screen.tsx b/IgniteDiffApp/app/screens/welcome/welcome-screen.tsx
+index 47ed2ce..40cb71e 100644
+--- a/IgniteDiffApp/app/screens/welcome/welcome-screen.tsx
++++ b/IgniteDiffApp/app/screens/welcome/welcome-screen.tsx
+@@ -1,9 +1,18 @@
+-import React from "react"
++import React, { FC } from "react"
+ import { View, ViewStyle, TextStyle, ImageStyle, SafeAreaView } from "react-native"
+-import { useNavigation } from "@react-navigation/native"
++import { StackScreenProps } from "@react-navigation/stack"
+ import { observer } from "mobx-react-lite"
+-import { Button, Header, Screen, Text, Wallpaper, AutoImage as Image } from "../../components"
++import {
++  Button,
++  Header,
++  Screen,
++  Text,
++  GradientBackground,
++  AutoImage as Image,
++} from "../../components"
+ import { color, spacing, typography } from "../../theme"
++import { NavigatorParamList } from "../../navigators"
++
+ const bowserLogo = require("./bowser.png")
+ 
+ const FULL: ViewStyle = { flex: 1 }
+@@ -77,42 +86,43 @@ const FOOTER_CONTENT: ViewStyle = {
+   paddingHorizontal: spacing[4],
+ }
+ 
+-export const WelcomeScreen = observer(function WelcomeScreen() {
+-  const navigation = useNavigation()
+-  const nextScreen = () => navigation.navigate("demo")
++export const WelcomeScreen: FC<StackScreenProps<NavigatorParamList, "welcome">> = observer(
++  ({ navigation }) => {
++    const nextScreen = () => navigation.navigate("demo")
+ 
+-  return (
+-    <View testID="WelcomeScreen" style={FULL}>
+-      <Wallpaper />
+-      <Screen style={CONTAINER} preset="scroll" backgroundColor={color.transparent}>
+-        <Header headerTx="welcomeScreen.poweredBy" style={HEADER} titleStyle={HEADER_TITLE} />
+-        <Text style={TITLE_WRAPPER}>
+-          <Text style={TITLE} text="Your new app, " />
+-          <Text style={ALMOST} text="almost" />
+-          <Text style={TITLE} text="!" />
+-        </Text>
+-        <Text style={TITLE} preset="header" tx="welcomeScreen.readyForLaunch" />
+-        <Image source={bowserLogo} style={BOWSER} />
+-        <Text style={CONTENT}>
+-          This probably isn't what your app is going to look like. Unless your designer handed you
+-          this screen and, in that case, congrats! You're ready to ship.
+-        </Text>
+-        <Text style={CONTENT}>
+-          For everyone else, this is where you'll see a live preview of your fully functioning app
+-          using Ignite.
+-        </Text>
+-      </Screen>
+-      <SafeAreaView style={FOOTER}>
+-        <View style={FOOTER_CONTENT}>
+-          <Button
+-            testID="next-screen-button"
+-            style={CONTINUE}
+-            textStyle={CONTINUE_TEXT}
+-            tx="welcomeScreen.continue"
+-            onPress={nextScreen}
+-          />
+-        </View>
+-      </SafeAreaView>
+-    </View>
+-  )
+-})
++    return (
++      <View testID="WelcomeScreen" style={FULL}>
++        <GradientBackground colors={["#422443", "#281b34"]} />
++        <Screen style={CONTAINER} preset="scroll" backgroundColor={color.transparent}>
++          <Header headerTx="welcomeScreen.poweredBy" style={HEADER} titleStyle={HEADER_TITLE} />
++          <Text style={TITLE_WRAPPER}>
++            <Text style={TITLE} text="Your new app, " />
++            <Text style={ALMOST} text="almost" />
++            <Text style={TITLE} text="!" />
++          </Text>
++          <Text style={TITLE} preset="header" tx="welcomeScreen.readyForLaunch" />
++          <Image source={bowserLogo} style={BOWSER} />
++          <Text style={CONTENT}>
++            This probably isn't what your app is going to look like. Unless your designer handed you
++            this screen and, in that case, congrats! You're ready to ship.
++          </Text>
++          <Text style={CONTENT}>
++            For everyone else, this is where you'll see a live preview of your fully functioning app
++            using Ignite.
++          </Text>
++        </Screen>
++        <SafeAreaView style={FOOTER}>
++          <View style={FOOTER_CONTENT}>
++            <Button
++              testID="next-screen-button"
++              style={CONTINUE}
++              textStyle={CONTINUE_TEXT}
++              tx="welcomeScreen.continue"
++              onPress={nextScreen}
++            />
++          </View>
++        </SafeAreaView>
++      </View>
++    )
++  },
++)
+diff --git a/IgniteDiffApp/app/services/reactotron/reactotron.ts b/IgniteDiffApp/app/services/reactotron/reactotron.ts
+index c585b91..799a10a 100644
+--- a/IgniteDiffApp/app/services/reactotron/reactotron.ts
++++ b/IgniteDiffApp/app/services/reactotron/reactotron.ts
+@@ -1,11 +1,12 @@
+ import { Tron } from "./tron"
+ import AsyncStorage from "@react-native-async-storage/async-storage"
++import { ArgType } from "reactotron-core-client"
+ import { RootStore } from "../../models/root-store/root-store"
+ import { onSnapshot } from "mobx-state-tree"
+ import { ReactotronConfig, DEFAULT_REACTOTRON_CONFIG } from "./reactotron-config"
+ import { mst } from "reactotron-mst"
+ import { clear } from "../../utils/storage"
+-import { AppNavigation } from "../../navigators/navigation-utilities"
++import { goBack, resetRoot, navigate } from "../../navigators/navigation-utilities"
+ import { Platform } from "react-native"
+ 
+ // Teach TypeScript about the bad things we want to do.
+@@ -158,17 +159,38 @@ export class Reactotron {
+         command: "resetNavigation",
+         handler: () => {
+           console.tron.log("resetting navigation state")
+-          AppNavigation.resetRoot({ routes: [] })
++          resetRoot({ index: 0, routes: [] })
+         },
+       })
+ 
++      Tron.onCustomCommand({
++        command: "navigateTo",
++        handler: (args) => {
++          const { route } = args
++          if (route) {
++            console.log(`Navigating to: ${route}`)
++            navigate(route)
++          } else {
++            console.log("Could not navigate. No route provided.")
++          }
++        },
++        title: "Navigate To Screen",
++        description: "Navigates to a screen by name.",
++        args: [
++          {
++            name: "route",
++            type: ArgType.String,
++          },
++        ],
++      })
++
+       Tron.onCustomCommand({
+         title: "Go Back",
+         description: "Goes back",
+         command: "goBack",
+         handler: () => {
+           console.tron.log("Going back")
+-          AppNavigation.goBack()
++          goBack()
+         },
+       })
+ 
+diff --git a/IgniteDiffApp/ios/IgniteDiffApp/AppDelegate.m b/IgniteDiffApp/ios/IgniteDiffApp/AppDelegate.m
+index 37d05d5..f685b8b 100644
+--- a/IgniteDiffApp/ios/IgniteDiffApp/AppDelegate.m
++++ b/IgniteDiffApp/ios/IgniteDiffApp/AppDelegate.m
+@@ -50,6 +50,9 @@ - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(
+                                             initialProperties:nil];
+ 
+     if (@available(iOS 13.0, *)) {
++        // Change this to whatever color you want -- it'll show as
++        // your app loads for the first time in the background.
++        // You can use the system's background color if you wish
+         rootView.backgroundColor = [UIColor systemBackgroundColor];
+     } else {
+         rootView.backgroundColor = [UIColor whiteColor];
+diff --git a/IgniteDiffApp/ios/Podfile b/IgniteDiffApp/ios/Podfile
+index 2ffb0cd..f9457dd 100644
+--- a/IgniteDiffApp/ios/Podfile
++++ b/IgniteDiffApp/ios/Podfile
+@@ -2,7 +2,7 @@ require_relative '../node_modules/react-native/scripts/react_native_pods'
+ require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+ require_relative '../node_modules/react-native-unimodules/cocoapods.rb'
+ 
+-platform :ios, '10.0'
++platform :ios, '11.0'
+ 
+ target 'IgniteDiffApp' do
+   use_unimodules!
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index 7c13232..60950fa 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -12,6 +12,8 @@ PODS:
+     - React-Core
+     - UMCore
+     - UMImageLoaderInterface
++  - EXLinearGradient (9.2.0):
++    - UMCore
+   - EXLocalization (9.1.0):
+     - UMCore
+   - EXPermissions (10.0.0):
+@@ -369,6 +371,7 @@ DEPENDENCIES:
+   - EXConstants (from `../node_modules/expo-constants/ios`)
+   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
+   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
++  - EXLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
+   - EXLocalization (from `../node_modules/expo-localization/ios`)
+   - EXPermissions (from `../node_modules/expo-permissions/ios`)
+   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
+@@ -463,6 +466,8 @@ EXTERNAL SOURCES:
+     :path: "../node_modules/expo-file-system/ios"
+   EXImageLoader:
+     :path: "../node_modules/expo-image-loader/ios"
++  EXLinearGradient:
++    :path: "../node_modules/expo-linear-gradient/ios"
+   EXLocalization:
+     :path: "../node_modules/expo-localization/ios"
+   EXPermissions:
+@@ -567,6 +572,7 @@ SPEC CHECKSUMS:
+   EXConstants: 54d0bf04319d1692c6c7bc03ca151ef7a71705a4
+   EXFileSystem: 0e4974ab77bff04cda68d2886d070cbe64b93a6b
+   EXImageLoader: f96ec9992733a4224418bbd9382e5485c8948944
++  EXLinearGradient: f9ea3259f096b27008860ca50764184225dc71c9
+   EXLocalization: 8b9463c81843da214476b541a27811dd885c9a76
+   EXPermissions: 17d4846ad1880f6891c74ae58ca1acb43e47ed47
+   FBLazyVector: e686045572151edef46010a6f819ade377dfeb4b
+@@ -626,6 +632,6 @@ SPEC CHECKSUMS:
+   Yoga: 575c581c63e0d35c9a83f4b46d01d63abc1100ac
+   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+ 
+-PODFILE CHECKSUM: 87df84f176bbea7a2ba0925bd07700b5c04392cf
++PODFILE CHECKSUM: c1cff56d6e7e9d9e531c0b993c32af466032c01f
+ 
+ COCOAPODS: 1.10.1
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 3ccd19a..1cb1c6d 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -28,10 +28,12 @@
+   "dependencies": {
+     "@react-native-async-storage/async-storage": "^1.14.1",
+     "@react-native-community/masked-view": "0.1.10",
+-    "@react-navigation/native": "5.9.3",
+-    "@react-navigation/stack": "5.12.8",
++    "@react-navigation/native": "~6.0.1",
++    "@react-navigation/stack": "~6.0.1",
++    "@react-navigation/native-stack": "^6.0.2",
+     "@unimodules/core": "6.0.0",
+     "apisauce": "2.0.0",
++    "expo-linear-gradient": "^9.2.0",
+     "expo-localization": "9.1.0",
+     "i18n-js": "3.8.0",
+     "mobx": "6.1.8",
+@@ -45,8 +47,8 @@
+     "react-native-screens": "2.18.1",
+     "react-native-unimodules": "0.12.0",
+     "reactotron-mst": "3.1.3",
+-    "reactotron-react-native": "5.0.0",
+     "reactotron-react-js": "^3.3.7",
++    "reactotron-react-native": "5.0.0",
+     "validate.js": "0.13.1"
+   },
+   "devDependencies": {
+@@ -102,7 +104,7 @@
+       "/e2e"
+     ],
+     "transformIgnorePatterns": [
+-      "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|@storybook|@react-native-community|expo-localization|@unimodules)"
++      "node_modules/(?!(jest-)?react-native|expo-linear-gradient|@react-native|@react-navigation|@storybook|@react-native-community|expo-localization|@unimodules)"
+     ]
+   },
+   "prettier": {
+diff --git a/IgniteDiffApp/storybook/storybook-registry.ts b/IgniteDiffApp/storybook/storybook-registry.ts
+index 83f0ed8..c782fc7 100644
+--- a/IgniteDiffApp/storybook/storybook-registry.ts
++++ b/IgniteDiffApp/storybook/storybook-registry.ts
+@@ -6,5 +6,6 @@ require("../app/components/switch/switch.story")
+ require("../app/components/text-field/text-field.story")
+ require("../app/components/checkbox/checkbox.story")
+ require("../app/components/wallpaper/wallpaper.story")
++require("../app/components/gradient-background/gradient-background.story")
+ require("../app/components/icon/icon.story")
+ require("../app/components/header/header.story")
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index f6eeb6d..39d2c76 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -277,13 +277,13 @@
+     "@babel/types" "^7.14.5"
+ 
+ "@babel/helpers@^7.14.8", "@babel/helpers@^7.9.0":
+-  version "7.14.8"
+-  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.14.8.tgz#839f88f463025886cff7f85a35297007e2da1b77"
+-  integrity sha512-ZRDmI56pnV+p1dH6d+UN6GINGz7Krps3+270qqI9UJ4wxYThfAIcI5i7j5vXC4FJ3Wap+S9qcebxeYiqn87DZw==
++  version "7.15.3"
++  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.15.3.tgz#c96838b752b95dcd525b4e741ed40bb1dc2a1357"
++  integrity sha512-HwJiz52XaS96lX+28Tnbu31VeFSQJGOeKHJeaEPQlTl7PnlhFElWPj8tUXtqFIzeN86XxXoBr+WFAyK2PPVz6g==
+   dependencies:
+     "@babel/template" "^7.14.5"
+-    "@babel/traverse" "^7.14.8"
+-    "@babel/types" "^7.14.8"
++    "@babel/traverse" "^7.15.0"
++    "@babel/types" "^7.15.0"
+ 
+ "@babel/highlight@^7.0.0", "@babel/highlight@^7.10.4", "@babel/highlight@^7.14.5", "@babel/highlight@^7.8.3":
+   version "7.14.5"
+@@ -295,9 +295,9 @@
+     js-tokens "^4.0.0"
+ 
+ "@babel/parser@^7.0.0", "@babel/parser@^7.1.0", "@babel/parser@^7.1.6", "@babel/parser@^7.14.5", "@babel/parser@^7.15.0", "@babel/parser@^7.9.0":
+-  version "7.15.0"
+-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.15.0.tgz#b6d6e29058ca369127b0eeca2a1c4b5794f1b6b9"
+-  integrity sha512-0v7oNOjr6YT9Z2RAOTv4T9aP+ubfx4Q/OhVtAet7PFDt0t9Oy6Jn+/rfC6b8HJ5zEqrQCiMxJfgtHpmIminmJQ==
++  version "7.15.3"
++  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.15.3.tgz#3416d9bea748052cfcb63dbcc27368105b1ed862"
++  integrity sha512-O0L6v/HvqbdJawj0iBEfVQMc3/6WP+AeOsovsIgBFyJaG+W2w7eqvZB7puddATmWuARlm1SX7DwxJ/JJUnDpEA==
+ 
+ "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@^7.14.5":
+   version "7.14.5"
+@@ -649,9 +649,9 @@
+     "@babel/helper-plugin-utils" "^7.14.5"
+ 
+ "@babel/plugin-transform-block-scoping@^7.0.0", "@babel/plugin-transform-block-scoping@^7.12.1", "@babel/plugin-transform-block-scoping@^7.12.13", "@babel/plugin-transform-block-scoping@^7.14.5":
+-  version "7.14.5"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.14.5.tgz#8cc63e61e50f42e078e6f09be775a75f23ef9939"
+-  integrity sha512-LBYm4ZocNgoCqyxMLoOnwpsmQ18HWTQvql64t3GvMUzLQrNoV1BDG0lNftC8QKYERkZgCCT/7J5xWGObGAyHDw==
++  version "7.15.3"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.15.3.tgz#94c81a6e2fc230bcce6ef537ac96a1e4d2b3afaf"
++  integrity sha512-nBAzfZwZb4DkaGtOes1Up1nOAp9TDRRFw4XBzBBSG9QK7KVFmYzgj9o9sbPv7TX5ofL4Auq4wZnxCoPnI/lz2Q==
+   dependencies:
+     "@babel/helper-plugin-utils" "^7.14.5"
+ 
+@@ -1165,9 +1165,9 @@
+     "@babel/plugin-transform-typescript" "^7.12.17"
+ 
+ "@babel/register@^7.0.0", "@babel/register@^7.12.1":
+-  version "7.14.5"
+-  resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.14.5.tgz#d0eac615065d9c2f1995842f85d6e56c345f3233"
+-  integrity sha512-TjJpGz/aDjFGWsItRBQMOFTrmTI9tr79CHOK+KIvLeCkbxuOAk2M5QHjvruIMGoo9OuccMh5euplPzc5FjAKGg==
++  version "7.15.3"
++  resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.15.3.tgz#6b40a549e06ec06c885b2ec42c3dd711f55fe752"
++  integrity sha512-mj4IY1ZJkorClxKTImccn4T81+UKTo4Ux0+OFSV9hME1ooqS9UV+pJ6BjD0qXPK4T3XW/KNa79XByjeEMZz+fw==
+   dependencies:
+     clone-deep "^4.0.1"
+     find-cache-dir "^2.0.0"
+@@ -1176,9 +1176,9 @@
+     source-map-support "^0.5.16"
+ 
+ "@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.2", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.14.8", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
+-  version "7.14.8"
+-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.14.8.tgz#7119a56f421018852694290b9f9148097391b446"
+-  integrity sha512-twj3L8Og5SaCRCErB4x4ajbvBIVV77CGeFglHpeg5WC5FF8TZzBWXtTJ4MqaD9QszLYTtr+IsaAL2rEUevb+eg==
++  version "7.15.3"
++  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.15.3.tgz#2e1c2880ca118e5b2f9988322bd8a7656a32502b"
++  integrity sha512-OvwMLqNXkCXSz1kSm58sEsNuhqOx/fKpnUnKnFB5v8uDda5bLNEHNgKPvhDN6IU0LDcnHQ90LlJ0Q6jnyBSIBA==
+   dependencies:
+     regenerator-runtime "^0.13.4"
+ 
+@@ -1191,7 +1191,7 @@
+     "@babel/parser" "^7.14.5"
+     "@babel/types" "^7.14.5"
+ 
+-"@babel/traverse@^7.0.0", "@babel/traverse@^7.1.0", "@babel/traverse@^7.13.0", "@babel/traverse@^7.14.5", "@babel/traverse@^7.14.8", "@babel/traverse@^7.15.0", "@babel/traverse@^7.7.4", "@babel/traverse@^7.9.0":
++"@babel/traverse@^7.0.0", "@babel/traverse@^7.1.0", "@babel/traverse@^7.13.0", "@babel/traverse@^7.14.5", "@babel/traverse@^7.15.0", "@babel/traverse@^7.7.4", "@babel/traverse@^7.9.0":
+   version "7.15.0"
+   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.15.0.tgz#4cca838fd1b2a03283c1f38e141f639d60b3fc98"
+   integrity sha512-392d8BN0C9eVxVWd8H6x9WfipgVH5IaIoLp23334Sc1vbKKWINnvwRpb4us0xtPaCumlwbTtIYNA0Dv/32sVFw==
+@@ -1715,6 +1715,17 @@
+     "@types/yargs" "^15.0.0"
+     chalk "^4.0.0"
+ 
++"@jest/types@^27.0.6":
++  version "27.0.6"
++  resolved "https://registry.yarnpkg.com/@jest/types/-/types-27.0.6.tgz#9a992bc517e0c49f035938b8549719c2de40706b"
++  integrity sha512-aSquT1qa9Pik26JK5/3rvnYb4bGtm1VFNesHKmNTwmPIgOrixvhL2ghIvFRNEpzy3gU+rUgjIF/KodbkFAl++g==
++  dependencies:
++    "@types/istanbul-lib-coverage" "^2.0.0"
++    "@types/istanbul-reports" "^3.0.0"
++    "@types/node" "*"
++    "@types/yargs" "^16.0.0"
++    chalk "^4.0.0"
++
+ "@jimp/bmp@^0.12.1":
+   version "0.12.1"
+   resolved "https://registry.yarnpkg.com/@jimp/bmp/-/bmp-0.12.1.tgz#43cf1f711797c029aa7570a492769b4778638da2"
+@@ -2212,40 +2223,54 @@
+   resolved "https://registry.yarnpkg.com/@react-native/polyfills/-/polyfills-1.0.0.tgz#05bb0031533598f9458cf65a502b8df0eecae780"
+   integrity sha512-0jbp4RxjYopTsIdLl+/Fy2TiwVYHy4mgeu07DG4b/LyM0OS/+lPP5c9sbnt/AMlnF6qz2JRZpPpGw1eMNS6A4w==
+ 
+-"@react-navigation/core@^5.15.2":
+-  version "5.15.5"
+-  resolved "https://registry.yarnpkg.com/@react-navigation/core/-/core-5.15.5.tgz#9b5a534ed101df8a18a89356f3fa1d8e5f6e3826"
+-  integrity sha512-xrUQ0xVQTMuuMiILRhhRpBzoI4TaFh4dJ4INCy6uwK9dwHjLwtsx+++ZefV/K4tbMQmGFxq4zSnLtTRtfMZKrA==
++"@react-navigation/core@^6.0.1":
++  version "6.0.1"
++  resolved "https://registry.yarnpkg.com/@react-navigation/core/-/core-6.0.1.tgz#4424ee1f83e2e305ef80d27c2778fb82fba852a0"
++  integrity sha512-mVdvBDYdz8uzLQHokmVdX/xC4rS7NIkD1FN/yaGdovVzYApAhM+UGd3w1zskjyCSyXaVHHOwV59ZGVew+84xfQ==
+   dependencies:
+-    "@react-navigation/routers" "^5.7.4"
++    "@react-navigation/routers" "^6.0.1"
+     escape-string-regexp "^4.0.0"
+-    nanoid "^3.1.15"
+-    query-string "^6.13.6"
++    nanoid "^3.1.23"
++    query-string "^7.0.0"
+     react-is "^16.13.0"
+ 
+-"@react-navigation/native@5.9.3":
+-  version "5.9.3"
+-  resolved "https://registry.yarnpkg.com/@react-navigation/native/-/native-5.9.3.tgz#3859f439adc9a744b79a98fbc7606bdd459574d5"
+-  integrity sha512-xaRlCDRVuFGxHsP/IetwLdNvLJwIJBYCUIx/ufWs6QkT9Q0EB0DtKzXCItuHydjMEVPd1Cy7lfjUlSM6hZ6Q3Q==
++"@react-navigation/elements@^1.0.4":
++  version "1.0.4"
++  resolved "https://registry.yarnpkg.com/@react-navigation/elements/-/elements-1.0.4.tgz#7694473716ebb8b5d69523bc75924d81955e19a8"
++  integrity sha512-WtaQXZ1y0aVQlQegyS2quOeSSqBvASZThdruW9AAgVbqs6qJMwbKjE5SOEsZS2jQX8OoeZNz+8bJHqVflynunw==
++
++"@react-navigation/native-stack@^6.0.2":
++  version "6.0.5"
++  resolved "https://registry.yarnpkg.com/@react-navigation/native-stack/-/native-stack-6.0.5.tgz#38d8b827b2215d18a2180764a00a139eccee75ab"
++  integrity sha512-2gYLzs71D2PJk7SKzDZjMjc2lrwUytYGnR6QQhBlLtGm54R6DKyMtmisxMMz1KzMlI9JhtawVxSZ5SHP2VlSlA==
++  dependencies:
++    "@react-navigation/elements" "^1.0.4"
++    warn-once "^0.1.0"
++
++"@react-navigation/native@~6.0.1":
++  version "6.0.2"
++  resolved "https://registry.yarnpkg.com/@react-navigation/native/-/native-6.0.2.tgz#6bdb3cfafb6a9cfb603c1555dd61faafca35b7c2"
++  integrity sha512-HDqEwgvQ4Cu16vz8jQ55lfyNK9CGbECI1wM9cPOcUa+gkOQEDZ/95VFfFjGGflXZs3ybPvGXlMC4ZAyh1CcO6w==
+   dependencies:
+-    "@react-navigation/core" "^5.15.2"
++    "@react-navigation/core" "^6.0.1"
+     escape-string-regexp "^4.0.0"
+-    nanoid "^3.1.15"
++    nanoid "^3.1.23"
+ 
+-"@react-navigation/routers@^5.7.4":
+-  version "5.7.4"
+-  resolved "https://registry.yarnpkg.com/@react-navigation/routers/-/routers-5.7.4.tgz#8b5460e841a0c64f6c9a5fbc2a1eb832432d4fb0"
+-  integrity sha512-0N202XAqsU/FlE53Nmh6GHyMtGm7g6TeC93mrFAFJOqGRKznT0/ail+cYlU6tNcPA9AHzZu1Modw1eoDINSliQ==
++"@react-navigation/routers@^6.0.1":
++  version "6.0.1"
++  resolved "https://registry.yarnpkg.com/@react-navigation/routers/-/routers-6.0.1.tgz#ae50f07c776c18bd9fdc87f17e9f3afc3fd59d19"
++  integrity sha512-5ctB49rmtTRQuTSBVgqMsEzBUjPP2ByUzBjNivA7jmvk+PDCl4oZsiR8KAm/twhxe215GYThfi2vUWXKAg6EEQ==
+   dependencies:
+-    nanoid "^3.1.15"
++    nanoid "^3.1.23"
+ 
+-"@react-navigation/stack@5.12.8":
+-  version "5.12.8"
+-  resolved "https://registry.yarnpkg.com/@react-navigation/stack/-/stack-5.12.8.tgz#31e54e05d8a3ffaaa3e39a1a9b7969f8316a35bf"
+-  integrity sha512-wUJFbU0v606RBXOUxHToCXJNmiwxtFYhN2TFvjxCZ3PJU+OWWx8HTmn99pT3rVH4Ax2cfO5BDUy9v+r74ZrIWw==
++"@react-navigation/stack@~6.0.1":
++  version "6.0.6"
++  resolved "https://registry.yarnpkg.com/@react-navigation/stack/-/stack-6.0.6.tgz#6dabf0e6a318b3b07a9d2b41490cf38319e32a20"
++  integrity sha512-2yaY0RLkZoakyou9mKdUA1UqJmyldPCtXMsOUyjCncW7PmKToAusYZbgDAIrQQB97u+/yUtvYbEQsFyQQO+rNw==
+   dependencies:
++    "@react-navigation/elements" "^1.0.4"
+     color "^3.1.3"
+-    react-native-iphone-x-helper "^1.3.0"
++    warn-once "^0.1.0"
+ 
+ "@sideway/address@^4.1.0":
+   version "4.1.2"
+@@ -3071,12 +3096,12 @@
+     "@types/jest" "*"
+ 
+ "@types/jest@*":
+-  version "26.0.24"
+-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.24.tgz#943d11976b16739185913a1936e0de0c4a7d595a"
+-  integrity sha512-E/X5Vib8BWqZNRlDxj9vYXhsDwPYbPINqKF9BsnSoon4RQ0D9moEuLD8txgyypFLH7J4+Lho9Nr/c8H0Fi+17w==
++  version "27.0.1"
++  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-27.0.1.tgz#fafcc997da0135865311bb1215ba16dba6bdf4ca"
++  integrity sha512-HTLpVXHrY69556ozYkcq47TtQJXpcWAWfkoqz+ZGz2JnmZhzlRjprCIyFnetSy8gpDWwTTGBcRVv1J1I1vBrHw==
+   dependencies:
+-    jest-diff "^26.0.0"
+-    pretty-format "^26.0.0"
++    jest-diff "^27.0.0"
++    pretty-format "^27.0.0"
+ 
+ "@types/jest@26.0.19":
+   version "26.0.19"
+@@ -3127,9 +3152,9 @@
+     form-data "^3.0.0"
+ 
+ "@types/node@*":
+-  version "16.4.13"
+-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.4.13.tgz#7dfd9c14661edc65cccd43a29eb454174642370d"
+-  integrity sha512-bLL69sKtd25w7p1nvg9pigE4gtKVpGTPojBFLMkGHXuUgap2sLqQt2qUnqmVCDfzGUL0DRNZP+1prIZJbMeAXg==
++  version "16.6.1"
++  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.6.1.tgz#aee62c7b966f55fc66c7b6dfa1d58db2a616da61"
++  integrity sha512-Sr7BhXEAer9xyGuCN3Ek9eg9xPviCF2gfu9kTfuU2HkTVAMYSDeX40fvpmo72n5nansg3nsBjuQBrsS28r+NUw==
+ 
+ "@types/normalize-package-data@^2.4.0":
+   version "2.4.1"
+@@ -3215,9 +3240,9 @@
+     "@types/react" "*"
+ 
+ "@types/react@*":
+-  version "17.0.16"
+-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.16.tgz#056f40c45645761527baeb7d89d842a6abdf285a"
+-  integrity sha512-3kCUiOOlQTwUUvjNFkbBTWMTxdTGybz/PfjCw9JmaRGcEDBQh+nGMg7/E9P2rklhJuYVd25IYLNcvqgSPCPksg==
++  version "17.0.17"
++  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.17.tgz#1772d3d5425128e0635a716f49ef57c2955df055"
++  integrity sha512-nrfi7I13cAmrd0wje8czYpf5SFbryczCtPzFc6ijqvdjKcyA3tCvGxwchOUlxb2ucBPuJ9Y3oUqKrRqZvrz0lw==
+   dependencies:
+     "@types/prop-types" "*"
+     "@types/scheduler" "*"
+@@ -3232,9 +3257,9 @@
+     csstype "^3.0.2"
+ 
+ "@types/react@^16":
+-  version "16.14.12"
+-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.14.12.tgz#1e38e2114e568f6541f88628a207f72630ee161f"
+-  integrity sha512-7nOJgNsRbARhZhvwPm7cnzahtzEi5VJ9OvcQk8ExEEb1t+zaFklwLVkJz7G1kfxX4X/mDa/icTmzE0vTmqsqBg==
++  version "16.14.13"
++  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.14.13.tgz#14f77c75ea581fa632907440dfda23b3c6ab24c9"
++  integrity sha512-KznsRYfqPmbcA5pMxc4mYQ7UgsJa2tAgKE2YwEmY5xKaTVZXLAY/ImBohyQHnEoIjxIJR+Um4FmaEYDr3q3zlg==
+   dependencies:
+     "@types/prop-types" "*"
+     "@types/scheduler" "*"
+@@ -3290,9 +3315,9 @@
+   integrity sha512-vKx7WNQNZDyJveYcHAm9ZxhqSGLYwoyLhrHjLBOkw3a7cT76sTdjgtwyijhk1MaHyRIuSztcVwrUOO/NEu68Dw==
+ 
+ "@types/webpack-sources@*":
+-  version "2.1.1"
+-  resolved "https://registry.yarnpkg.com/@types/webpack-sources/-/webpack-sources-2.1.1.tgz#6af17e3a3ded71eec2b98008d7c12f498a0a4506"
+-  integrity sha512-MjM1R6iuw8XaVbtkCBz0N349cyqBjJHCbQiOeppe3VBeFvxqs74RKHAVt9LkxTnUWc7YLZOEsUfPUnmK6SBPKQ==
++  version "3.2.0"
++  resolved "https://registry.yarnpkg.com/@types/webpack-sources/-/webpack-sources-3.2.0.tgz#16d759ba096c289034b26553d2df1bf45248d38b"
++  integrity sha512-Ft7YH3lEVRQ6ls8k4Ff1oB4jN6oy/XmU6tQISKdhfh+1mR+viZFphS6WL0IrtDOzvefmJg5a0s7ZQoRXwqTEFg==
+   dependencies:
+     "@types/node" "*"
+     "@types/source-list-map" "*"
+@@ -3322,6 +3347,13 @@
+   dependencies:
+     "@types/yargs-parser" "*"
+ 
++"@types/yargs@^16.0.0":
++  version "16.0.4"
++  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-16.0.4.tgz#26aad98dd2c2a38e421086ea9ad42b9e51642977"
++  integrity sha512-T8Yc9wt/5LbJyCaLiHPReJa0kApcIgJ7Bn735GjItUfh08Z1pJvu8QZqb9s+mMvKV6WUQRV7K2R46YbjMXTTJw==
++  dependencies:
++    "@types/yargs-parser" "*"
++
+ "@typescript-eslint/eslint-plugin@4.10.0":
+   version "4.10.0"
+   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-4.10.0.tgz#19ed3baf4bc4232c5a7fcd32eaca75c3a5baf9f3"
+@@ -3964,6 +3996,11 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0:
+   dependencies:
+     color-convert "^2.0.1"
+ 
++ansi-styles@^5.0.0:
++  version "5.2.0"
++  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-5.2.0.tgz#07449690ad45777d1924ac2abb2fc8895dba836b"
++  integrity sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==
++
+ ansi-to-html@^0.6.11:
+   version "0.6.15"
+   resolved "https://registry.yarnpkg.com/ansi-to-html/-/ansi-to-html-0.6.15.tgz#ac6ad4798a00f6aa045535d7f6a9cb9294eebea7"
+@@ -5056,7 +5093,7 @@ browserslist@4.7.0:
+     electron-to-chromium "^1.3.247"
+     node-releases "^1.1.29"
+ 
+-browserslist@^4.12.0, browserslist@^4.16.6:
++browserslist@^4.12.0, browserslist@^4.16.6, browserslist@^4.16.7:
+   version "4.16.7"
+   resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.16.7.tgz#108b0d1ef33c4af1b587c54f390e7041178e4335"
+   integrity sha512-7I4qVwqZltJ7j37wObBe3SoTz+nS8APaNcrBOlgoirb6/HbEU2XxW/LpUDTCngM6iauwFqmRTuOMfyKnFGY5JA==
+@@ -5316,9 +5353,9 @@ can-use-dom@^0.1.0:
+   integrity sha1-IsxKNKCrxDlQ9CxkEQJKP2NmtFo=
+ 
+ caniuse-lite@^1.0.30000989, caniuse-lite@^1.0.30001035, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001248:
+-  version "1.0.30001249"
+-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001249.tgz#90a330057f8ff75bfe97a94d047d5e14fabb2ee8"
+-  integrity sha512-vcX4U8lwVXPdqzPWi6cAJ3FnQaqXbBqy/GZseKNQzRj37J7qZdGcBtxq/QLFNLLlfsoXLUdHw8Iwenri86Tagw==
++  version "1.0.30001251"
++  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001251.tgz#6853a606ec50893115db660f82c094d18f096d85"
++  integrity sha512-HOe1r+9VkU4TFmnU70z+r7OLmtR+/chB1rdcJUeQlAinjEeb0cKL20tlAtOagNZhbrtLnCvV19B4FmF1rgzl6A==
+ 
+ capture-exit@^2.0.0:
+   version "2.0.0"
+@@ -5719,9 +5756,9 @@ color@^3.1.3:
+     color-string "^1.6.0"
+ 
+ colorette@^1.0.7, colorette@^1.2.1, colorette@^1.2.2:
+-  version "1.2.2"
+-  resolved "https://registry.yarnpkg.com/colorette/-/colorette-1.2.2.tgz#cbcc79d5e99caea2dbf10eb3a26fd8b3e6acfa94"
+-  integrity sha512-MKGMzyfeuutC/ZJ1cba9NqcNpfeqMUcYmyF1ZFY6/Cn7CNSAKx6a+s48sqLqyAiZuaP2TcqMhoo+dlwFnVxT9w==
++  version "1.3.0"
++  resolved "https://registry.yarnpkg.com/colorette/-/colorette-1.3.0.tgz#ff45d2f0edb244069d3b772adeb04fed38d0a0af"
++  integrity sha512-ecORCqbSFP7Wm8Y6lyqMJjexBQqXSF7SSeaTyGGphogUjBlFP9m9o08wy86HL2uB7fMTxtOUzLMk7ogKcxMg1w==
+ 
+ colors@1.2.4:
+   version "1.2.4"
+@@ -5909,17 +5946,17 @@ copy-to-clipboard@^3.0.8:
+     toggle-selection "^1.0.6"
+ 
+ core-js-compat@^3.14.0, core-js-compat@^3.16.0, core-js-compat@^3.8.0:
+-  version "3.16.0"
+-  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.16.0.tgz#fced4a0a534e7e02f7e084bff66c701f8281805f"
+-  integrity sha512-5D9sPHCdewoUK7pSUPfTF7ZhLh8k9/CoJXWUEo+F1dZT5Z1DVgcuRqUKhjeKW+YLb8f21rTFgWwQJiNw1hoZ5Q==
++  version "3.16.1"
++  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.16.1.tgz#c44b7caa2dcb94b673a98f27eee1c8312f55bc2d"
++  integrity sha512-NHXQXvRbd4nxp9TEmooTJLUf94ySUG6+DSsscBpTftN1lQLQ4LjnWvc7AoIo4UjDsFF3hB8Uh5LLCRRdaiT5MQ==
+   dependencies:
+-    browserslist "^4.16.6"
++    browserslist "^4.16.7"
+     semver "7.0.0"
+ 
+ core-js-pure@^3.0.1:
+-  version "3.16.0"
+-  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.16.0.tgz#218e07add3f1844e53fab195c47871fc5ba18de8"
+-  integrity sha512-wzlhZNepF/QA9yvx3ePDgNGudU5KDB8lu/TRPKelYA/QtSnkS/cLl2W+TIdEX1FAFcBr0YpY7tPDlcmXJ7AyiQ==
++  version "3.16.1"
++  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.16.1.tgz#b997df2669c957a5b29f06e95813a171f993592e"
++  integrity sha512-TyofCdMzx0KMhi84mVRS8rL1XsRk2SPUNz2azmth53iRN0/08Uim9fdhQTaZTG1LqaXHYVci4RDHka6WrXfnvg==
+ 
+ core-js@^2.4.1:
+   version "2.6.12"
+@@ -5927,9 +5964,9 @@ core-js@^2.4.1:
+   integrity sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==
+ 
+ core-js@^3.0.1, core-js@^3.0.4, core-js@^3.6.5:
+-  version "3.16.0"
+-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.16.0.tgz#1d46fb33720bc1fa7f90d20431f36a5540858986"
+-  integrity sha512-5+5VxRFmSf97nM8Jr2wzOwLqRo6zphH2aX+7KsAUONObyzakDNq2G/bgbhinxB4PoV9L3aXQYhiDKyIKWd2c8g==
++  version "3.16.1"
++  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.16.1.tgz#f4485ce5c9f3c6a7cb18fa80488e08d362097249"
++  integrity sha512-AAkP8i35EbefU+JddyWi12AWE9f2N/qr/pwnDtWz4nyUIBGMJPX99ANFFRSw6FefM374lDujdtLDyhN2A/btHw==
+ 
+ core-util-is@1.0.2, core-util-is@~1.0.0:
+   version "1.0.2"
+@@ -6441,6 +6478,11 @@ diff-sequences@^26.6.2:
+   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-26.6.2.tgz#48ba99157de1923412eed41db6b6d4aa9ca7c0b1"
+   integrity sha512-Mv/TDa3nZ9sbc5soK+OoA74BsS3mL37yixCvUAQkiuA4Wz6YtwP/K47n2rv2ovzHZvoiQeA5FTQOschKkEwB0Q==
+ 
++diff-sequences@^27.0.6:
++  version "27.0.6"
++  resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-27.0.6.tgz#3305cb2e55a033924054695cc66019fd7f8e5723"
++  integrity sha512-ag6wfpBFyNXZ0p8pcuIDS//D8H062ZQJ3fzYxjpmeKjnz8W4pekL3AI8VohmyZmsWW2PWaHgjsmqR6L13101VQ==
++
+ diffie-hellman@^5.0.0:
+   version "5.0.3"
+   resolved "https://registry.yarnpkg.com/diffie-hellman/-/diffie-hellman-5.0.3.tgz#40e8ee98f55a2149607146921c63e1ae5f3d2875"
+@@ -6586,14 +6628,15 @@ dotenv@^8.0.0:
+   integrity sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==
+ 
+ downshift@^6.0.6:
+-  version "6.1.6"
+-  resolved "https://registry.yarnpkg.com/downshift/-/downshift-6.1.6.tgz#c002cff93da293466d9274ea3d9ac0a7f377aea4"
+-  integrity sha512-Ae+wVfOrS9ZtS4brOSM5X7pcMtOfZOUh9M2L6XU6dUoyLvx6wAXt9D/jUqnI4FpcHuCDwcwmoXFo4Z3z76xh/g==
++  version "6.1.7"
++  resolved "https://registry.yarnpkg.com/downshift/-/downshift-6.1.7.tgz#fdb4c4e4f1d11587985cd76e21e8b4b3fa72e44c"
++  integrity sha512-cVprZg/9Lvj/uhYRxELzlu1aezRcgPWBjTvspiGTVEU64gF5pRdSRKFVLcxqsZC637cLAGMbL40JavEfWnqgNg==
+   dependencies:
+     "@babel/runtime" "^7.14.8"
+     compute-scroll-into-view "^1.0.17"
+     prop-types "^15.7.2"
+     react-is "^17.0.2"
++    tslib "^2.3.0"
+ 
+ dtrace-provider@~0.8:
+   version "0.8.8"
+@@ -6643,9 +6686,9 @@ ejs@^3.1.2:
+     jake "^10.6.1"
+ 
+ electron-to-chromium@^1.3.247, electron-to-chromium@^1.3.378, electron-to-chromium@^1.3.793:
+-  version "1.3.798"
+-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.798.tgz#12b0bb826ddf35486f2ca41c01be4bd6ad1b9b1e"
+-  integrity sha512-fwsr6oXAORoV9a6Ak2vMCdXfmHIpAGgpOGesulS1cbGgJmrMl3H+GicUyRG3t+z9uHTMrIuMTleFDW+EUFYT3g==
++  version "1.3.805"
++  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.805.tgz#a0873393a3b027ec60bdaf22a19c4946688cf941"
++  integrity sha512-uUJF59M6pNSRHQaXwdkaNB4BhSQ9lldRdG1qCjlrAFkynPGDc5wPoUcYEQQeQGmKyAWJPvGkYAWmtVrxWmDAkg==
+ 
+ element-resize-detector@^1.2.1:
+   version "1.2.3"
+@@ -6907,17 +6950,17 @@ eslint-config-standard@16.0.2:
+   integrity sha512-fx3f1rJDsl9bY7qzyX8SAtP8GBSk6MfXFaTfaGgk12aAYW4gJSyRm7dM790L6cbXv63fvjY4XeSzXnb4WM+SKw==
+ 
+ eslint-import-resolver-node@^0.3.4:
+-  version "0.3.4"
+-  resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.4.tgz#85ffa81942c25012d8231096ddf679c03042c717"
+-  integrity sha512-ogtf+5AB/O+nM6DIeBUNr2fuT7ot9Qg/1harBfBtaP13ekEWFQEEMP94BCB7zaNW3gyY+8SHYF00rnqYwXKWOA==
++  version "0.3.5"
++  resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.5.tgz#939bbb0f74e179e757ca87f7a4a890dabed18ac4"
++  integrity sha512-XMoPKjSpXbkeJ7ZZ9icLnJMTY5Mc1kZbCakHquaFsXPpyWOwK0TK6CODO+0ca54UoM9LKOxyUNnoVZRl8TeaAg==
+   dependencies:
+-    debug "^2.6.9"
+-    resolve "^1.13.1"
++    debug "^3.2.7"
++    resolve "^1.20.0"
+ 
+ eslint-module-utils@^2.6.0:
+-  version "2.6.1"
+-  resolved "https://registry.yarnpkg.com/eslint-module-utils/-/eslint-module-utils-2.6.1.tgz#b51be1e473dd0de1c5ea638e22429c2490ea8233"
+-  integrity sha512-ZXI9B8cxAJIH4nfkhTwcRTEAnrVfobYqwjWy/QMCZ8rHkZHFjf9yO4BzpiF9kCSfNlMG54eKigISHpX0+AaT4A==
++  version "2.6.2"
++  resolved "https://registry.yarnpkg.com/eslint-module-utils/-/eslint-module-utils-2.6.2.tgz#94e5540dd15fe1522e8ffa3ec8db3b7fa7e7a534"
++  integrity sha512-QG8pcgThYOuqxupd06oYTZoNOGaUdTY1PqK+oS6ElF6vs4pBdk/aYxFVQQXzcrAqp9m7cl7lb2ubazX+g16k2Q==
+   dependencies:
+     debug "^3.2.7"
+     pkg-dir "^2.0.0"
+@@ -7283,6 +7326,11 @@ expo-image-loader@~1.3.0:
+   resolved "https://registry.yarnpkg.com/expo-image-loader/-/expo-image-loader-1.3.0.tgz#06982a1a02f443ba6afa2cc7a4f0ccebc26a5415"
+   integrity sha512-kn+9hm42TtHi1wFEp/1nq63vp33/cIbypI2hYjGsL22PAC9yk1go1hs/ktKgVWVlgmi0ruwR09SrM6ndOs7s7w==
+ 
++expo-linear-gradient@^9.2.0:
++  version "9.2.0"
++  resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-9.2.0.tgz#5ae16fcb8f141b1c51dc36bd4493dfd6566a9511"
++  integrity sha512-LnW2u9OT6GeyC6T8qEGjFYfNSk4KIBAwU0aRSjM4Y8hckWqhtKngGDz46DqGmJBzvZMSKuZZvj5xKn794r54ag==
++
+ expo-localization@9.1.0:
+   version "9.1.0"
+   resolved "https://registry.yarnpkg.com/expo-localization/-/expo-localization-9.1.0.tgz#463381568082fdcb28ad4e4c533a6f9471a3f78a"
+@@ -8925,9 +8973,11 @@ is-arrayish@^0.3.1:
+   integrity sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==
+ 
+ is-bigint@^1.0.1:
+-  version "1.0.2"
+-  resolved "https://registry.yarnpkg.com/is-bigint/-/is-bigint-1.0.2.tgz#ffb381442503235ad245ea89e45b3dbff040ee5a"
+-  integrity sha512-0JV5+SOCQkIdzjBK9buARcV804Ddu7A0Qet6sHi3FimE9ne6m4BGQZfRn+NZiXbBk4F4XmHfDZIipLj9pX8dSA==
++  version "1.0.4"
++  resolved "https://registry.yarnpkg.com/is-bigint/-/is-bigint-1.0.4.tgz#08147a1875bc2b32005d41ccd8291dffc6691df3"
++  integrity sha512-zB9CruMamjym81i2JZ3UMn54PKGsQzsJeo6xvN3HJJ4CAsQNB6iRutp2To77OfCNuoxspsIhzaPoO1zyCEhFOg==
++  dependencies:
++    has-bigints "^1.0.1"
+ 
+ is-binary-path@^1.0.0:
+   version "1.0.1"
+@@ -8957,9 +9007,9 @@ is-buffer@^1.0.2, is-buffer@^1.1.5:
+   integrity sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==
+ 
+ is-callable@^1.1.4, is-callable@^1.2.3:
+-  version "1.2.3"
+-  resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.2.3.tgz#8b1e0500b73a1d76c70487636f368e519de8db8e"
+-  integrity sha512-J1DcMe8UYTBSrKezuIUTUwjXsho29693unXM2YhJUTR2txK/eG47bvNa/wipPFmZFgr/N6f1GA66dv0mEyTIyQ==
++  version "1.2.4"
++  resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.2.4.tgz#47301d58dd0259407865547853df6d61fe471945"
++  integrity sha512-nsuwtxZfMX67Oryl9LCQ+upnC0Z0BgpwntpS89m1H/TLF0zNfzfLMV/9Wa/6MZsj0acpEjAO0KF1xT6ZdLl95w==
+ 
+ is-ci@^2.0.0:
+   version "2.0.0"
+@@ -9430,6 +9480,16 @@ jest-diff@^26.0.0, jest-diff@^26.6.2:
+     jest-get-type "^26.3.0"
+     pretty-format "^26.6.2"
+ 
++jest-diff@^27.0.0:
++  version "27.0.6"
++  resolved "https://registry.yarnpkg.com/jest-diff/-/jest-diff-27.0.6.tgz#4a7a19ee6f04ad70e0e3388f35829394a44c7b5e"
++  integrity sha512-Z1mqgkTCSYaFgwTlP/NUiRzdqgxmmhzHY1Tq17zL94morOHfHu3K4bgSgl+CR4GLhpV8VxkuOYuIWnQ9LnFqmg==
++  dependencies:
++    chalk "^4.0.0"
++    diff-sequences "^27.0.6"
++    jest-get-type "^27.0.6"
++    pretty-format "^27.0.6"
++
+ jest-docblock@^25.3.0:
+   version "25.3.0"
+   resolved "https://registry.yarnpkg.com/jest-docblock/-/jest-docblock-25.3.0.tgz#8b777a27e3477cd77a168c05290c471a575623ef"
+@@ -9496,6 +9556,11 @@ jest-get-type@^26.3.0:
+   resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-26.3.0.tgz#e97dc3c3f53c2b406ca7afaed4493b1d099199e0"
+   integrity sha512-TpfaviN1R2pQWkIihlfEanwOXK0zcxrKEE4MlU6Tn7keoXdN6/3gK/xl0yEh8DOunn5pOVGKf8hB4R9gVh04ig==
+ 
++jest-get-type@^27.0.6:
++  version "27.0.6"
++  resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-27.0.6.tgz#0eb5c7f755854279ce9b68a9f1a4122f69047cfe"
++  integrity sha512-XTkK5exIeUbbveehcSR8w0bhH+c0yloW/Wpl+9vZrjzztCPWrxhHwkIFpZzCt71oRBsgxmuUfxEqOYoZI2macg==
++
+ jest-haste-map@^25.5.1:
+   version "25.5.1"
+   resolved "https://registry.yarnpkg.com/jest-haste-map/-/jest-haste-map-25.5.1.tgz#1df10f716c1d94e60a1ebf7798c9fb3da2620943"
+@@ -11206,10 +11271,10 @@ nan@^2.12.1, nan@^2.14.0:
+   resolved "https://registry.yarnpkg.com/nan/-/nan-2.15.0.tgz#3f34a473ff18e15c1b5626b62903b5ad6e665fee"
+   integrity sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==
+ 
+-nanoid@^3.1.15:
+-  version "3.1.23"
+-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.23.tgz#f744086ce7c2bc47ee0a8472574d5c78e4183a81"
+-  integrity sha512-FiB0kzdP0FFVGDKlRLEQ1BgDzU87dy5NnzjeW9YZNt+/c3+q82EQDUwniSAUxp/F0gFNI1ZhKU1FqYsMuqZVnw==
++nanoid@^3.1.23:
++  version "3.1.25"
++  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.25.tgz#09ca32747c0e543f0e1814b7d3793477f9c8e152"
++  integrity sha512-rdwtIXaXCLFAQbnfqDRnI6jaRHp9fTcYBjtFKE8eezcZ7LuLjhUaQGNeMXf1HmRoCH32CLz6XwX0TtxEOS/A3Q==
+ 
+ nanomatch@^1.2.9:
+   version "1.2.13"
+@@ -11342,9 +11407,9 @@ node-notifier@^6.0.0:
+     which "^1.3.1"
+ 
+ node-releases@^1.1.29, node-releases@^1.1.52, node-releases@^1.1.73:
+-  version "1.1.73"
+-  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.73.tgz#dd4e81ddd5277ff846b80b52bb40c49edf7a7b20"
+-  integrity sha512-uW7fodD6pyW2FZNZnp/Z3hvWKeEW1Y8R1+1CnErE8cXFXzl5blBOoVB41CvMer6P6Q0S5FXDwcHgFd1Wj0U9zg==
++  version "1.1.74"
++  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.74.tgz#e5866488080ebaa70a93b91144ccde06f3c3463e"
++  integrity sha512-caJBVempXZPepZoZAPCWRTNxYQ+xtG/KAi4ozTA5A+nJ7IU+kLQCbqaUjb5Rwy14M9upBWiQ4NutcmW04LJSRw==
+ 
+ node-stream-zip@^1.9.1:
+   version "1.14.0"
+@@ -12356,6 +12421,16 @@ pretty-format@^26.0.0, pretty-format@^26.4.0, pretty-format@^26.5.2, pretty-form
+     ansi-styles "^4.0.0"
+     react-is "^17.0.1"
+ 
++pretty-format@^27.0.0, pretty-format@^27.0.6:
++  version "27.0.6"
++  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-27.0.6.tgz#ab770c47b2c6f893a21aefc57b75da63ef49a11f"
++  integrity sha512-8tGD7gBIENgzqA+UBzObyWqQ5B778VIFZA/S66cclyd5YkFLYs2Js7gxDKf0MXtTc9zcS7t1xhdfcElJ3YIvkQ==
++  dependencies:
++    "@jest/types" "^27.0.6"
++    ansi-regex "^5.0.0"
++    ansi-styles "^5.0.0"
++    react-is "^17.0.1"
++
+ pretty-hrtime@^1.0.3:
+   version "1.0.3"
+   resolved "https://registry.yarnpkg.com/pretty-hrtime/-/pretty-hrtime-1.0.3.tgz#b7e3ea42435a4c9b2759d99e0f201eb195802ee1"
+@@ -12804,10 +12879,10 @@ query-string@6.10.1:
+     split-on-first "^1.0.0"
+     strict-uri-encode "^2.0.0"
+ 
+-query-string@^6.13.6:
+-  version "6.14.1"
+-  resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.14.1.tgz#7ac2dca46da7f309449ba0f86b1fd28255b0c86a"
+-  integrity sha512-XDxAeVmpfu1/6IjyT/gXHOl+S0vQ9owggJ30hhWKdHAsNPOcasn5o9BW0eejZqL2e4vMjhAxoW3jVHcD6mbcYw==
++query-string@^7.0.0:
++  version "7.0.1"
++  resolved "https://registry.yarnpkg.com/query-string/-/query-string-7.0.1.tgz#45bd149cf586aaa582dffc7ec7a8ad97dd02f75d"
++  integrity sha512-uIw3iRvHnk9to1blJCG3BTc+Ro56CBowJXKmNNAm3RulvPBzWLRqKSiiDk+IplJhsydwtuNMHi8UGQFcCLVfkA==
+   dependencies:
+     decode-uri-component "^0.2.0"
+     filter-obj "^1.1.0"
+@@ -13015,9 +13090,9 @@ react-devtools-core@4.10.1:
+     ws "^7"
+ 
+ react-devtools-core@^4.6.0:
+-  version "4.14.0"
+-  resolved "https://registry.yarnpkg.com/react-devtools-core/-/react-devtools-core-4.14.0.tgz#4b9dc50937ed4cf4c04fa293430cac62d829fa8b"
+-  integrity sha512-cE7tkSUkGCDxTA79pntDGJCBgzNN/XxA3kgPdXujdfSfEfVhzrItQIEsN0kCN/hJJACDvH2Q8p5+tJb/K4B3qA==
++  version "4.15.0"
++  resolved "https://registry.yarnpkg.com/react-devtools-core/-/react-devtools-core-4.15.0.tgz#c0fa2a0a1c966bef2705d52aacee3f143cfac092"
++  integrity sha512-Y1NwrWSKRg4TtwcES2upzXFDmccAW9jrGQG2D8EGQrZhK+0hmuhgFnSdKpFc3z04CSeDT5t83RMXcmX5TkR1dA==
+   dependencies:
+     shell-quote "^1.6.1"
+     ws "^7"
+@@ -13134,11 +13209,6 @@ react-native-gesture-handler@1.10.3:
+     invariant "^2.2.4"
+     prop-types "^15.7.2"
+ 
+-react-native-iphone-x-helper@^1.3.0:
+-  version "1.3.1"
+-  resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.3.1.tgz#20c603e9a0e765fd6f97396638bdeb0e5a60b010"
+-  integrity sha512-HOf0jzRnq2/aFUcdCJ9w9JGzN3gdEg0zFE4FyYlp4jtidqU03D5X7ZegGKfT1EWteR0gPBGp9ye5T5FvSWi9Yg==
+-
+ react-native-keychain@6.2.0:
+   version "6.2.0"
+   resolved "https://registry.yarnpkg.com/react-native-keychain/-/react-native-keychain-6.2.0.tgz#8f4cff503aad367141db5aea0189ead9240c28ff"
+@@ -13802,7 +13872,7 @@ resolve@1.1.7:
+   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.1.7.tgz#203114d82ad2c5ed9e8e0411b3932875e889e97b"
+   integrity sha1-IDEU2CrSxe2ejgQRs5ModeiJ6Xs=
+ 
+-resolve@^1.1.6, resolve@^1.10.0, resolve@^1.10.1, resolve@^1.11.0, resolve@^1.12.0, resolve@^1.13.1, resolve@^1.14.2, resolve@^1.17.0, resolve@^1.18.1, resolve@^1.3.2:
++resolve@^1.1.6, resolve@^1.10.0, resolve@^1.10.1, resolve@^1.11.0, resolve@^1.12.0, resolve@^1.14.2, resolve@^1.17.0, resolve@^1.18.1, resolve@^1.20.0, resolve@^1.3.2:
+   version "1.20.0"
+   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.20.0.tgz#629a013fb3f70755d6f0b7935cc1c2c5378b1975"
+   integrity sha512-wENBPt4ySzg4ybFQW2TT1zMQucPK95HSh/nq2CFTZVOGut2+pQvSsgtda4d26YrYcr067wjbmzOG8byDPBX63A==
+@@ -14494,9 +14564,9 @@ spdx-expression-parse@^3.0.0:
+     spdx-license-ids "^3.0.0"
+ 
+ spdx-license-ids@^3.0.0:
+-  version "3.0.9"
+-  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.9.tgz#8a595135def9592bda69709474f1cbeea7c2467f"
+-  integrity sha512-Ki212dKK4ogX+xDo4CtOZBVIwhsKBEfsEEcwmJfLQzirgc2jIWdzg40Unxz/HzEUqM1WFzVlQSMF9kZZ2HboLQ==
++  version "3.0.10"
++  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.10.tgz#0d9becccde7003d6c658d487dd48a32f0bf3014b"
++  integrity sha512-oie3/+gKf7QtpitB0LYLETe+k8SifzsX4KixvpOsbI6S0kRiRQ5MKOio8eMSAKQ17N06+wdEOXRiId+zOxo0hA==
+ 
+ split-on-first@^1.0.0:
+   version "1.1.0"
+@@ -14923,9 +14993,9 @@ tapable@^1.0.0, tapable@^1.1.3:
+   integrity sha512-4WK/bYZmj8xLr+HUCODHGF1ZFzsYffasLUgEiMBY4fgtltdO6B4WJtlSbPaDTLpYTcGVwM2qLnFTICEcNxs3kA==
+ 
+ tar@^6.0.2:
+-  version "6.1.6"
+-  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.6.tgz#c23d797b0a1efe5d479b1490805c5443f3560c5d"
+-  integrity sha512-oaWyu5dQbHaYcyZCTfyPpC+VmI62/OM2RTUYavTk1MDr1cwW5Boi3baeYQKiZbY2uSQJGr+iMOzb/JFxLrft+g==
++  version "6.1.8"
++  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.8.tgz#4fc50cfe56511c538ce15b71e05eebe66530cbd4"
++  integrity sha512-sb9b0cp855NbkMJcskdSYA7b11Q8JsX4qe4pyUAfHp+Y6jBjJeek2ZVlwEfWayshEIwlIzXx0Fain3QG9JPm2A==
+   dependencies:
+     chownr "^2.0.0"
+     fs-minipass "^2.0.0"
+@@ -15297,10 +15367,10 @@ tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
+   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
+   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+ 
+-tslib@^2.0.1, tslib@^2.0.3:
+-  version "2.3.0"
+-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.0.tgz#803b8cdab3e12ba581a4ca41c8839bbb0dacb09e"
+-  integrity sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==
++tslib@^2.0.1, tslib@^2.0.3, tslib@^2.3.0:
++  version "2.3.1"
++  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
++  integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+ 
+ tsutils@^3.17.1:
+   version "3.21.0"
+@@ -15808,6 +15878,11 @@ walker@^1.0.7, walker@~1.0.5:
+   dependencies:
+     makeerror "1.0.x"
+ 
++warn-once@^0.1.0:
++  version "0.1.0"
++  resolved "https://registry.yarnpkg.com/warn-once/-/warn-once-0.1.0.tgz#4f58d89b84f968d0389176aa99e0cf0f14ffd4c8"
++  integrity sha512-recZTSvuaH/On5ZU5ywq66y99lImWqzP93+AiUo9LUwG8gXHW+LJjhOd6REJHm7qb0niYqrEQJvbHSQfuJtTqA==
++
+ warning-symbol@^0.1.0:
+   version "0.1.0"
+   resolved "https://registry.yarnpkg.com/warning-symbol/-/warning-symbol-0.1.0.tgz#bb31dd11b7a0f9d67ab2ed95f457b65825bbad21"
