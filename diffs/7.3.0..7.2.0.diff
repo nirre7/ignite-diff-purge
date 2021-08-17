@@ -1,0 +1,239 @@
+diff --git a/IgniteDiffApp/android/app/BUCK b/IgniteDiffApp/android/app/BUCK
+index 414189d..0e77904 100644
+--- a/IgniteDiffApp/android/app/BUCK
++++ b/IgniteDiffApp/android/app/BUCK
+@@ -35,12 +35,12 @@ android_library(
+ 
+ android_build_config(
+     name = "build_config",
+-    package = "com.ignitediffapp",
++    package = "com.helloworld",
+ )
+ 
+ android_resource(
+     name = "res",
+-    package = "com.ignitediffapp",
++    package = "com.helloworld",
+     res = "src/main/res",
+ )
+ 
+diff --git a/IgniteDiffApp/android/app/build.gradle b/IgniteDiffApp/android/app/build.gradle
+index 1bb89bf..2d8ac31 100644
+--- a/IgniteDiffApp/android/app/build.gradle
++++ b/IgniteDiffApp/android/app/build.gradle
+@@ -134,7 +134,7 @@ android {
+     }
+ 
+     defaultConfig {
+-        applicationId "com.ignitediffapp"
++        applicationId "com.helloworld"
+         minSdkVersion rootProject.ext.minSdkVersion
+         targetSdkVersion rootProject.ext.targetSdkVersion
+         versionCode 1
+diff --git a/IgniteDiffApp/android/app/src/debug/java/com/ignitediffapp/ReactNativeFlipper.java b/IgniteDiffApp/android/app/src/debug/java/com/helloworld/ReactNativeFlipper.java
+similarity index 99%
+rename from IgniteDiffApp/android/app/src/debug/java/com/ignitediffapp/ReactNativeFlipper.java
+rename to IgniteDiffApp/android/app/src/debug/java/com/helloworld/ReactNativeFlipper.java
+index 3631f4a..8b7f091 100644
+--- a/IgniteDiffApp/android/app/src/debug/java/com/ignitediffapp/ReactNativeFlipper.java
++++ b/IgniteDiffApp/android/app/src/debug/java/com/helloworld/ReactNativeFlipper.java
+@@ -4,7 +4,7 @@
+  * <p>This source code is licensed under the MIT license found in the LICENSE file in the root
+  * directory of this source tree.
+  */
+-package com.ignitediffapp;
++package com.helloworld;
+ 
+ import android.content.Context;
+ import com.facebook.flipper.android.AndroidFlipperClient;
+diff --git a/IgniteDiffApp/android/app/src/main/AndroidManifest.xml b/IgniteDiffApp/android/app/src/main/AndroidManifest.xml
+index 6d5b871..6db8bad 100644
+--- a/IgniteDiffApp/android/app/src/main/AndroidManifest.xml
++++ b/IgniteDiffApp/android/app/src/main/AndroidManifest.xml
+@@ -1,5 +1,5 @@
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+-  package="com.ignitediffapp">
++  package="com.helloworld">
+ 
+     <uses-permission android:name="android.permission.INTERNET" />
+ 
+diff --git a/IgniteDiffApp/android/app/src/main/java/com/helloworld/.npmignore b/IgniteDiffApp/android/app/src/main/java/com/helloworld/.npmignore
+new file mode 100644
+index 0000000..11390d2
+--- /dev/null
++++ b/IgniteDiffApp/android/app/src/main/java/com/helloworld/.npmignore
+@@ -0,0 +1 @@
++generated/*
+diff --git a/IgniteDiffApp/android/app/src/main/java/com/ignitediffapp/MainActivity.java b/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainActivity.java
+similarity index 97%
+rename from IgniteDiffApp/android/app/src/main/java/com/ignitediffapp/MainActivity.java
+rename to IgniteDiffApp/android/app/src/main/java/com/helloworld/MainActivity.java
+index 0d6c512..85040c5 100644
+--- a/IgniteDiffApp/android/app/src/main/java/com/ignitediffapp/MainActivity.java
++++ b/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainActivity.java
+@@ -1,4 +1,4 @@
+-package com.ignitediffapp;
++package com.helloworld;
+ 
+ import com.facebook.react.ReactActivity;
+ 
+diff --git a/IgniteDiffApp/android/app/src/main/java/com/ignitediffapp/MainApplication.java b/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainApplication.java
+similarity index 95%
+rename from IgniteDiffApp/android/app/src/main/java/com/ignitediffapp/MainApplication.java
+rename to IgniteDiffApp/android/app/src/main/java/com/helloworld/MainApplication.java
+index 884a41c..9a7b55a 100644
+--- a/IgniteDiffApp/android/app/src/main/java/com/ignitediffapp/MainApplication.java
++++ b/IgniteDiffApp/android/app/src/main/java/com/helloworld/MainApplication.java
+@@ -1,7 +1,7 @@
+-package com.ignitediffapp;
++package com.helloworld;
+ 
+ // Unimodules https://docs.expo.io/bare/installing-unimodules/#configuration-for-android
+-import com.ignitediffapp.generated.BasePackageList;
++import com.helloworld.generated.BasePackageList;
+ 
+ import android.app.Application;
+ import android.content.Context;
+@@ -78,7 +78,7 @@ public class MainApplication extends Application implements ReactApplication {
+          We use reflection here to pick up the class that initializes Flipper,
+         since Flipper library is not available in release mode
+         */
+-        Class<?> aClass = Class.forName("com.ignitediffapp.ReactNativeFlipper");
++        Class<?> aClass = Class.forName("com.helloworld.ReactNativeFlipper");
+         aClass
+             .getMethod("initializeFlipper", Context.class, ReactInstanceManager.class)
+             .invoke(null, context, reactInstanceManager);
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index 5f2cd6b..60950fa 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -335,7 +335,7 @@ PODS:
+     - React-cxxreact (= 0.64.2)
+     - React-jsi (= 0.64.2)
+     - React-perflogger (= 0.64.2)
+-  - RNCAsyncStorage (1.15.6):
++  - RNCAsyncStorage (1.15.5):
+     - React-Core
+   - RNCMaskedView (0.1.10):
+     - React
+@@ -611,7 +611,7 @@ SPEC CHECKSUMS:
+   React-RCTVibration: 24600e3b1aaa77126989bc58b6747509a1ba14f3
+   React-runtimeexecutor: a9904c6d0218fb9f8b19d6dd88607225927668f9
+   ReactCommon: 149906e01aa51142707a10665185db879898e966
+-  RNCAsyncStorage: b7c6564ce662366dd44d0189456183ef7eda2d4d
++  RNCAsyncStorage: 56a3355a10b5d660c48c6e37325ac85ebfd09885
+   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
+   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
+   RNKeychain: b8e0711b959a19c5b057d1e970d3c83d159b6da5
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index a36f5b0..39d2c76 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -2073,11 +2073,11 @@
+     react-lifecycles-compat "^3.0.4"
+ 
+ "@react-native-async-storage/async-storage@^1.14.1":
+-  version "1.15.6"
+-  resolved "https://registry.yarnpkg.com/@react-native-async-storage/async-storage/-/async-storage-1.15.6.tgz#a4fd461d2d891326e006d2284d060229f6c2b328"
+-  integrity sha512-kVfy6O5Xbce9GfD9Islxn5JaOczNz6dF3Ce/7tP4foVLPNwo7UfdgXeKZ7iac07ZbvDvViSUuNyzzrN81FgqkQ==
++  version "1.15.5"
++  resolved "https://registry.yarnpkg.com/@react-native-async-storage/async-storage/-/async-storage-1.15.5.tgz#0d221a5ef1cd7a6494a42fcaad43136d68379afb"
++  integrity sha512-4AYehLH39B9a8UXCMf3ieOK+G61wGMP72ikx6/XSMA0DUnvx0PgaeaT2Wyt06kTrDTy8edewKnbrbeqwaM50TQ==
+   dependencies:
+-    merge-options "^3.0.4"
++    deep-assign "^3.0.0"
+ 
+ "@react-native-community/cli-debugger-ui@^5.0.1":
+   version "5.0.1"
+@@ -3240,9 +3240,9 @@
+     "@types/react" "*"
+ 
+ "@types/react@*":
+-  version "17.0.18"
+-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.18.tgz#4109cbbd901be9582e5e39e3d77acd7b66bb7fbe"
+-  integrity sha512-YTLgu7oS5zvSqq49X5Iue5oAbVGhgPc5Au29SJC4VeE17V6gASoOxVkUDy9pXFMRFxCWCD9fLeweNFizo3UzOg==
++  version "17.0.17"
++  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.17.tgz#1772d3d5425128e0635a716f49ef57c2955df055"
++  integrity sha512-nrfi7I13cAmrd0wje8czYpf5SFbryczCtPzFc6ijqvdjKcyA3tCvGxwchOUlxb2ucBPuJ9Y3oUqKrRqZvrz0lw==
+   dependencies:
+     "@types/prop-types" "*"
+     "@types/scheduler" "*"
+@@ -6300,6 +6300,13 @@ decode-uri-component@^0.2.0:
+   resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.0.tgz#eb3913333458775cb84cd1a1fae062106bb87545"
+   integrity sha1-6zkTMzRYd1y4TNGh+uBiEGu4dUU=
+ 
++deep-assign@^3.0.0:
++  version "3.0.0"
++  resolved "https://registry.yarnpkg.com/deep-assign/-/deep-assign-3.0.0.tgz#c8e4c4d401cba25550a2f0f486a2e75bc5f219a2"
++  integrity sha512-YX2i9XjJ7h5q/aQ/IM9PEwEnDqETAIYbggmdDB3HLTlSgo1CxPsj6pvhPG68rq6SVE0+p+6Ywsm5fTYNrYtBWw==
++  dependencies:
++    is-obj "^1.0.0"
++
+ deep-equal@^1.1.1:
+   version "1.1.1"
+   resolved "https://registry.yarnpkg.com/deep-equal/-/deep-equal-1.1.1.tgz#b5c98c942ceffaf7cb051e24e1434a25a2e6076a"
+@@ -6679,9 +6686,9 @@ ejs@^3.1.2:
+     jake "^10.6.1"
+ 
+ electron-to-chromium@^1.3.247, electron-to-chromium@^1.3.378, electron-to-chromium@^1.3.793:
+-  version "1.3.807"
+-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.807.tgz#c2eb803f4f094869b1a24151184ffbbdbf688b1f"
+-  integrity sha512-p8uxxg2a23zRsvQ2uwA/OOI+O4BQxzaR7YKMIGGGQCpYmkFX2CVF5f0/hxLMV7yCr7nnJViCwHLhPfs52rIYCA==
++  version "1.3.805"
++  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.805.tgz#a0873393a3b027ec60bdaf22a19c4946688cf941"
++  integrity sha512-uUJF59M6pNSRHQaXwdkaNB4BhSQ9lldRdG1qCjlrAFkynPGDc5wPoUcYEQQeQGmKyAWJPvGkYAWmtVrxWmDAkg==
+ 
+ element-resize-detector@^1.2.1:
+   version "1.2.3"
+@@ -6943,9 +6950,9 @@ eslint-config-standard@16.0.2:
+   integrity sha512-fx3f1rJDsl9bY7qzyX8SAtP8GBSk6MfXFaTfaGgk12aAYW4gJSyRm7dM790L6cbXv63fvjY4XeSzXnb4WM+SKw==
+ 
+ eslint-import-resolver-node@^0.3.4:
+-  version "0.3.6"
+-  resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.6.tgz#4048b958395da89668252001dbd9eca6b83bacbd"
+-  integrity sha512-0En0w03NRVMn9Uiyn8YRPDKvWjxCWkslUEhGNTdGx15RvPJYQ+lbOlqrlNI2vEAs4pDYK4f/HN2TbDmk5TP0iw==
++  version "0.3.5"
++  resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.5.tgz#939bbb0f74e179e757ca87f7a4a890dabed18ac4"
++  integrity sha512-XMoPKjSpXbkeJ7ZZ9icLnJMTY5Mc1kZbCakHquaFsXPpyWOwK0TK6CODO+0ca54UoM9LKOxyUNnoVZRl8TeaAg==
+   dependencies:
+     debug "^3.2.7"
+     resolve "^1.20.0"
+@@ -9181,6 +9188,11 @@ is-number@^7.0.0:
+   resolved "https://registry.yarnpkg.com/is-number/-/is-number-7.0.0.tgz#7535345b896734d5f80c4d06c50955527a14f12b"
+   integrity sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==
+ 
++is-obj@^1.0.0:
++  version "1.0.1"
++  resolved "https://registry.yarnpkg.com/is-obj/-/is-obj-1.0.1.tgz#3e4729ac1f5fde025cd7d83a896dab9f4f67db0f"
++  integrity sha1-PkcprB9f3gJc19g6iW2rn09n2w8=
++
+ is-plain-obj@^2.1.0:
+   version "2.1.0"
+   resolved "https://registry.yarnpkg.com/is-plain-obj/-/is-plain-obj-2.1.0.tgz#45e42e37fccf1f40da8e5f76ee21515840c09287"
+@@ -10720,13 +10732,6 @@ merge-descriptors@1.0.1:
+   resolved "https://registry.yarnpkg.com/merge-descriptors/-/merge-descriptors-1.0.1.tgz#b00aaa556dd8b44568150ec9d1b953f3f90cbb61"
+   integrity sha1-sAqqVW3YtEVoFQ7J0blT8/kMu2E=
+ 
+-merge-options@^3.0.4:
+-  version "3.0.4"
+-  resolved "https://registry.yarnpkg.com/merge-options/-/merge-options-3.0.4.tgz#84709c2aa2a4b24c1981f66c179fe5565cc6dbb7"
+-  integrity sha512-2Sug1+knBjkaMsMgf1ctR1Ujx+Ayku4EdJN4Z+C2+JzoeF7A3OZ9KM2GY0CpQS51NR61LTurMJrRKPhSs3ZRTQ==
+-  dependencies:
+-    is-plain-obj "^2.1.0"
+-
+ merge-stream@^2.0.0:
+   version "2.0.0"
+   resolved "https://registry.yarnpkg.com/merge-stream/-/merge-stream-2.0.0.tgz#52823629a14dd00c9770fb6ad47dc6310f2c1f60"
+@@ -13085,9 +13090,9 @@ react-devtools-core@4.10.1:
+     ws "^7"
+ 
+ react-devtools-core@^4.6.0:
+-  version "4.16.0"
+-  resolved "https://registry.yarnpkg.com/react-devtools-core/-/react-devtools-core-4.16.0.tgz#c640ab15b98d077bc47f10f84fc8ed3633f537bd"
+-  integrity sha512-fqyVbp+wVVey6O4uVBk5s3J/vTiPludp7lulr6a8asTBm7DIA0vLBbjmAOLCnOlkWcgdy4mjsqOgNCbu8uICWw==
++  version "4.15.0"
++  resolved "https://registry.yarnpkg.com/react-devtools-core/-/react-devtools-core-4.15.0.tgz#c0fa2a0a1c966bef2705d52aacee3f143cfac092"
++  integrity sha512-Y1NwrWSKRg4TtwcES2upzXFDmccAW9jrGQG2D8EGQrZhK+0hmuhgFnSdKpFc3z04CSeDT5t83RMXcmX5TkR1dA==
+   dependencies:
+     shell-quote "^1.6.1"
+     ws "^7"
