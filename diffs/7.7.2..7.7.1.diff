@@ -1,0 +1,286 @@
+diff --git a/IgniteDiffApp/app/components/bullet-item/bullet-item.story.tsx b/IgniteDiffApp/app/components/bullet-item/bullet-item.story.tsx
+deleted file mode 100644
+index 85df52c..0000000
+--- a/IgniteDiffApp/app/components/bullet-item/bullet-item.story.tsx
++++ /dev/null
+@@ -1,33 +0,0 @@
+-import { storiesOf } from "@storybook/react-native"
+-import * as React from "react"
+-import { View } from "react-native"
+-import { Story, StoryScreen, UseCase } from "../../../storybook/views"
+-import { color } from "../../theme"
+-import { BulletItem } from "./bullet-item"
+-
+-declare let module
+-
+-const VIEWSTYLE = {
+-  flex: 1,
+-  backgroundColor: color.storybookDarkBg,
+-  borderWidth: 5,
+-}
+-
+-storiesOf("Bullet Item", module)
+-  .addDecorator((fn) => <StoryScreen>{fn()}</StoryScreen>)
+-  .add("Styling", () => (
+-    <Story>
+-      <UseCase noPad text="default" usage="The default usage">
+-        <BulletItem text="The default Bullet Item text" />
+-      </UseCase>
+-      <UseCase
+-        noPad
+-        text="with view wrapper"
+-        usage={`backgroundColor: ${color.storybookDarkBg} (color.storybookDarkBg)`}
+-      >
+-        <View style={VIEWSTYLE}>
+-          <BulletItem text="The default Bullet Item text" />
+-        </View>
+-      </UseCase>
+-    </Story>
+-  ))
+diff --git a/IgniteDiffApp/app/services/reactotron/reactotron-config.ts b/IgniteDiffApp/app/services/reactotron/reactotron-config.ts
+index 707c845..dd87bd7 100644
+--- a/IgniteDiffApp/app/services/reactotron/reactotron-config.ts
++++ b/IgniteDiffApp/app/services/reactotron/reactotron-config.ts
+@@ -28,8 +28,3 @@ export const DEFAULT_REACTOTRON_CONFIG: ReactotronConfig = {
+     snapshots: false,
+   },
+ }
+-
+-/**
+- * The default Reactotron WebSocket URI
+- */
+-export const DEFAULT_REACTOTRON_WS_URI = "ws://localhost:9090"
+diff --git a/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj b/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj
+index 85d3fa1..80faeeb 100644
+--- a/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj
++++ b/IgniteDiffApp/ios/IgniteDiffApp.xcodeproj/project.pbxproj
+@@ -8,7 +8,6 @@
+ 
+ /* Begin PBXBuildFile section */
+ 		00E356F31AD99517003FC87E /* IgniteDiffAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* IgniteDiffAppTests.m */; };
+-		0BCDBEAD6BBA8F4657653323 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296B16A7626B86F5C11A4120 /* ExpoModulesProvider.swift */; };
+ 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
+ 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+ 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+@@ -16,9 +15,10 @@
+ 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+ 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+ 		2DCD954D1E0B4F2C00145EB5 /* IgniteDiffAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* IgniteDiffAppTests.m */; };
++		65F2FABF38C3A49C965AF764 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121F651DDB73B51F97BB83E9 /* ExpoModulesProvider.swift */; };
+ 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
++		8B8B213A182BB25D375608FE /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDDFA52441F0CA3EFA72894 /* ExpoModulesProvider.swift */; };
+ 		A4B148D367B119F99EC2C2E5 /* libPods-IgniteDiffApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EADEA568884090C1B008E181 /* libPods-IgniteDiffApp.a */; };
+-		D4762EDC9E42C895A3F60BC4 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5135498763A69D25DBF2EE8C /* ExpoModulesProvider.swift */; };
+ 		E0E402AF856107EC82190244 /* libPods-IgniteDiffApp-IgniteDiffAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 301BE758935A381A571F5B21 /* libPods-IgniteDiffApp-IgniteDiffAppTests.a */; };
+ /* End PBXBuildFile section */
+ 
+@@ -44,22 +44,22 @@
+ 		00E356EE1AD99517003FC87E /* IgniteDiffAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IgniteDiffAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+ 		00E356F21AD99517003FC87E /* IgniteDiffAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IgniteDiffAppTests.m; sourceTree = "<group>"; };
++		121F651DDB73B51F97BB83E9 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-IgniteDiffApp/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+ 		13B07F961A680F5B00A75B9A /* IgniteDiffApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IgniteDiffApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = IgniteDiffApp/AppDelegate.h; sourceTree = "<group>"; };
+ 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = IgniteDiffApp/AppDelegate.m; sourceTree = "<group>"; };
+ 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = IgniteDiffApp/Images.xcassets; sourceTree = "<group>"; };
+ 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = IgniteDiffApp/Info.plist; sourceTree = "<group>"; };
+ 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = IgniteDiffApp/main.m; sourceTree = "<group>"; };
+-		296B16A7626B86F5C11A4120 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-IgniteDiffApp-IgniteDiffAppTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+ 		2D02E47B1E0B4A5D006451C7 /* IgniteDiffApp-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "IgniteDiffApp-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		2D02E4901E0B4A5D006451C7 /* IgniteDiffApp-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "IgniteDiffApp-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		301BE758935A381A571F5B21 /* libPods-IgniteDiffApp-IgniteDiffAppTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IgniteDiffApp-IgniteDiffAppTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		32B04630CC446F19212E357A /* Pods-IgniteDiffApp-IgniteDiffAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IgniteDiffApp-IgniteDiffAppTests.release.xcconfig"; path = "Target Support Files/Pods-IgniteDiffApp-IgniteDiffAppTests/Pods-IgniteDiffApp-IgniteDiffAppTests.release.xcconfig"; sourceTree = "<group>"; };
+ 		3ECD546F3378FD459F4E82B0 /* Pods-IgniteDiffApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IgniteDiffApp.debug.xcconfig"; path = "Target Support Files/Pods-IgniteDiffApp/Pods-IgniteDiffApp.debug.xcconfig"; sourceTree = "<group>"; };
+ 		4D40708BE521DBE7DC6E68C8 /* Pods-IgniteDiffApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IgniteDiffApp.release.xcconfig"; path = "Target Support Files/Pods-IgniteDiffApp/Pods-IgniteDiffApp.release.xcconfig"; sourceTree = "<group>"; };
+-		5135498763A69D25DBF2EE8C /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-IgniteDiffApp/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+ 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = IgniteDiffApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
+ 		8D3D2E99D3814D73E5353ACB /* Pods-IgniteDiffApp-IgniteDiffAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IgniteDiffApp-IgniteDiffAppTests.debug.xcconfig"; path = "Target Support Files/Pods-IgniteDiffApp-IgniteDiffAppTests/Pods-IgniteDiffApp-IgniteDiffAppTests.debug.xcconfig"; sourceTree = "<group>"; };
++		9FDDFA52441F0CA3EFA72894 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-IgniteDiffApp-IgniteDiffAppTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+ 		EADEA568884090C1B008E181 /* libPods-IgniteDiffApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IgniteDiffApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+ 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
+@@ -116,15 +116,6 @@
+ 			name = "Supporting Files";
+ 			sourceTree = "<group>";
+ 		};
+-		0B76225642D4E44E65BB15A9 /* ExpoModulesProviders */ = {
+-			isa = PBXGroup;
+-			children = (
+-				4661B4E2A8BF672C42686602 /* IgniteDiffApp */,
+-				179F8D01E38F5A3AD101D904 /* IgniteDiffAppTests */,
+-			);
+-			name = ExpoModulesProviders;
+-			sourceTree = "<group>";
+-		};
+ 		13B07FAE1A68108700A75B9A /* IgniteDiffApp */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -139,14 +130,6 @@
+ 			name = IgniteDiffApp;
+ 			sourceTree = "<group>";
+ 		};
+-		179F8D01E38F5A3AD101D904 /* IgniteDiffAppTests */ = {
+-			isa = PBXGroup;
+-			children = (
+-				296B16A7626B86F5C11A4120 /* ExpoModulesProvider.swift */,
+-			);
+-			name = IgniteDiffAppTests;
+-			sourceTree = "<group>";
+-		};
+ 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -158,14 +141,6 @@
+ 			name = Frameworks;
+ 			sourceTree = "<group>";
+ 		};
+-		4661B4E2A8BF672C42686602 /* IgniteDiffApp */ = {
+-			isa = PBXGroup;
+-			children = (
+-				5135498763A69D25DBF2EE8C /* ExpoModulesProvider.swift */,
+-			);
+-			name = IgniteDiffApp;
+-			sourceTree = "<group>";
+-		};
+ 		71ED362ACEA45F9F60DCD285 /* Pods */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -193,7 +168,7 @@
+ 				83CBBA001A601CBA00E9B192 /* Products */,
+ 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+ 				71ED362ACEA45F9F60DCD285 /* Pods */,
+-				0B76225642D4E44E65BB15A9 /* ExpoModulesProviders */,
++				D37736FD46469F961EA7F60C /* ExpoModulesProviders */,
+ 			);
+ 			indentWidth = 2;
+ 			sourceTree = "<group>";
+@@ -211,6 +186,31 @@
+ 			name = Products;
+ 			sourceTree = "<group>";
+ 		};
++		8D3E666AB1FB3782A312D79B /* IgniteDiffApp */ = {
++			isa = PBXGroup;
++			children = (
++				121F651DDB73B51F97BB83E9 /* ExpoModulesProvider.swift */,
++			);
++			name = IgniteDiffApp;
++			sourceTree = "<group>";
++		};
++		D1F4B1EE69B31B19645B673B /* IgniteDiffAppTests */ = {
++			isa = PBXGroup;
++			children = (
++				9FDDFA52441F0CA3EFA72894 /* ExpoModulesProvider.swift */,
++			);
++			name = IgniteDiffAppTests;
++			sourceTree = "<group>";
++		};
++		D37736FD46469F961EA7F60C /* ExpoModulesProviders */ = {
++			isa = PBXGroup;
++			children = (
++				8D3E666AB1FB3782A312D79B /* IgniteDiffApp */,
++				D1F4B1EE69B31B19645B673B /* IgniteDiffAppTests */,
++			);
++			name = ExpoModulesProviders;
++			sourceTree = "<group>";
++		};
+ /* End PBXGroup section */
+ 
+ /* Begin PBXNativeTarget section */
+@@ -574,7 +574,7 @@
+ 			buildActionMask = 2147483647;
+ 			files = (
+ 				00E356F31AD99517003FC87E /* IgniteDiffAppTests.m in Sources */,
+-				0BCDBEAD6BBA8F4657653323 /* ExpoModulesProvider.swift in Sources */,
++				8B8B213A182BB25D375608FE /* ExpoModulesProvider.swift in Sources */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};
+@@ -584,7 +584,7 @@
+ 			files = (
+ 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+ 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+-				D4762EDC9E42C895A3F60BC4 /* ExpoModulesProvider.swift in Sources */,
++				65F2FABF38C3A49C965AF764 /* ExpoModulesProvider.swift in Sources */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};
+diff --git a/IgniteDiffApp/storybook/storybook-registry.ts b/IgniteDiffApp/storybook/storybook-registry.ts
+index 13a27c2..c782fc7 100644
+--- a/IgniteDiffApp/storybook/storybook-registry.ts
++++ b/IgniteDiffApp/storybook/storybook-registry.ts
+@@ -1,7 +1,6 @@
+ require("../app/components/text/text.story")
+ require("../app/components/auto-image/auto-image.story")
+ require("../app/components/button/button.story")
+-require("../app/components/bullet-item/bullet-item.story")
+ require("../app/components/form-row/form-row.story")
+ require("../app/components/switch/switch.story")
+ require("../app/components/text-field/text-field.story")
+diff --git a/IgniteDiffApp/storybook/toggle-storybook.tsx b/IgniteDiffApp/storybook/toggle-storybook.tsx
+index 9c9b43f..394ecf4 100644
+--- a/IgniteDiffApp/storybook/toggle-storybook.tsx
++++ b/IgniteDiffApp/storybook/toggle-storybook.tsx
+@@ -1,7 +1,6 @@
+-import React, { useState, useEffect, useRef } from "react"
++import React, { useState, useEffect } from "react"
+ import { DevSettings } from "react-native"
+ import { loadString, saveString } from "../app/utils/storage"
+-import { DEFAULT_REACTOTRON_WS_URI } from "../app/services/reactotron/reactotron-config"
+ 
+ /**
+  * Toggle Storybook mode, in __DEV__ mode only.
+@@ -16,19 +15,14 @@ import { DEFAULT_REACTOTRON_WS_URI } from "../app/services/reactotron/reactotron
+ export function ToggleStorybook(props) {
+   const [showStorybook, setShowStorybook] = useState(false)
+   const [StorybookUIRoot, setStorybookUIRoot] = useState(null)
+-  const ws = useRef(new WebSocket(DEFAULT_REACTOTRON_WS_URI))
+ 
+   useEffect(() => {
+-    if (!__DEV__) {
+-      return undefined
+-    }
+-
+-    // Load the setting from storage if it's there
+-    loadString("devStorybook").then((storedSetting) => {
+-      // Set the initial value
+-      setShowStorybook(storedSetting === "on")
++    if (__DEV__ && DevSettings) {
++      // Load the setting from storage if it's there
++      loadString("devStorybook").then((storedSetting) => {
++        // Set the initial value
++        setShowStorybook(storedSetting === "on")
+ 
+-      if (DevSettings) {
+         // Add our toggle command to the menu
+         DevSettings.addMenuItem("Toggle Storybook", () => {
+           setShowStorybook((show) => {
+@@ -42,25 +36,11 @@ export function ToggleStorybook(props) {
+             return show
+           })
+         })
+-      }
+-
+-      // Load the storybook UI once
+-      setStorybookUIRoot(() => require("./storybook").StorybookUIRoot)
+ 
+-      // Behave as Reactotron.storybookSwitcher(), not a HOC way.
+-      ws.current.onmessage = (e) => {
+-        const data = JSON.parse(e.data)
+-
+-        if (data.type === "storybook") {
+-          saveString("devStorybook", data.payload ? "on" : "off")
+-          setShowStorybook(data.payload)
+-        }
+-      }
+-      ws.current.onerror = (e) => {
+-        console.tron.error(e, null)
+-        setShowStorybook(storedSetting === "on")
+-      }
+-    })
++        // Load the storybook UI once
++        setStorybookUIRoot(() => require("./storybook").StorybookUIRoot)
++      })
++    }
+   }, [])
+ 
+   if (showStorybook) {
