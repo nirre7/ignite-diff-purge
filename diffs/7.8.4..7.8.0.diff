@@ -1,0 +1,79 @@
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index bdd8f3b..a4fea22 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -15,7 +15,7 @@ import React, { useState, useEffect } from "react"
+ import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
+ import { initFonts } from "./theme/fonts" // expo
+ import * as storage from "./utils/storage"
+-import { AppNavigator, useNavigationPersistence } from "./navigators"
++import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
+ import { RootStore, RootStoreProvider, setupRootStore } from "./models"
+ import { ToggleStorybook } from "../storybook/toggle-storybook"
+ import { ErrorBoundary } from "./screens/error/error-boundary"
+@@ -31,6 +31,8 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
+  */
+ function App() {
+   const [rootStore, setRootStore] = useState<RootStore | undefined>(undefined)
++
++  useBackButtonHandler(canExit)
+   const {
+     initialNavigationState,
+     onNavigationStateChange,
+diff --git a/IgniteDiffApp/app/navigators/app-navigator.tsx b/IgniteDiffApp/app/navigators/app-navigator.tsx
+index a5a4cfc..a84bd6e 100644
+--- a/IgniteDiffApp/app/navigators/app-navigator.tsx
++++ b/IgniteDiffApp/app/navigators/app-navigator.tsx
+@@ -9,7 +9,7 @@ import { useColorScheme } from "react-native"
+ import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
+ import { createNativeStackNavigator } from "@react-navigation/native-stack"
+ import { WelcomeScreen, DemoScreen, DemoListScreen } from "../screens"
+-import { navigationRef, useBackButtonHandler } from "./navigation-utilities"
++import { navigationRef } from "./navigation-utilities"
+ 
+ /**
+  * This type allows TypeScript to know what routes are defined in this navigator
+@@ -51,7 +51,6 @@ interface NavigationProps extends Partial<React.ComponentProps<typeof Navigation
+ 
+ export const AppNavigator = (props: NavigationProps) => {
+   const colorScheme = useColorScheme()
+-  useBackButtonHandler(canExit)
+   return (
+     <NavigationContainer
+       ref={navigationRef}
+diff --git a/IgniteDiffApp/app/navigators/navigation-utilities.tsx b/IgniteDiffApp/app/navigators/navigation-utilities.tsx
+index ed611f0..7fa90c0 100644
+--- a/IgniteDiffApp/app/navigators/navigation-utilities.tsx
++++ b/IgniteDiffApp/app/navigators/navigation-utilities.tsx
+@@ -57,9 +57,8 @@ export function useBackButtonHandler(canExit: (routeName: string) => boolean) {
+ 
+       // are we allowed to exit?
+       if (canExitRef.current(routeName)) {
+-        // exit and let the system know we've handled the event
+-        BackHandler.exitApp()
+-        return true
++        // let the system know we've not handled this event
++        return false
+       }
+ 
+       // we can't exit, so let's turn this into a back action
+diff --git a/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs b/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs
+index 5faebc6..fc62ba8 100644
+--- a/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs
+@@ -4,12 +4,12 @@ import {
+   DemoScreen
+ } from "../../screens"
+ 
+-export type <%= props.pascalCaseName %>NavigatorParamList = {
++export type <%= props.pascalCaseName %>ParamList = {
+   demo: undefined
+ }
+ 
+-const Stack = createStackNavigator<<%= props.pascalCaseName %>NavigatorParamList>()
+-export const <%= props.pascalCaseName %>Navigator = () => {
++const Stack = createStackNavigator<<%= props.pascalCaseName %>ParamList>()
++export const <%= props.pascalCaseName %> = () => {
+   return (
+     <Stack.Navigator screenOptions={{ cardStyle: { backgroundColor: "transparent" }, headerShown: false, }}>
+       <Stack.Screen name="demo" component={DemoScreen} />

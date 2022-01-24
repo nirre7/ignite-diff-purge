@@ -1,0 +1,20 @@
+diff --git a/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs b/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs
+index 5faebc6..fc62ba8 100644
+--- a/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/navigator/NAME-navigator.tsx.ejs
+@@ -4,12 +4,12 @@ import {
+   DemoScreen
+ } from "../../screens"
+ 
+-export type <%= props.pascalCaseName %>NavigatorParamList = {
++export type <%= props.pascalCaseName %>ParamList = {
+   demo: undefined
+ }
+ 
+-const Stack = createStackNavigator<<%= props.pascalCaseName %>NavigatorParamList>()
+-export const <%= props.pascalCaseName %>Navigator = () => {
++const Stack = createStackNavigator<<%= props.pascalCaseName %>ParamList>()
++export const <%= props.pascalCaseName %> = () => {
+   return (
+     <Stack.Navigator screenOptions={{ cardStyle: { backgroundColor: "transparent" }, headerShown: false, }}>
+       <Stack.Screen name="demo" component={DemoScreen} />
