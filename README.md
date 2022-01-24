@@ -37,7 +37,7 @@ This repository exposes an untouched Ignite based app generated with the ignite-
 ## To see the full table containing all releases click [HERE](https://nirre7.github.io/ignite-diff-purge/)
 
 ## Notes
-
+- The 7.8.0 ... 7.9.0 release diffs were created without react-native-colo-loco since there seems to be a git/installation issue when [creating an Ignite app within a git repo with react-native-colo-loco (for example a mono repo)](https://github.com/infinitered/ignite/issues/1845) 
 - The diffs start with the latest version of ignite-bowser, 5.4.1 all versions after this version is based on the updated ignite-cli which has an integrated boilerplate
 - For Ignite Bowser diffs please click [HERE](https://github.com/nirre7/ignite-bowser-diff-purge)
 
