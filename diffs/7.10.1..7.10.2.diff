@@ -1,0 +1,13 @@
+diff --git a/IgniteDiffApp/app/components/auto-image/auto-image.story.tsx b/IgniteDiffApp/app/components/auto-image/auto-image.story.tsx
+index bd0852d..25ad636 100644
+--- a/IgniteDiffApp/app/components/auto-image/auto-image.story.tsx
++++ b/IgniteDiffApp/app/components/auto-image/auto-image.story.tsx
+@@ -6,7 +6,7 @@ import { AutoImage } from "./auto-image"
+ 
+ declare let module
+ 
+-const rick = require("./rick.png")
++const rick = require("./rick.jpg")
+ const morty = { uri: "https://rickandmortyapi.com/api/character/avatar/2.jpeg" }
+ 
+ storiesOf("AutoImage", module)
