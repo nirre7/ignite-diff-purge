@@ -1,0 +1,350 @@
+diff --git a/IgniteDiffApp/android/app/build.gradle b/IgniteDiffApp/android/app/build.gradle
+index 1c2f4d6..8b6062a 100644
+--- a/IgniteDiffApp/android/app/build.gradle
++++ b/IgniteDiffApp/android/app/build.gradle
+@@ -80,9 +80,10 @@ import com.android.build.OutputFile
+ 
+ project.ext.react = [
+     enableHermes: false,  // clean and rebuild if changing
++    cliPath: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute().text.trim(), "../cli.js"),
+ ]
+ 
+-apply from: "../../node_modules/react-native/react.gradle"
++apply from: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute().text.trim(), "../react.gradle")
+ 
+ /**
+  * Set this to true to create two separate APKs instead of one:
+@@ -236,9 +237,8 @@ dependencies {
+     }
+ 
+     if (enableHermes) {
+-        def hermesPath = "../../node_modules/hermes-engine/android/";
+-        debugImplementation files(hermesPath + "hermes-debug.aar")
+-        releaseImplementation files(hermesPath + "hermes-release.aar")
++        debugImplementation files(new File(["node", "--print", "require.resolve('hermes-engine/package.json')"].execute().text.trim(), "../android/hermes-debug.aar"))
++        releaseImplementation files(new File(["node", "--print", "require.resolve('hermes-engine/package.json')"].execute().text.trim(), "../android/hermes-release.aar"))
+     } else {
+         implementation jscFlavor
+     }
+@@ -253,5 +253,5 @@ task copyDownloadableDepsToLibs(type: Copy) {
+     into 'libs'
+ }
+ 
+-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
+-applyNativeModulesAppBuildGradle(project);
++apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute().text.trim(), "../native_modules.gradle");
++applyNativeModulesAppBuildGradle(project)
+diff --git a/IgniteDiffApp/pnpm-lock.yaml b/IgniteDiffApp/pnpm-lock.yaml
+index 60906a4..7718c39 100644
+--- a/IgniteDiffApp/pnpm-lock.yaml
++++ b/IgniteDiffApp/pnpm-lock.yaml
+@@ -102,7 +102,7 @@ devDependencies:
+   '@babel/plugin-proposal-optional-catch-binding': 7.12.1_@babel+core@7.17.5
+   '@babel/runtime': 7.17.2
+   '@react-native-community/cli-platform-ios': 6.2.0
+-  '@rnx-kit/metro-config': 1.2.29_3ad03d4d8cb9d06f5cb4daa456308555
++  '@rnx-kit/metro-config': 1.2.28_3ad03d4d8cb9d06f5cb4daa456308555
+   '@rnx-kit/metro-resolver-symlinks': 0.1.16
+   '@storybook/react-native': 5.3.23_fb5bcf13e44340e6c2dcca6cf0aa4642
+   '@storybook/react-native-server': 5.3.23_7339c1723db5c326aef98bf2eec8527f
+@@ -225,7 +225,7 @@ packages:
+       '@babel/compat-data': 7.17.0
+       '@babel/core': 7.17.5
+       '@babel/helper-validator-option': 7.16.7
+-      browserslist: 4.20.0
++      browserslist: 4.19.3
+       semver: 6.3.0
+ 
+   /@babel/helper-create-class-features-plugin/7.17.6_@babel+core@7.17.5:
+@@ -1620,12 +1620,13 @@ packages:
+       - supports-color
+     dev: true
+ 
+-  /@expo/config-plugins/4.0.6:
+-    resolution: {integrity: sha512-K/KQaw/CU8uLQgk7sFnZC54YGHoGucKFfdjYeZx5ds2eyzbuMAiKzGFcxZ/S+1dVBZ8QHzwowsVBW3kuYhnQ3Q==}
++  /@expo/config-plugins/4.0.18:
++    resolution: {integrity: sha512-tW4bnrnKhn+PPHF8wf1KAoubICAVUHW8CcagvyFqaRIzeh6yavMIOsQShxOVTbgx7LzSyymZ1nEs45yCGAiMfA==}
+     dependencies:
+-      '@expo/config-types': 43.0.1
+-      '@expo/json-file': 8.2.33
+-      '@expo/plist': 0.0.15
++      '@expo/config-types': 44.0.0
++      '@expo/json-file': 8.2.34
++      '@expo/plist': 0.0.17
++      '@expo/sdk-runtime-versions': 1.0.0
+       '@react-native/normalize-color': 2.0.0
+       chalk: 4.1.2
+       debug: 4.3.3
+@@ -1640,15 +1641,13 @@ packages:
+       xml2js: 0.4.23
+     transitivePeerDependencies:
+       - supports-color
+-    dev: false
+ 
+-  /@expo/config-plugins/4.1.0:
+-    resolution: {integrity: sha512-+Uq7kzi1StUZZZivnnqNV6+v8b+SMF6MDgH+cEZxCoM9uwLXOK0rTAURzBGtl+C6EEbKnoZmnKGuzABBGPRP7A==}
++  /@expo/config-plugins/4.0.6:
++    resolution: {integrity: sha512-K/KQaw/CU8uLQgk7sFnZC54YGHoGucKFfdjYeZx5ds2eyzbuMAiKzGFcxZ/S+1dVBZ8QHzwowsVBW3kuYhnQ3Q==}
+     dependencies:
+-      '@expo/config-types': 44.0.0
+-      '@expo/json-file': 8.2.34
+-      '@expo/plist': 0.0.17
+-      '@expo/sdk-runtime-versions': 1.0.0
++      '@expo/config-types': 43.0.1
++      '@expo/json-file': 8.2.33
++      '@expo/plist': 0.0.15
+       '@react-native/normalize-color': 2.0.0
+       chalk: 4.1.2
+       debug: 4.3.3
+@@ -1663,6 +1662,7 @@ packages:
+       xml2js: 0.4.23
+     transitivePeerDependencies:
+       - supports-color
++    dev: false
+ 
+   /@expo/config-types/43.0.1:
+     resolution: {integrity: sha512-EtllpCGDdB/UdwAIs5YXJwBLpbFQNdlLLrxIvoILA9cXrpQMWkeDCT9lQPJzFRMFcLUaMuGvkzX2tR4tx5EQFQ==}
+@@ -1671,11 +1671,11 @@ packages:
+   /@expo/config-types/44.0.0:
+     resolution: {integrity: sha512-d+gpdKOAhqaD5RmcMzGgKzNtvE1w+GCqpFQNSXLliYlXjj+Tv0eL8EPeAdPtvke0vowpPFwd5McXLA90dgY6Jg==}
+ 
+-  /@expo/config/6.0.19:
+-    resolution: {integrity: sha512-UkLnnKnt4zP382K7s0UDnUNY646Gdw8PoDWnxaIGAL515R9IX8oWef7+7hX/dZMi27d/WLJPmWNRYsEL8Q/3rw==}
++  /@expo/config/6.0.18:
++    resolution: {integrity: sha512-60z0YICI9eJWlvajl/Wgq8+lKm0jfkZOMdATDQtWz6GvWshUxd+A8EYhtgjJ9eWMGqOYkwrCpRNLHz5TZtCKWA==}
+     dependencies:
+       '@babel/code-frame': 7.10.4
+-      '@expo/config-plugins': 4.1.0
++      '@expo/config-plugins': 4.0.18
+       '@expo/config-types': 44.0.0
+       '@expo/json-file': 8.2.34
+       getenv: 1.0.0
+@@ -2372,8 +2372,8 @@ packages:
+       - supports-color
+     dev: true
+ 
+-  /@rnx-kit/metro-config/1.2.29_3ad03d4d8cb9d06f5cb4daa456308555:
+-    resolution: {integrity: sha512-Cpaawoqw1Ta0RPc/DdmpGnJar6HfkipQfFHKT8yPKJmlOErxGfCz2BeQnIGy3n3vQ33kPh/Lea+Wl4UjncEc+A==}
++  /@rnx-kit/metro-config/1.2.28_3ad03d4d8cb9d06f5cb4daa456308555:
++    resolution: {integrity: sha512-efe1hwqsZGxTQwPvHzIvZWmD86R+U3/jbuWQkJwytnhdZ5jWOzdrUHBrMIEitOwFaq8smInR/WN2UFcsFsWEOA==}
+     peerDependencies:
+       metro-config: '>=0.58.0'
+       react: '*'
+@@ -3457,7 +3457,7 @@ packages:
+     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
+     engines: {node: '>= 0.6'}
+     dependencies:
+-      mime-types: 2.1.35
++      mime-types: 2.1.34
+       negotiator: 0.6.3
+ 
+   /acorn-globals/6.0.0:
+@@ -3819,8 +3819,8 @@ packages:
+     engines: {node: '>=4'}
+     dev: true
+ 
+-  /ansi-regex/4.1.1:
+-    resolution: {integrity: sha512-ILlv4k/3f6vfQ4OoP2AGvirOktlQ98ZEL1k9FaQjxa3L1abBgbuTDAdPOpvbGncC0BTVQrl+OM8xZGK6tWXt7g==}
++  /ansi-regex/4.1.0:
++    resolution: {integrity: sha512-1apePfXM1UOSqw0o9IiFAovVz9M5S1Dg+4TrDwfMewQ6p/rmMueb7tWZjQ1rx4Loy1ArBggoqGpfqqdI4rondg==}
+     engines: {node: '>=6'}
+ 
+   /ansi-regex/5.0.1:
+@@ -4162,8 +4162,8 @@ packages:
+     resolution: {integrity: sha512-eM9d/swFopRt5gdJ7jrpCwgvEMIayITpojhkkSMRsFHYuH5bkSQ4p/9qTEHtmNudUZh22Tehu7I6CxAW0IXTKA==}
+     hasBin: true
+     dependencies:
+-      browserslist: 4.20.0
+-      caniuse-lite: 1.0.30001316
++      browserslist: 4.19.3
++      caniuse-lite: 1.0.30001313
+       normalize-range: 0.1.2
+       num2fraction: 1.2.2
+       picocolors: 0.2.1
+@@ -4810,13 +4810,13 @@ packages:
+       pako: 1.0.11
+     dev: true
+ 
+-  /browserslist/4.20.0:
+-    resolution: {integrity: sha512-bnpOoa+DownbciXj0jVGENf8VYQnE2LNWomhYuCsMmmx9Jd9lwq0WXODuwpSsp8AVdKM2/HorrzxAfbKvWTByQ==}
++  /browserslist/4.19.3:
++    resolution: {integrity: sha512-XK3X4xtKJ+Txj8G5c30B4gsm71s69lqXlkYui4s6EkKxuv49qjYlY6oVd+IFJ73d4YymtM3+djvvt/R/iJwwDg==}
+     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
+     hasBin: true
+     dependencies:
+-      caniuse-lite: 1.0.30001316
+-      electron-to-chromium: 1.4.82
++      caniuse-lite: 1.0.30001313
++      electron-to-chromium: 1.4.75
+       escalade: 3.1.1
+       node-releases: 2.0.2
+       picocolors: 1.0.0
+@@ -4825,8 +4825,8 @@ packages:
+     resolution: {integrity: sha512-9rGNDtnj+HaahxiVV38Gn8n8Lr8REKsel68v1sPFfIGEK6uSXTY3h9acgiT1dZVtOOUtifo/Dn8daDQ5dUgVsA==}
+     hasBin: true
+     dependencies:
+-      caniuse-lite: 1.0.30001316
+-      electron-to-chromium: 1.4.82
++      caniuse-lite: 1.0.30001313
++      electron-to-chromium: 1.4.75
+       node-releases: 1.1.77
+     dev: true
+ 
+@@ -5029,8 +5029,8 @@ packages:
+     resolution: {integrity: sha1-IsxKNKCrxDlQ9CxkEQJKP2NmtFo=}
+     dev: true
+ 
+-  /caniuse-lite/1.0.30001316:
+-    resolution: {integrity: sha512-JgUdNoZKxPZFzbzJwy4hDSyGuH/gXz2rN51QmoR8cBQsVo58llD3A0vlRKKRt8FGf5u69P9eQyIH8/z9vN/S0Q==}
++  /caniuse-lite/1.0.30001313:
++    resolution: {integrity: sha512-rI1UN0koZUiKINjysQDuRi2VeSCce3bYJNmDcj3PIKREiAmjakugBul1QSkg/fPrlULYl6oWfGg3PbgOSY9X4Q==}
+ 
+   /capture-exit/2.0.0:
+     resolution: {integrity: sha512-PiT/hQmTonHhl/HFGN+Lx3JJUznrVYJ3+AQsnthneZbvW7x+f08Tk7yLJTLEOUvBTbduLeeBkxEaYXUOUrRq6g==}
+@@ -5559,7 +5559,7 @@ packages:
+   /core-js-compat/3.21.1:
+     resolution: {integrity: sha512-gbgX5AUvMb8gwxC7FLVWYT7Kkgu/y7+h/h1X43yJkNqhlK2fuYyQimqvKGNZFAY6CKii/GFKJ2cp/1/42TN36g==}
+     dependencies:
+-      browserslist: 4.20.0
++      browserslist: 4.19.3
+       semver: 7.0.0
+ 
+   /core-js-pure/3.21.1:
+@@ -6186,8 +6186,8 @@ packages:
+     requiresBuild: true
+     dev: true
+ 
+-  /electron-to-chromium/1.4.82:
+-    resolution: {integrity: sha512-Ks+ANzLoIrFDUOJdjxYMH6CMKB8UQo5modAwvSZTxgF+vEs/U7G5IbWFUp6dS4klPkTDVdxbORuk8xAXXhMsWw==}
++  /electron-to-chromium/1.4.75:
++    resolution: {integrity: sha512-LxgUNeu3BVU7sXaKjUDD9xivocQLxFtq6wgERrutdY/yIOps3ODOZExK1jg8DTEg4U8TUCb5MLGeWFOYuxjF3Q==}
+ 
+   /element-resize-detector/1.2.4:
+     resolution: {integrity: sha512-Fl5Ftk6WwXE0wqCgNoseKWndjzZlDCwuPTcoVZfCP9R3EHQF8qUtr3YUPNETegRBOKqQKPW3n4kiIWngGi8tKg==}
+@@ -6522,7 +6522,7 @@ packages:
+       object.values: 1.1.5
+       read-pkg-up: 2.0.0
+       resolve: 1.22.0
+-      tsconfig-paths: 3.14.0
++      tsconfig-paths: 3.13.0
+     dev: true
+ 
+   /eslint-plugin-node/11.1.0_eslint@7.15.0:
+@@ -6836,7 +6836,7 @@ packages:
+     peerDependencies:
+       expo: '*'
+     dependencies:
+-      '@expo/config': 6.0.19
++      '@expo/config': 6.0.18
+       expo: 44.0.6_@babel+core@7.17.5
+       uuid: 3.4.0
+     transitivePeerDependencies:
+@@ -6857,7 +6857,7 @@ packages:
+     peerDependencies:
+       expo: '*'
+     dependencies:
+-      '@expo/config-plugins': 4.1.0
++      '@expo/config-plugins': 4.0.18
+       expo: 44.0.6_@babel+core@7.17.5
+       uuid: 3.4.0
+     transitivePeerDependencies:
+@@ -7390,7 +7390,7 @@ packages:
+     dependencies:
+       asynckit: 0.4.0
+       combined-stream: 1.0.8
+-      mime-types: 2.1.35
++      mime-types: 2.1.34
+     dev: true
+ 
+   /format/0.2.2:
+@@ -8057,8 +8057,8 @@ packages:
+       statuses: 1.5.0
+       toidentifier: 1.0.1
+ 
+-  /http-parser-js/0.5.6:
+-    resolution: {integrity: sha512-vDlkRPDJn93swjcjqMSaGSPABbIarsr1TLAui/gLDXzV5VsJNdXNzMYDyNBLQkjWQCJ1uizu8T2oDMhmGt0PRA==}
++  /http-parser-js/0.5.5:
++    resolution: {integrity: sha512-x+JVEkO2PoM8qqpbPbOL3cqHPwerep7OwzK7Ay+sMQjKzaKCqWvjoXm5tqMP9tXWWTnTzAjIhXg+J99XYuPhPA==}
+     dev: true
+ 
+   /http-proxy-agent/4.0.1:
+@@ -8897,7 +8897,7 @@ packages:
+     resolution: {integrity: sha512-pGncycmLBlg2rOiZjdWGFujlVe3X+SHutKN42rZPoG3zOvv66/E0VpSQxPyn3DN3JCNKpWlK7CkwpCweg0qKtA==}
+     hasBin: true
+     dependencies:
+-      '@expo/config': 6.0.19
++      '@expo/config': 6.0.18
+       '@jest/create-cache-key-function': 26.6.2
+       babel-jest: 26.6.3_@babel+core@7.17.5
+       find-up: 5.0.0
+@@ -10276,7 +10276,7 @@ packages:
+       metro-symbolicate: 0.66.2
+       metro-transform-plugins: 0.66.2
+       metro-transform-worker: 0.66.2
+-      mime-types: 2.1.35
++      mime-types: 2.1.34
+       mkdirp: 0.5.5
+       node-fetch: 2.6.7
+       nullthrows: 1.1.1
+@@ -10330,15 +10330,20 @@ packages:
+       brorand: 1.1.0
+     dev: true
+ 
++  /mime-db/1.51.0:
++    resolution: {integrity: sha512-5y8A56jg7XVQx2mbv1lu49NR4dokRnhZYTtL+KGfaa27uq4pSTXkwQkFJl4pkRMyNFz/EtYDSkiiEHx3F7UN6g==}
++    engines: {node: '>= 0.6'}
++
+   /mime-db/1.52.0:
+     resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
+     engines: {node: '>= 0.6'}
++    dev: false
+ 
+-  /mime-types/2.1.35:
+-    resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
++  /mime-types/2.1.34:
++    resolution: {integrity: sha512-6cP692WwGIs9XXdOO4++N+7qjqv0rqxxVvJ3VHPh/Sc9mVZcQP+ZGhkKiTvWMQRr2tbHkJP/Yn7Y0npb3ZBs4A==}
+     engines: {node: '>= 0.6'}
+     dependencies:
+-      mime-db: 1.52.0
++      mime-db: 1.51.0
+ 
+   /mime/1.6.0:
+     resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==}
+@@ -13667,7 +13672,7 @@ packages:
+     resolution: {integrity: sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA==}
+     engines: {node: '>=6'}
+     dependencies:
+-      ansi-regex: 4.1.1
++      ansi-regex: 4.1.0
+ 
+   /strip-ansi/6.0.1:
+     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==}
+@@ -14121,8 +14126,8 @@ packages:
+       typescript: 4.2.3
+     dev: true
+ 
+-  /tsconfig-paths/3.14.0:
+-    resolution: {integrity: sha512-cg/1jAZoL57R39+wiw4u/SCC6Ic9Q5NqjBOb+9xISedOYurfog9ZNmKJSxAnb2m/5Bq4lE9lhUcau33Ml8DM0g==}
++  /tsconfig-paths/3.13.0:
++    resolution: {integrity: sha512-nWuffZppoaYK0vQ1SQmkSsQzJoHA4s6uzdb2waRpD806x9yfq153AdVsWz4je2qZcW+pENrMQXbGQ3sMCkXuhw==}
+     dependencies:
+       '@types/json5': 0.0.29
+       json5: 1.0.1
+@@ -14200,7 +14205,7 @@ packages:
+     engines: {node: '>= 0.6'}
+     dependencies:
+       media-typer: 0.3.0
+-      mime-types: 2.1.35
++      mime-types: 2.1.34
+     dev: true
+ 
+   /typed-styles/0.0.7:
+@@ -14642,7 +14647,7 @@ packages:
+     resolution: {integrity: sha512-b17KeDIQVjvb0ssuSDF2cYXSg2iztliJ4B9WdsuB6J952qCPKmnVq4DyW5motImXHDC1cBT/1UezrJVsKw5zjg==}
+     engines: {node: '>=0.8.0'}
+     dependencies:
+-      http-parser-js: 0.5.6
++      http-parser-js: 0.5.5
+       safe-buffer: 5.2.1
+       websocket-extensions: 0.1.4
+     dev: true
