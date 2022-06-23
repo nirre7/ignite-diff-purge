@@ -1,0 +1,13 @@
+diff --git a/IgniteDiffApp/pnpm-lock.yaml b/IgniteDiffApp/pnpm-lock.yaml
+index e7f4ddb..aac83db 100644
+--- a/IgniteDiffApp/pnpm-lock.yaml
++++ b/IgniteDiffApp/pnpm-lock.yaml
+@@ -1861,7 +1861,7 @@ packages:
+       '@expo/json-file': 8.2.36
+       debug: 4.3.4
+       expo-modules-autolinking: 0.8.1
+-      fs-extra: 9.1.0
++      fs-extra: 9.0.0
+       resolve-from: 5.0.0
+       semver: 7.3.2
+       xml2js: 0.4.23
