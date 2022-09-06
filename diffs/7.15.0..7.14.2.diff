@@ -1,0 +1,120 @@
+diff --git a/IgniteDiffApp/README.md b/IgniteDiffApp/README.md
+index fc660f1..aaeb18c 100644
+--- a/IgniteDiffApp/README.md
++++ b/IgniteDiffApp/README.md
+@@ -54,12 +54,8 @@ ignite-project
+ │   ├── keystores
+ │   └── settings.gradle
+ ├── ignite
+-│   └── templates
+-|       |── app-icon
+-│       ├── component
+-│       ├── model
+-│       ├── navigator
+-│       └── screen
++│   ├── ignite.json
++│   └── plugins
+ ├── index.js
+ ├── ios
+ │   ├── IgniteProject
+@@ -119,7 +115,7 @@ This is a great place to put miscellaneous helpers and utilities. Things like da
+ 
+ ### ./ignite directory
+ 
+-The `ignite` directory stores all things Ignite, including CLI and boilerplate items. Here you will find templates you can customize to help you get started with React Native.
++The `ignite` directory stores all things Ignite, including CLI and boilerplate items. Here you will find generators, plugins and examples to help you get started with React Native.
+ 
+ ### ./storybook directory
+ 
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+index 5f23635..01a13d0 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.props.ts
+@@ -1,4 +1,4 @@
+-import { StyleProp, ViewStyle, TextStyle } from "react-native"
++import { StyleProp, ViewStyle } from "react-native"
+ import { TxKeyPath } from "../../i18n"
+ 
+ export interface CheckboxProps {
+@@ -17,11 +17,6 @@ export interface CheckboxProps {
+    */
+   fillStyle?: StyleProp<ViewStyle>
+ 
+-  /**
+-   * Additional label style.
+-   */
+-  labelStyle?: StyleProp<TextStyle>
+-
+   /**
+    * Is the checkbox checked?
+    */
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.story.tsx b/IgniteDiffApp/app/components/checkbox/checkbox.story.tsx
+index 862319d..9853f47 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.story.tsx
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.story.tsx
+@@ -47,22 +47,6 @@ storiesOf("Checkbox", module)
+           )}
+         </Toggle>
+       </UseCase>
+-      <UseCase text=".labelStyle" usage="Override the label style">
+-        <Toggle initial={false}>
+-          {({ on, toggle }) => (
+-            <View>
+-              <Checkbox
+-                text="Hello there!"
+-                value={on}
+-                labelStyle={{
+-                  color: "red",
+-                }}
+-                onToggle={toggle}
+-              />
+-            </View>
+-          )}
+-        </Toggle>
+-      </UseCase>
+       <UseCase text=".style" usage="Override the container style">
+         <Toggle initial={false}>
+           {({ on, toggle }) => (
+diff --git a/IgniteDiffApp/app/components/checkbox/checkbox.tsx b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+index 4367a47..fc3992a 100644
+--- a/IgniteDiffApp/app/components/checkbox/checkbox.tsx
++++ b/IgniteDiffApp/app/components/checkbox/checkbox.tsx
+@@ -28,7 +28,7 @@ const FILL: ViewStyle = {
+   backgroundColor: color.primary,
+ }
+ 
+-const LABEL: TextStyle = { paddingLeft: spacing[2], color: color.palette.black }
++const LABEL: TextStyle = { paddingLeft: spacing[2] }
+ 
+ export function Checkbox(props: CheckboxProps) {
+   const numberOfLines = props.multiline ? 0 : 1
+@@ -36,7 +36,6 @@ export function Checkbox(props: CheckboxProps) {
+   const rootStyle = [ROOT, props.style]
+   const outlineStyle = [OUTLINE, props.outlineStyle]
+   const fillStyle = [FILL, props.fillStyle]
+-  const labelStyle = [LABEL, props.labelStyle]
+ 
+   const onPress = props.onToggle ? () => props.onToggle && props.onToggle(!props.value) : null
+ 
+@@ -48,7 +47,7 @@ export function Checkbox(props: CheckboxProps) {
+       style={rootStyle}
+     >
+       <View style={outlineStyle}>{props.value && <View style={fillStyle} />}</View>
+-      <Text text={props.text} tx={props.tx} numberOfLines={numberOfLines} style={labelStyle} />
++      <Text text={props.text} tx={props.tx} numberOfLines={numberOfLines} style={LABEL} />
+     </TouchableOpacity>
+   )
+ }
+diff --git a/IgniteDiffApp/pnpm-lock.yaml b/IgniteDiffApp/pnpm-lock.yaml
+index ff8f784..54cbbf3 100644
+--- a/IgniteDiffApp/pnpm-lock.yaml
++++ b/IgniteDiffApp/pnpm-lock.yaml
+@@ -10415,7 +10415,7 @@ packages:
+       '@babel/plugin-proposal-export-default-from': 7.18.10_@babel+core@7.19.0
+       '@babel/plugin-proposal-nullish-coalescing-operator': 7.18.6_@babel+core@7.19.0
+       '@babel/plugin-proposal-object-rest-spread': 7.18.9_@babel+core@7.19.0
+-      '@babel/plugin-proposal-optional-catch-binding': 7.16.7_@babel+core@7.19.0
++      '@babel/plugin-proposal-optional-catch-binding': 7.18.6_@babel+core@7.19.0
+       '@babel/plugin-proposal-optional-chaining': 7.18.9_@babel+core@7.19.0
+       '@babel/plugin-syntax-dynamic-import': 7.8.3_@babel+core@7.19.0
+       '@babel/plugin-syntax-export-default-from': 7.18.6_@babel+core@7.19.0
