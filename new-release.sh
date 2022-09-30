@@ -10,6 +10,7 @@ ReleasesFile=RELEASES
 ReadmeFile=README.md
 ReadmeTable=README_TABLE.md
 ReadmeTableBig=README_TABLE_BIG.md
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 NumberOfReleases=20 # the number of releases on the table
 
@@ -47,7 +48,13 @@ function generateNewReleaseBranch () {
     git checkout -b "$branchName"
 
     # generate app
-    npx --yes ignite-cli@"$newRelease" --no-colo-loco new "$AppName" --debug
+    npx --yes ignite-cli@"$newRelease" new "$AppName" \
+        --debug \
+        --bundle=com.ignitediffapp \
+        --git \
+        --packager=yarn \
+        --install-deps \
+        --target-path=$SCRIPT_DIR/wt-app/$AppName
 
     # remove the .git folder in created ignite app
     cd "$AppName"
