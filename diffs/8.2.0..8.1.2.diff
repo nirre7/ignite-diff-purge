@@ -1,0 +1,116 @@
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index e2227a7..a124514 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -12,7 +12,7 @@ PODS:
+     - ExpoModulesCore
+   - EXFont (10.2.1):
+     - ExpoModulesCore
+-  - Expo (46.0.14):
++  - Expo (46.0.13):
+     - ExpoModulesCore
+   - ExpoKeepAwake (10.2.0):
+     - ExpoModulesCore
+@@ -20,7 +20,7 @@ PODS:
+     - ExpoModulesCore
+   - ExpoLocalization (13.1.0):
+     - ExpoModulesCore
+-  - ExpoModulesCore (0.11.6):
++  - ExpoModulesCore (0.11.5):
+     - React-Core
+     - ReactCommon/turbomodule/core
+   - EXSplashScreen (0.16.2):
+@@ -647,11 +647,11 @@ SPEC CHECKSUMS:
+   EXDevice: 7647ca9b1fd8b269dfd896a7643d659343358054
+   EXFileSystem: 927e0a8885aa9c49e50fc38eaba2c2389f2f1019
+   EXFont: 06df627203afcb8a3b3152ec06eb2f11f46f0cff
+-  Expo: abbff717ae8a8494e84c64e753cad531ad668bb4
++  Expo: 39582e41ae9e0aa9ed016d3918da87ee61e87525
+   ExpoKeepAwake: 0e8f18142e71bbf2c7f6aa66ebed249ba1420320
+   ExpoLinearGradient: 1a3af07c6dab3c612967a294836df9ae717431df
+   ExpoLocalization: 63204f4b9d4f653469d266332ceaa6c6ac8a305d
+-  ExpoModulesCore: 971c2160fa5f4567bdd6b2d2a0d8b6b814c74ce0
++  ExpoModulesCore: 5a973701f4400d70254bc836305228731c829010
+   EXSplashScreen: 799bece80089219b2c989c1082d70f3b00995cda
+   FBLazyVector: 0045cf98ca4a48af3bf7108d85b1c243740fa289
+   FBReactNativeSpec: 82e74141263f8c962e288f5cd6b5d149cdc8afe1
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 31daa0f..7d3ba00 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -2762,9 +2762,9 @@
+   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
+ 
+ "@types/node@*":
+-  version "18.8.0"
+-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.8.0.tgz#b8ee8d83a99470c0661bd899417fcd77060682fe"
+-  integrity sha512-u+h43R6U8xXDt2vzUaVP3VwjjLyOJk6uEciZS8OSyziUQGOwmk+l+4drxcsDboHXwyTaqS1INebghmWMRxq3LA==
++  version "18.7.23"
++  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.23.tgz#75c580983846181ebe5f4abc40fe9dfb2d65665f"
++  integrity sha512-DWNcCHolDq0ZKGizjx2DZjR/PqsYwAcYUJmfMWqtVU2MBMG5Mo+xFZrhGId5r/O5HOuMPyQEcM6KUBp5lBZZBg==
+ 
+ "@types/node@16.9.1":
+   version "16.9.1"
+@@ -5063,9 +5063,9 @@ copy-webpack-plugin@~6.0.3:
+     webpack-sources "^1.4.3"
+ 
+ core-js-compat@^3.25.1:
+-  version "3.25.4"
+-  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.25.4.tgz#730a255d4a47a937513abf1672bf278dc24dcebf"
+-  integrity sha512-gCEcIEEqCR6230WroNunK/653CWKhqyCKJ9b+uESqOt/WFJA8B4lTnnQFdpYY5vmBcwJAA90Bo5vXs+CVsf6iA==
++  version "3.25.3"
++  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.25.3.tgz#d6a442a03f4eade4555d4e640e6a06151dd95d38"
++  integrity sha512-xVtYpJQ5grszDHEUU9O7XbjjcZ0ccX3LgQsyqSvTnjX97ZqEgn9F5srmrwwwMtbKzDllyFPL+O+2OFMl1lU4TQ==
+   dependencies:
+     browserslist "^4.21.4"
+ 
+@@ -5932,9 +5932,9 @@ ee-first@1.1.1:
+   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
+ 
+ electron-to-chromium@^1.3.564, electron-to-chromium@^1.4.251:
+-  version "1.4.270"
+-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.270.tgz#2c6ea409b45cdb5c3e0cb2c08cf6c0ba7e0f2c26"
+-  integrity sha512-KNhIzgLiJmDDC444dj9vEOpZEgsV96ult9Iff98Vanumn+ShJHd5se8aX6KeVxdc0YQeqdrezBZv89rleDbvSg==
++  version "1.4.269"
++  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.269.tgz#93ea2724b07f5f562daa7dd3740a1d28572b028b"
++  integrity sha512-7mHFONwp7MNvdyto1v70fCwk28NJMFgsK79op+iYHzz1BLE8T66a1B2qW5alb8XgE0yi3FL3ZQjSYZpJpF6snw==
+ 
+ elliptic@^6.5.3:
+   version "6.5.4"
+@@ -6644,10 +6644,10 @@ expo-modules-autolinking@0.10.3:
+     find-up "^5.0.0"
+     fs-extra "^9.1.0"
+ 
+-expo-modules-core@0.11.6, expo-modules-core@~0.11.3:
+-  version "0.11.6"
+-  resolved "https://registry.yarnpkg.com/expo-modules-core/-/expo-modules-core-0.11.6.tgz#0fb166ce6c18def4bfef7a617d4ba8b20cd87d9f"
+-  integrity sha512-Z3DSfyLCag5JxMas+rdPbb8PzhN0F7v0GGx2VuaiC3QvIITrybdRS5lJaXlsfqrJZ36j80p3ZKzfMjMX/RF9kA==
++expo-modules-core@0.11.5, expo-modules-core@~0.11.3:
++  version "0.11.5"
++  resolved "https://registry.yarnpkg.com/expo-modules-core/-/expo-modules-core-0.11.5.tgz#19d30e9b24b0b98ea614df3cb474293133a08bd4"
++  integrity sha512-KmTHtaL21M1AzKOmu3YM5K8ddCbbr6wgooG4uCb+o+7zZXe+BPP4jAPs5LLez1Et34OQcyjopxUpJ8r43HImvQ==
+   dependencies:
+     compare-versions "^3.4.0"
+     invariant "^2.2.4"
+@@ -6676,9 +6676,9 @@ expo-status-bar@~1.4.0:
+   integrity sha512-vh98g8qMIjig/2XTBsoAWS6Vo2dIIwDWjB3/GiuZ9Lazpxc9GO/APfJ4dar7MibzIDUKIrjotrcL6rLdPH13Ew==
+ 
+ expo@~46.0.3:
+-  version "46.0.14"
+-  resolved "https://registry.yarnpkg.com/expo/-/expo-46.0.14.tgz#bdb134fbc73f806f3d92a385c00d34a778e11973"
+-  integrity sha512-l44Dn1/eXLoUOyXevffpKgQhqsf4PEB8bUp7aR97C7Hlcg7Rx9dbv7sTh8wV0M6ylJ+2M1kB5GgNX+CCuIwiSQ==
++  version "46.0.13"
++  resolved "https://registry.yarnpkg.com/expo/-/expo-46.0.13.tgz#86bb45ca3b0aa71d028129f2eb6e1292a750cd72"
++  integrity sha512-xaU8GlJ7j3vo1U5tSbFDsoJqUfTkRF4XDEUj/Dr/jqUf0GcvlMKuGe6HvnbMO9slxYQlYlWJUzvlAx38TLhxyA==
+   dependencies:
+     "@babel/runtime" "^7.14.0"
+     "@expo/cli" "0.3.1"
+@@ -6692,7 +6692,7 @@ expo@~46.0.3:
+     expo-font "~10.2.1"
+     expo-keep-awake "~10.2.0"
+     expo-modules-autolinking "0.10.3"
+-    expo-modules-core "0.11.6"
++    expo-modules-core "0.11.5"
+     fbemitter "^3.0.0"
+     getenv "^1.0.0"
+     invariant "^2.2.4"
