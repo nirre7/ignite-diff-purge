@@ -1,0 +1,261 @@
+diff --git a/IgniteDiffApp/app/components/Screen.tsx b/IgniteDiffApp/app/components/Screen.tsx
+index 1c4ea39..c3c46b3 100644
+--- a/IgniteDiffApp/app/components/Screen.tsx
++++ b/IgniteDiffApp/app/components/Screen.tsx
+@@ -11,7 +11,7 @@ import {
+   ViewStyle,
+ } from "react-native"
+ import { StatusBar, StatusBarProps } from "expo-status-bar"
+-import { Edge, SafeAreaView, SafeAreaViewProps } from "react-native-safe-area-context"
++import { Edge, useSafeAreaInsets } from "react-native-safe-area-context"
+ import { useScrollToTop } from "@react-navigation/native"
+ import { colors } from "../theme"
+ 
+@@ -44,10 +44,6 @@ interface BaseScreenProps {
+    * By how much should we offset the keyboard? Defaults to 0.
+    */
+   keyboardOffset?: number
+-  /**
+-   * Pass any additional props directly to the SafeAreaView component.
+-   */
+-  SafeAreaViewProps?: SafeAreaViewProps
+   /**
+    * Pass any additional props directly to the StatusBar component.
+    */
+@@ -141,6 +137,18 @@ function useAutoPreset(props: AutoScreenProps) {
+   }
+ }
+ 
++function useSafeAreaInsetPadding(safeAreaEdges?: Edge[]) {
++  const insets = useSafeAreaInsets()
++
++  const insetStyles: ViewStyle = {}
++  safeAreaEdges?.forEach((edge: Edge) => {
++    const paddingProp = `padding${edge.charAt(0).toUpperCase()}${edge.slice(1)}`
++    insetStyles[paddingProp] = insets[edge]
++  })
++
++  return insetStyles
++}
++
+ function ScreenWithoutScrolling(props: ScreenProps) {
+   const { style, contentContainerStyle, children } = props
+   return (
+@@ -197,19 +205,14 @@ export function Screen(props: ScreenProps) {
+     KeyboardAvoidingViewProps,
+     keyboardOffset = 0,
+     safeAreaEdges,
+-    SafeAreaViewProps,
+     StatusBarProps,
+     statusBarStyle = "dark",
+   } = props
+ 
+-  const Wrapper = safeAreaEdges?.length ? SafeAreaView : View
++  const insetPadding = useSafeAreaInsetPadding(safeAreaEdges)
+ 
+   return (
+-    <Wrapper
+-      edges={safeAreaEdges}
+-      {...SafeAreaViewProps}
+-      style={[$safeAreaStyle, SafeAreaViewProps?.style, { backgroundColor }]}
+-    >
++    <View style={[$containerStyle, { backgroundColor }, insetPadding]}>
+       <StatusBar style={statusBarStyle} {...StatusBarProps} />
+ 
+       <KeyboardAvoidingView
+@@ -224,11 +227,11 @@ export function Screen(props: ScreenProps) {
+           <ScreenWithScrolling {...props} />
+         )}
+       </KeyboardAvoidingView>
+-    </Wrapper>
++    </View>
+   )
+ }
+ 
+-const $safeAreaStyle: ViewStyle = {
++const $containerStyle: ViewStyle = {
+   flex: 1,
+   height: "100%",
+   width: "100%",
+diff --git a/IgniteDiffApp/app/i18n/ar.ts b/IgniteDiffApp/app/i18n/ar.ts
+index a1bd46a..6567054 100644
+--- a/IgniteDiffApp/app/i18n/ar.ts
++++ b/IgniteDiffApp/app/i18n/ar.ts
+@@ -5,13 +5,13 @@ const ar: Translations = {
+     ok: "نعم",
+     cancel: "حذف",
+     back: "خلف",
++    logOut: "تسجيل خروج", // @demo remove-current-line
+   },
+   welcomeScreen: {
+     postscript:
+       "ربما لا يكون هذا هو الشكل الذي يبدو عليه تطبيقك مالم يمنحك المصمم هذه الشاشات وشحنها في هذه الحالة",
+     readyForLaunch: "تطبيقك تقريبا جاهز للتشغيل",
+     exciting: "اوه هذا مثير",
+-    headerRight: "تسجيل خروج", // @demo remove-current-line
+     letsGo: "لنذهب", // @demo remove-current-line
+   },
+   errorScreen: {
+diff --git a/IgniteDiffApp/app/i18n/en.ts b/IgniteDiffApp/app/i18n/en.ts
+index 70d12b5..3acae53 100644
+--- a/IgniteDiffApp/app/i18n/en.ts
++++ b/IgniteDiffApp/app/i18n/en.ts
+@@ -3,13 +3,13 @@ const en = {
+     ok: "OK!",
+     cancel: "Cancel",
+     back: "Back",
++    logOut: "Log Out", // @demo remove-current-line
+   },
+   welcomeScreen: {
+     postscript:
+       "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
+     readyForLaunch: "Your app, almost ready for launch!",
+     exciting: "(ohh, this is exciting!)",
+-    headerRight: "Log Out", // @demo remove-current-line
+     letsGo: "Let's go!", // @demo remove-current-line
+   },
+   errorScreen: {
+diff --git a/IgniteDiffApp/app/i18n/ko.ts b/IgniteDiffApp/app/i18n/ko.ts
+index 407d326..8226b4a 100644
+--- a/IgniteDiffApp/app/i18n/ko.ts
++++ b/IgniteDiffApp/app/i18n/ko.ts
+@@ -5,13 +5,13 @@ const ko: Translations = {
+     ok: "확인!",
+     cancel: "취소",
+     back: "뒤로",
++    logOut: "로그아웃", // @demo remove-current-line
+   },
+   welcomeScreen: {
+     postscript:
+       "잠깐! — 지금 보시는 것은 아마도 당신의 앱의 모양새가 아닐겁니다. (디자이너분이 이렇게 건내주셨다면 모를까요. 만약에 그렇다면, 이대로 가져갑시다!) ",
+     readyForLaunch: "출시 준비가 거의 끝난 나만의 앱!",
+     exciting: "(오, 이거 신나는데요!)",
+-    headerRight: "로그아웃", // @demo remove-current-line
+     letsGo: "가보자구요!", // @demo remove-current-line
+   },
+   errorScreen: {
+diff --git a/IgniteDiffApp/app/models/AuthenticationStore.ts b/IgniteDiffApp/app/models/AuthenticationStore.ts
+index 45181bf..44c87d6 100644
+--- a/IgniteDiffApp/app/models/AuthenticationStore.ts
++++ b/IgniteDiffApp/app/models/AuthenticationStore.ts
+@@ -38,6 +38,11 @@ export const AuthenticationStoreModel = types
+     setAuthPassword(value: string) {
+       store.authPassword = value.replace(/ /g, "")
+     },
++    logout() {
++      store.authToken = undefined
++      store.authEmail = ""
++      store.authPassword = ""
++    },
+   }))
+ 
+ export interface AuthenticationStore extends Instance<typeof AuthenticationStoreModel> {}
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index ee054cd..c0d985b 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -53,15 +53,6 @@ export function DemoNavigator() {
+         }}
+       />
+ 
+-      <Tab.Screen
+-        name="DemoDebug"
+-        component={DemoDebugScreen}
+-        options={{
+-          tabBarLabel: translate("demoNavigator.debugTab"),
+-          tabBarIcon: ({ focused }) => <Icon icon="debug" color={focused && colors.tint} />,
+-        }}
+-      />
+-
+       <Tab.Screen
+         name="DemoCommunity"
+         component={DemoCommunityScreen}
+@@ -79,6 +70,15 @@ export function DemoNavigator() {
+           tabBarIcon: ({ focused }) => <Icon icon="podcast" color={focused && colors.tint} />,
+         }}
+       />
++
++      <Tab.Screen
++        name="DemoDebug"
++        component={DemoDebugScreen}
++        options={{
++          tabBarLabel: translate("demoNavigator.debugTab"),
++          tabBarIcon: ({ focused }) => <Icon icon="debug" color={focused && colors.tint} />,
++        }}
++      />
+     </Tab.Navigator>
+   )
+ }
+diff --git a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+index bad5c8f..1754840 100644
+--- a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+@@ -5,12 +5,17 @@ import { Button, ListItem, Screen, Text } from "../components"
+ import { DemoTabScreenProps } from "../navigators/DemoNavigator"
+ import { colors, spacing } from "../theme"
+ import { isRTL } from "../i18n"
++import { useStores } from "../models"
+ 
+ function openLinkInBrowser(url: string) {
+   Linking.canOpenURL(url).then((canOpen) => canOpen && Linking.openURL(url))
+ }
+ 
+ export function DemoDebugScreen(_props: DemoTabScreenProps<"DemoDebug">) {
++  const {
++    authenticationStore: { logout },
++  } = useStores()
++
+   const usingHermes = typeof HermesInternal === "object" && HermesInternal !== null
+ 
+   const demoReactotron = React.useMemo(
+@@ -84,6 +89,9 @@ export function DemoDebugScreen(_props: DemoTabScreenProps<"DemoDebug">) {
+         <Button style={$button} tx="demoDebugScreen.reactotron" onPress={demoReactotron} />
+         <Text style={$hint} tx={`demoDebugScreen.${Platform.OS}ReactotronHint` as const} />
+       </View>
++      <View style={$buttonContainer}>
++        <Button style={$button} tx="common.logOut" onPress={logout} />
++      </View>
+     </Screen>
+   )
+ }
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index 78f008a..9bcad45 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -25,21 +25,17 @@ export const WelcomeScreen = observer(function WelcomeScreen(
+   // @demo remove-block-start
+   const { navigation } = props
+   const {
+-    authenticationStore: { setAuthToken },
++    authenticationStore: { logout },
+   } = useStores()
+ 
+   function goNext() {
+     navigation.navigate("Demo", { screen: "DemoShowroom" })
+   }
+ 
+-  function logout() {
+-    setAuthToken(undefined)
+-  }
+-
+   useLayoutEffect(() => {
+     navigation.setOptions({
+       headerShown: true,
+-      header: () => <Header rightTx="welcomeScreen.headerRight" onRightPress={logout} />,
++      header: () => <Header rightTx="common.logOut" onRightPress={logout} />,
+     })
+   }, [])
+   // @demo remove-block-end
+diff --git a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+index ee37d83..aac4ca1 100644
+--- a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+@@ -22,7 +22,7 @@ export interface <%= props.pascalCaseName %>Props {
+  */
+ export const <%= props.pascalCaseName %> = observer(function <%= props.pascalCaseName %>(props: <%= props.pascalCaseName %>Props) {
+   const { style } = props
+-  const $styles = Object.assign({}, $container, style)
++  const $styles = [$container, style]
+ 
+   return (
+     <View style={$styles}>
