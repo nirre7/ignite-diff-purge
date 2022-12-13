@@ -55,7 +55,7 @@ function generateNewReleaseBranch () {
         --packager=yarn \
         --install-deps \
         --target-path=$SCRIPT_DIR/wt-app/$AppName \
-        --removeDemo=false
+        --remove-demo=false
 
     # remove the .git folder in created ignite app
     cd "$AppName"
