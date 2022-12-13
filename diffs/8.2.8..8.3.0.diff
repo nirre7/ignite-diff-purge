@@ -1,0 +1,128 @@
+diff --git a/IgniteDiffApp/android/gradle.properties b/IgniteDiffApp/android/gradle.properties
+index b3e191d..bc9b7c5 100644
+--- a/IgniteDiffApp/android/gradle.properties
++++ b/IgniteDiffApp/android/gradle.properties
+@@ -34,6 +34,9 @@ expo.webp.enabled=true
+ # Enable animated webp support (~3.4 MB increase)
+ # Disabled by default because iOS doesn't support animated webp
+ expo.webp.animated=false
++# Use hermes as JS engine. To disable remove this line
++expo.jsEngine=hermes
++
+ 
+ # Use this property to specify which architecture you want to build.
+ # You can also override it from the CLI using
+diff --git a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+index 9671d12..b56bc48 100644
+--- a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
++++ b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+@@ -13,6 +13,7 @@ patches:
+     skip: <%= props.skipIndexFile %>
+ ---
+ import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
++import { withSetPropAction } from "./helpers/withSetPropAction"
+ 
+ /**
+  * Model description here for TypeScript hints.
+@@ -20,6 +21,7 @@ import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+ export const <%= props.pascalCaseName %>Model = types
+   .model("<%= props.pascalCaseName %>")
+   .props({})
++  .actions(withSetPropAction)
+   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+   .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+ 
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index 5c0b30a..f333eb9 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -16,8 +16,6 @@ PODS:
+     - ExpoModulesCore
+   - ExpoKeepAwake (10.2.1):
+     - ExpoModulesCore
+-  - ExpoLinearGradient (11.4.0):
+-    - ExpoModulesCore
+   - ExpoLocalization (13.1.0):
+     - ExpoModulesCore
+   - ExpoModulesCore (0.11.9):
+@@ -448,7 +446,6 @@ DEPENDENCIES:
+   - EXFont (from `../node_modules/expo-font/ios`)
+   - Expo (from `../node_modules/expo`)
+   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+-  - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
+   - ExpoLocalization (from `../node_modules/expo-localization/ios`)
+   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
+   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
+@@ -553,8 +550,6 @@ EXTERNAL SOURCES:
+     :path: "../node_modules/expo"
+   ExpoKeepAwake:
+     :path: "../node_modules/expo-keep-awake/ios"
+-  ExpoLinearGradient:
+-    :path: "../node_modules/expo-linear-gradient/ios"
+   ExpoLocalization:
+     :path: "../node_modules/expo-localization/ios"
+   ExpoModulesCore:
+@@ -649,7 +644,6 @@ SPEC CHECKSUMS:
+   EXFont: 06df627203afcb8a3b3152ec06eb2f11f46f0cff
+   Expo: 4de8a31146bb0480353b3ed1850e015c4862625f
+   ExpoKeepAwake: 8b47e5358d54ea4922b630a74f2acb026ab7a28b
+-  ExpoLinearGradient: 1a3af07c6dab3c612967a294836df9ae717431df
+   ExpoLocalization: 63204f4b9d4f653469d266332ceaa6c6ac8a305d
+   ExpoModulesCore: f9d1730cc2dde38e46b0becb97628b3ebbd29f21
+   EXSplashScreen: 799bece80089219b2c989c1082d70f3b00995cda
+diff --git a/IgniteDiffApp/ios/Podfile.properties.json b/IgniteDiffApp/ios/Podfile.properties.json
+index e69de29..ed63f99 100644
+--- a/IgniteDiffApp/ios/Podfile.properties.json
++++ b/IgniteDiffApp/ios/Podfile.properties.json
+@@ -0,0 +1,3 @@
++{
++	"expo.jsEngine": "hermes"
++}
+\ No newline at end of file
+diff --git a/IgniteDiffApp/metro.config.js b/IgniteDiffApp/metro.config.js
+index 9bb8722..6a150a6 100644
+--- a/IgniteDiffApp/metro.config.js
++++ b/IgniteDiffApp/metro.config.js
+@@ -1,4 +1,5 @@
+ const { getDefaultConfig } = require("metro-config")
++const { getDefaultConfig: getDefaultExpoConfig } = require("@expo/metro-config")
+ 
+ let metroConfig
+ let isExpo = false
+@@ -18,7 +19,7 @@ if (isExpo) {
+    * For one idea on how to support symlinks in Expo, see:
+    * https://github.com/infinitered/ignite/issues/1904#issuecomment-1054535068
+    */
+-  metroConfig = getDefaultConfig(__dirname)
++  metroConfig = getDefaultExpoConfig(__dirname)
+ } else {
+   /**
+    * Vanilla metro config - we're using a custom metro config because we want to support symlinks
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 36eb26f..e009302 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -51,7 +51,6 @@
+     "expo-device": "~4.3.0",
+     "expo-file-system": "~14.1.0",
+     "expo-font": "~10.2.0",
+-    "expo-linear-gradient": "~11.4.0",
+     "expo-localization": "13.1.0",
+     "expo-modules-core": "~0.11.3",
+     "expo-splash-screen": "~0.16.1",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index a28a722..b556149 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -6676,11 +6676,6 @@ expo-keep-awake@~10.2.0:
+   resolved "https://registry.yarnpkg.com/expo-keep-awake/-/expo-keep-awake-10.2.1.tgz#af6d6f7f08cc2a01d6c728c36c5419060006d98d"
+   integrity sha512-UBge1BwzDPhUFX0gKu9eDLwEFj4LGiqrOogNoEYxcosM1SwhkbWwPrd3zZtl53LLz02TxEi/CI/MUGJJsrVQLw==
+ 
+-expo-linear-gradient@~11.4.0:
+-  version "11.4.0"
+-  resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-11.4.0.tgz#20ecad4d11e66e35b31600e5389ec9c4067f7312"
+-  integrity sha512-qtIfsLs7NOpfxYrFSJL5uLtNHIkBHQFuQ3f7++XpoJTSm4eQVFxjjkCGWiLIrkpVjKzmgp3DLuIVsadsGX21lA==
+-
+ expo-localization@13.1.0:
+   version "13.1.0"
+   resolved "https://registry.yarnpkg.com/expo-localization/-/expo-localization-13.1.0.tgz#a69eac5dfee3f1e7b3a443bdd61fd38de5e4e28b"
