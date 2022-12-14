@@ -1,0 +1,456 @@
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index 28afc1d..cbcaf42 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -7,11 +7,11 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import { isRTL, translate } from "../i18n"
++import { Edge, SafeAreaView, SafeAreaViewProps } from "react-native-safe-area-context"
+ import { colors, spacing } from "../theme"
+-import { ExtendedEdge, useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ import { Icon, IconTypes } from "./Icon"
+ import { Text, TextProps } from "./Text"
++import { isRTL, translate } from "../i18n"
+ 
+ export interface HeaderProps {
+   /**
+@@ -25,11 +25,7 @@ export interface HeaderProps {
+    */
+   titleStyle?: StyleProp<TextStyle>
+   /**
+-   * Optional inner header wrapper style override.
+-   */
+-  style?: StyleProp<ViewStyle>
+-  /**
+-   * Optional outer header container style override.
++   * Optional header style override.
+    */
+   containerStyle?: StyleProp<ViewStyle>
+   /**
+@@ -118,7 +114,11 @@ export interface HeaderProps {
+   /**
+    * Override the default edges for the safe area.
+    */
+-  safeAreaEdges?: ExtendedEdge[]
++  safeAreaEdges?: Edge[]
++  /**
++   * Pass any additional props directly to the SafeAreaView component.
++   */
++  SafeAreaViewProps?: SafeAreaViewProps
+ }
+ 
+ interface HeaderActionProps {
+@@ -134,7 +134,7 @@ interface HeaderActionProps {
+ 
+ /**
+  * Header that appears on many screens. Will hold navigation buttons and screen title.
+- * The Header is meant to be used with the `screenOptions.header` option on navigators, routes, or screen components via `navigation.setOptions({ header })`.
++ * The Header is meant to be used with the `screenOptions.header` option on navigators,routes, or screen components via `navigation.setOptions({ header })`.
+  *
+  * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Header.md)
+  */
+@@ -156,22 +156,26 @@ export function Header(props: HeaderProps) {
+     rightTx,
+     rightTxOptions,
+     safeAreaEdges = ["top"],
++    SafeAreaViewProps,
+     title,
+     titleMode = "center",
+     titleTx,
+     titleTxOptions,
+-    style: $styleOverride,
+     titleStyle: $titleStyleOverride,
+     containerStyle: $containerStyleOverride,
+   } = props
+ 
+-  const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges)
++  const Wrapper = safeAreaEdges?.length ? SafeAreaView : View
+ 
+   const titleContent = titleTx ? translate(titleTx, titleTxOptions) : title
+ 
+   return (
+-    <View style={[$container, $containerInsets, { backgroundColor }, $containerStyleOverride]}>
+-      <View style={[$wrapper, $styleOverride]}>
++    <Wrapper
++      edges={safeAreaEdges}
++      {...SafeAreaViewProps}
++      style={[$safeArea, SafeAreaViewProps?.style, { backgroundColor }]}
++    >
++      <View style={[$container, $containerStyleOverride]}>
+         <HeaderAction
+           tx={leftTx}
+           text={leftText}
+@@ -207,7 +211,7 @@ export function Header(props: HeaderProps) {
+           ActionComponent={RightActionComponent}
+         />
+       </View>
+-    </View>
++    </Wrapper>
+   )
+ }
+ 
+@@ -247,17 +251,17 @@ function HeaderAction(props: HeaderActionProps) {
+   return <View style={[$actionFillerContainer, { backgroundColor }]} />
+ }
+ 
+-const $wrapper: ViewStyle = {
++const $safeArea: ViewStyle = {
++  width: "100%",
++}
++
++const $container: ViewStyle = {
+   height: 56,
+   flexDirection: "row",
+   alignItems: "center",
+   justifyContent: "space-between",
+ }
+ 
+-const $container: ViewStyle = {
+-  width: "100%",
+-}
+-
+ const $centerTitle: TextStyle = {
+   position: "absolute",
+   width: "100%",
+diff --git a/IgniteDiffApp/app/components/Screen.tsx b/IgniteDiffApp/app/components/Screen.tsx
+index 9f209bf..c3c46b3 100644
+--- a/IgniteDiffApp/app/components/Screen.tsx
++++ b/IgniteDiffApp/app/components/Screen.tsx
+@@ -1,5 +1,3 @@
+-import { useScrollToTop } from "@react-navigation/native"
+-import { StatusBar, StatusBarProps } from "expo-status-bar"
+ import React, { useRef, useState } from "react"
+ import {
+   KeyboardAvoidingView,
+@@ -12,8 +10,10 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
++import { StatusBar, StatusBarProps } from "expo-status-bar"
++import { Edge, useSafeAreaInsets } from "react-native-safe-area-context"
++import { useScrollToTop } from "@react-navigation/native"
+ import { colors } from "../theme"
+-import { ExtendedEdge, useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ 
+ interface BaseScreenProps {
+   /**
+@@ -31,7 +31,7 @@ interface BaseScreenProps {
+   /**
+    * Override the default edges for the safe area.
+    */
+-  safeAreaEdges?: ExtendedEdge[]
++  safeAreaEdges?: Edge[]
+   /**
+    * Background color
+    */
+@@ -137,6 +137,18 @@ function useAutoPreset(props: AutoScreenProps) {
+   }
+ }
+ 
++function useSafeAreaInsetPadding(safeAreaEdges?: Edge[]) {
++  const insets = useSafeAreaInsets()
++
++  const insetStyles: ViewStyle = {}
++  safeAreaEdges?.forEach((edge: Edge) => {
++    const paddingProp = `padding${edge.charAt(0).toUpperCase()}${edge.slice(1)}`
++    insetStyles[paddingProp] = insets[edge]
++  })
++
++  return insetStyles
++}
++
+ function ScreenWithoutScrolling(props: ScreenProps) {
+   const { style, contentContainerStyle, children } = props
+   return (
+@@ -197,10 +209,10 @@ export function Screen(props: ScreenProps) {
+     statusBarStyle = "dark",
+   } = props
+ 
+-  const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges)
++  const insetPadding = useSafeAreaInsetPadding(safeAreaEdges)
+ 
+   return (
+-    <View style={[$containerStyle, { backgroundColor }, $containerInsets]}>
++    <View style={[$containerStyle, { backgroundColor }, insetPadding]}>
+       <StatusBar style={statusBarStyle} {...StatusBarProps} />
+ 
+       <KeyboardAvoidingView
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index f6bd493..5305a01 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -8,7 +8,7 @@ import {
+ } from "@react-navigation/native"
+ import Config from "../config"
+ import type { PersistNavigationConfig } from "../config/config.base"
+-import { useIsMounted } from "../utils/useIsMounted"
++import { useIsMounted } from "../utils/isMounted"
+ 
+ /* eslint-disable */
+ export const RootNavigation = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index 61a2866..42e8b45 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -2,11 +2,11 @@ import React, { FC, ReactElement, useEffect, useRef, useState } from "react"
+ import { FlatList, Image, ImageStyle, SectionList, TextStyle, View, ViewStyle } from "react-native"
+ import { DrawerLayout, DrawerState } from "react-native-gesture-handler"
+ import { useSharedValue } from "react-native-reanimated"
++import { SafeAreaView } from "react-native-safe-area-context"
+ import { ListItem, Screen, Text } from "../../components"
+ import { isRTL } from "../../i18n"
+ import { DemoTabScreenProps } from "../../navigators/DemoNavigator"
+ import { colors, spacing } from "../../theme"
+-import { useSafeAreaInsetsStyle } from "../../utils/useSafeAreaInsetsStyle"
+ import * as Demos from "./demos"
+ import { DrawerIconButton } from "./DrawerIconButton"
+ 
+@@ -67,8 +67,6 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+       return () => timeout.current && clearTimeout(timeout.current)
+     }, [])
+ 
+-    const $drawerInsets = useSafeAreaInsetsStyle(["top"])
+-
+     return (
+       <DrawerLayout
+         ref={drawerRef}
+@@ -86,7 +84,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+           }
+         }}
+         renderNavigationView={() => (
+-          <View style={[$drawer, $drawerInsets]}>
++          <SafeAreaView style={$drawer} edges={["top"]}>
+             <View style={$logoContainer}>
+               <Image source={logo} style={$logoImage} />
+             </View>
+@@ -119,10 +117,14 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+                 </View>
+               )}
+             />
+-          </View>
++          </SafeAreaView>
+         )}
+       >
+-        <Screen preset="fixed" safeAreaEdges={["top"]} contentContainerStyle={$screenContainer}>
++        <Screen
++          preset="fixed"
++          safeAreaEdges={["top", "bottom"]}
++          contentContainerStyle={$screenContainer}
++        >
+           <DrawerIconButton onPress={toggleDrawer} {...{ open, progress }} />
+ 
+           <SectionList
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+index 98e8ecc..2ead507 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+@@ -97,10 +97,10 @@ export const DemoHeader: Demo = {
+       <Header title="Styled Title" titleStyle={$customTitle} safeAreaEdges={[]} />
+       <DemoDivider size={24} />
+       <Header
+-        title="Styled Wrapper"
++        title="Styled Container"
+         titleStyle={$customWhiteTitle}
+         backgroundColor={colors.error}
+-        style={{ height: 35 }}
++        containerStyle={{ height: 35 }}
+         safeAreaEdges={[]}
+       />
+       <DemoDivider size={24} />
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index 271c422..f1324ac 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -1,16 +1,19 @@
+ import { observer } from "mobx-react-lite"
+-import React, { FC } from "react"
++import React, {
++  FC,
++  useLayoutEffect, // @demo remove-current-line
++} from "react"
+ import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
++import { SafeAreaView } from "react-native-safe-area-context"
+ import {
+   Button, // @demo remove-current-line
++  Header, // @demo remove-current-line
+   Text,
+ } from "../components"
+ import { isRTL } from "../i18n"
+ import { useStores } from "../models" // @demo remove-current-line
+ import { AppStackScreenProps } from "../navigators" // @demo remove-current-line
+ import { colors, spacing } from "../theme"
+-import { useHeader } from "../utils/useHeader" // @demo remove-current-line
+-import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ 
+ const welcomeLogo = require("../../assets/images/logo.png")
+ const welcomeFace = require("../../assets/images/welcome-face.png")
+@@ -30,14 +33,14 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
+     navigation.navigate("Demo", { screen: "DemoShowroom" })
+   }
+ 
+-  useHeader({
+-    rightTx: "common.logOut",
+-    onRightPress: logout,
+-  })
++  useLayoutEffect(() => {
++    navigation.setOptions({
++      headerShown: true,
++      header: () => <Header rightTx="common.logOut" onRightPress={logout} />,
++    })
++  }, [])
+   // @demo remove-block-end
+ 
+-  const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
+-
+   return (
+     <View style={$container}>
+       <View style={$topContainer}>
+@@ -52,17 +55,19 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
+         <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
+       </View>
+ 
+-      <View style={[$bottomContainer, $bottomContainerInsets]}>
+-        <Text tx="welcomeScreen.postscript" size="md" />
+-        {/* @demo remove-block-start */}
+-        <Button
+-          testID="next-screen-button"
+-          preset="reversed"
+-          tx="welcomeScreen.letsGo"
+-          onPress={goNext}
+-        />
+-        {/* @demo remove-block-end */}
+-      </View>
++      <SafeAreaView style={$bottomContainer} edges={["bottom"]}>
++        <View style={$bottomContentContainer}>
++          <Text tx="welcomeScreen.postscript" size="md" />
++          {/* @demo remove-block-start */}
++          <Button
++            testID="next-screen-button"
++            preset="reversed"
++            tx="welcomeScreen.letsGo"
++            onPress={goNext}
++          />
++          {/* @demo remove-block-end */}
++        </View>
++      </SafeAreaView>
+     </View>
+   )
+ })
+@@ -87,9 +92,14 @@ const $bottomContainer: ViewStyle = {
+   backgroundColor: colors.palette.neutral100,
+   borderTopLeftRadius: 16,
+   borderTopRightRadius: 16,
++}
++
++const $bottomContentContainer: ViewStyle = {
++  flex: 1,
+   paddingHorizontal: spacing.large,
+   justifyContent: "space-around",
+ }
++
+ const $welcomeLogo: ImageStyle = {
+   height: 88,
+   width: "100%",
+diff --git a/IgniteDiffApp/app/utils/useIsMounted.ts b/IgniteDiffApp/app/utils/isMounted.ts
+similarity index 100%
+rename from IgniteDiffApp/app/utils/useIsMounted.ts
+rename to IgniteDiffApp/app/utils/isMounted.ts
+diff --git a/IgniteDiffApp/app/utils/useHeader.tsx b/IgniteDiffApp/app/utils/useHeader.tsx
+deleted file mode 100644
+index 0243cb8..0000000
+--- a/IgniteDiffApp/app/utils/useHeader.tsx
++++ /dev/null
+@@ -1,19 +0,0 @@
+-import React, { useLayoutEffect } from "react"
+-import { useNavigation } from "@react-navigation/native"
+-import { Header, HeaderProps } from "../components"
+-
+-/**
+- * A hook that can be used to easily set the Header of a react-navigation screen from within the screen's component.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Utils-useHeader.md)
+- */
+-export function useHeader(headerProps: HeaderProps, deps: any[] = []) {
+-  const navigation = useNavigation()
+-
+-  useLayoutEffect(() => {
+-    navigation.setOptions({
+-      headerShown: true,
+-      header: () => <Header {...headerProps} />,
+-    })
+-  }, deps)
+-}
+diff --git a/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts b/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts
+deleted file mode 100644
+index 5d4fd19..0000000
+--- a/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts
++++ /dev/null
+@@ -1,44 +0,0 @@
+-import { FlexStyle } from "react-native"
+-import { Edge, useSafeAreaInsets } from "react-native-safe-area-context"
+-
+-export type ExtendedEdge = Edge | "start" | "end"
+-
+-const propertySuffixMap = {
+-  top: "Top",
+-  bottom: "Bottom",
+-  left: "Start",
+-  right: "End",
+-  start: "Start",
+-  end: "End",
+-}
+-
+-const edgeInsetMap = {
+-  start: "left",
+-  end: "right",
+-}
+-
+-/**
+- * A hook that can be used to create a safe-area-aware style object that can be passed directly to a View.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Utils-useSafeAreaInsetsStyle.md)
+- */
+-export function useSafeAreaInsetsStyle(
+-  safeAreaEdges: ExtendedEdge[] = [],
+-  property: "padding" | "margin" = "padding",
+-): Pick<
+-  FlexStyle,
+-  | "marginBottom"
+-  | "marginEnd"
+-  | "marginStart"
+-  | "marginTop"
+-  | "paddingBottom"
+-  | "paddingEnd"
+-  | "paddingStart"
+-  | "paddingTop"
+-> {
+-  const insets = useSafeAreaInsets()
+-
+-  return safeAreaEdges.reduce((acc, e) => {
+-    return { ...acc, [`${property}${propertySuffixMap[e]}`]: insets[edgeInsetMap[e] ?? e] }
+-  }, {})
+-}
+diff --git a/IgniteDiffApp/bin/postInstall b/IgniteDiffApp/bin/postInstall
+index db77e75..ac88329 100755
+--- a/IgniteDiffApp/bin/postInstall
++++ b/IgniteDiffApp/bin/postInstall
+@@ -14,13 +14,10 @@ if (["darwin", "linux"].includes(process.platform)) {
+   run('pkill -f "cli.js start" || set exit 0')
+ }
+ 
+-/**
+- * On darwin machine:
+- *   1. Check if CocoaPods CLI is installed (and if not, install it)
+- *   2. Find an Xcode project dir
+- *   3. Run `pod install`, if fails run `pod repo update` and try again
+- */
+-run('npx pod-install')
++// On iOS, make sure CocoaPods are installed
++if (process.platform === "darwin") {
++  run('if [ -d "ios" ]; then cd ios && pod install && cd -; fi')
++}
+ 
+ // Run baby run
+ function run(command) {
