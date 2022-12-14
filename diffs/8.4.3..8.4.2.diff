@@ -1,0 +1,254 @@
+diff --git a/IgniteDiffApp/app/components/Card.tsx b/IgniteDiffApp/app/components/Card.tsx
+index b118f73..6d4da5a 100644
+--- a/IgniteDiffApp/app/components/Card.tsx
++++ b/IgniteDiffApp/app/components/Card.tsx
+@@ -180,8 +180,8 @@ export function Card(props: CardProps) {
+   const $alignmentWrapperStyle = [
+     $alignmentWrapper,
+     { justifyContent: $alignmentWrapperFlexOptions[verticalAlignment] },
+-    LeftComponent && { marginStart: spacing.medium },
+-    RightComponent && { marginEnd: spacing.medium },
++    LeftComponent && { marginLeft: spacing.medium },
++    RightComponent && { marginRight: spacing.medium },
+   ]
+ 
+   return (
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index ba8ee0f..28afc1d 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -24,10 +24,6 @@ export interface HeaderProps {
+    * Optional title style override.
+    */
+   titleStyle?: StyleProp<TextStyle>
+-  /**
+-   * Optional outer title container style override.
+-   */
+-  titleContainerStyle?: StyleProp<ViewStyle>
+   /**
+    * Optional inner header wrapper style override.
+    */
+@@ -164,7 +160,6 @@ export function Header(props: HeaderProps) {
+     titleMode = "center",
+     titleTx,
+     titleTxOptions,
+-    titleContainerStyle: $titleContainerStyleOverride,
+     style: $styleOverride,
+     titleStyle: $titleStyleOverride,
+     containerStyle: $containerStyleOverride,
+@@ -189,21 +184,16 @@ export function Header(props: HeaderProps) {
+         />
+ 
+         {!!titleContent && (
+-          <View
++          <Text
++            weight="medium"
++            size="md"
++            text={titleContent}
+             style={[
+-              titleMode === "center" && $titleWrapperCenter,
+-              titleMode === "flex" && $titleWrapperFlex,
+-              $titleContainerStyleOverride,
++              titleMode === "center" && $centerTitle,
++              titleMode === "flex" && $flexTitle,
++              $titleStyleOverride,
+             ]}
+-            pointerEvents="none"
+-          >
+-            <Text
+-              weight="medium"
+-              size="md"
+-              text={titleContent}
+-              style={[$title, $titleStyleOverride]}
+-            />
+-          </View>
++          />
+         )}
+ 
+         <HeaderAction
+@@ -268,7 +258,16 @@ const $container: ViewStyle = {
+   width: "100%",
+ }
+ 
+-const $title: TextStyle = {
++const $centerTitle: TextStyle = {
++  position: "absolute",
++  width: "100%",
++  textAlign: "center",
++  paddingHorizontal: spacing.huge,
++  zIndex: 1,
++}
++
++const $flexTitle: TextStyle = {
++  flex: 1,
+   textAlign: "center",
+ }
+ 
+@@ -297,18 +296,3 @@ const $actionIconContainer: ViewStyle = {
+ const $actionFillerContainer: ViewStyle = {
+   width: 16,
+ }
+-
+-const $titleWrapperCenter: ViewStyle = {
+-  alignItems: "center",
+-  justifyContent: "center",
+-  height: "100%",
+-  width: "100%",
+-  position: "absolute",
+-  paddingHorizontal: spacing.huge,
+-  zIndex: 1,
+-}
+-
+-const $titleWrapperFlex: ViewStyle = {
+-  justifyContent: "center",
+-  flexGrow: 1,
+-}
+diff --git a/IgniteDiffApp/app/components/Toggle.tsx b/IgniteDiffApp/app/components/Toggle.tsx
+index 3568905..3882a30 100644
+--- a/IgniteDiffApp/app/components/Toggle.tsx
++++ b/IgniteDiffApp/app/components/Toggle.tsx
+@@ -623,11 +623,11 @@ const $label: TextStyle = {
+ }
+ 
+ const $labelRight: TextStyle = {
+-  marginStart: spacing.medium,
++  marginLeft: spacing.medium,
+ }
+ 
+ const $labelLeft: TextStyle = {
+-  marginEnd: spacing.medium,
++  marginRight: spacing.medium,
+ }
+ 
+ const $switchAccessibility: TextStyle = {
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index bdf331b..f6bd493 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -123,7 +123,7 @@ export function useNavigationPersistence(storage: any, persistenceKey: string) {
+       }
+     }
+ 
+-    // Save the current route name for later comparison
++    // Save the current route name for later comparision
+     routeNameRef.current = currentRouteName
+ 
+     // Persist state to storage
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 3aa9ca8..08e7951 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -329,7 +329,7 @@ const $iconContainer: ViewStyle = {
+   height: ICON_SIZE,
+   width: ICON_SIZE,
+   flexDirection: "row",
+-  marginEnd: spacing.small,
++  marginRight: spacing.small,
+ }
+ 
+ const $metadata: TextStyle = {
+@@ -340,7 +340,7 @@ const $metadata: TextStyle = {
+ 
+ const $metadataText: TextStyle = {
+   color: colors.textDim,
+-  marginEnd: spacing.medium,
++  marginRight: spacing.medium,
+   marginBottom: spacing.extraSmall,
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+index 7fe7190..6be705a 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+@@ -29,14 +29,14 @@ export function DemoDivider(props: DemoDividerProps) {
+             type === "horizontal" && {
+               width: 150,
+               height: 1,
+-              marginStart: -75,
++              marginLeft: -75,
+               marginTop: -1,
+             },
+             type === "vertical" && {
+               height: 50,
+               width: 1,
+               marginTop: -25,
+-              marginStart: -1,
++              marginLeft: -1,
+             },
+           ]}
+         />
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 289a035..352eaef 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -15,7 +15,7 @@ interface DrawerIconButtonProps extends PressableProps {
+   progress: SharedValue<number>
+ }
+ 
+-const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
++const AnimatedPressible = Animated.createAnimatedComponent(Pressable)
+ 
+ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   const { open, progress, ...PressableProps } = props
+@@ -30,14 +30,14 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+ 
+   const animatedTopBarStyles = useAnimatedStyle(() => {
+     const backgroundColor = interpolateColor(progress.value, [0, 1], [colors.text, colors.tint])
+-    const marginStart = interpolate(progress.value, [0, 1], [0, -11.5])
++    const marginLeft = interpolate(progress.value, [0, 1], [0, -11.5])
+     const rotate = interpolate(progress.value, [0, 1], [0, isRTL ? 45 : -45])
+     const marginBottom = interpolate(progress.value, [0, 1], [0, -2])
+     const width = interpolate(progress.value, [0, 1], [18, 12])
+ 
+     return {
+       backgroundColor,
+-      marginStart,
++      marginLeft,
+       marginBottom,
+       width,
+       transform: [{ rotate: `${rotate}deg` }],
+@@ -57,13 +57,13 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   const animatedBottomBarStyles = useAnimatedStyle(() => {
+     const marginTop = interpolate(progress.value, [0, 1], [4, 2])
+     const backgroundColor = interpolateColor(progress.value, [0, 1], [colors.text, colors.tint])
+-    const marginStart = interpolate(progress.value, [0, 1], [0, -11.5])
++    const marginLeft = interpolate(progress.value, [0, 1], [0, -11.5])
+     const rotate = interpolate(progress.value, [0, 1], [0, isRTL ? -45 : 45])
+     const width = interpolate(progress.value, [0, 1], [18, 12])
+ 
+     return {
+       backgroundColor,
+-      marginStart,
++      marginLeft,
+       width,
+       marginTop,
+       transform: [{ rotate: `${rotate}deg` }],
+@@ -75,13 +75,13 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   }, [open, progress])
+ 
+   return (
+-    <AnimatedPressable {...PressableProps} style={[$container, animatedContainerStyles]}>
++    <AnimatedPressible {...PressableProps} style={[$container, animatedContainerStyles]}>
+       <Animated.View style={[$topBar, animatedTopBarStyles]} />
+ 
+       <Animated.View style={[$middleBar, animatedMiddleBarStyles]} />
+ 
+       <Animated.View style={[$bottomBar, animatedBottomBarStyles]} />
+-    </AnimatedPressable>
++    </AnimatedPressible>
+   )
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+index 9adbf08..ccd5a13 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+@@ -133,7 +133,7 @@ export const DemoAutoImage: Demo = {
+           />
+         </View>
+ 
+-        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginStart: spacing.small }]}>
++        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginLeft: spacing.small }]}>
+           <View style={[$aspectRatioBox, { height: 32 }]} />
+           <Image
+             source={{

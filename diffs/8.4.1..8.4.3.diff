@@ -1,0 +1,517 @@
+diff --git a/IgniteDiffApp/app/components/Card.tsx b/IgniteDiffApp/app/components/Card.tsx
+index 6d4da5a..b118f73 100644
+--- a/IgniteDiffApp/app/components/Card.tsx
++++ b/IgniteDiffApp/app/components/Card.tsx
+@@ -180,8 +180,8 @@ export function Card(props: CardProps) {
+   const $alignmentWrapperStyle = [
+     $alignmentWrapper,
+     { justifyContent: $alignmentWrapperFlexOptions[verticalAlignment] },
+-    LeftComponent && { marginLeft: spacing.medium },
+-    RightComponent && { marginRight: spacing.medium },
++    LeftComponent && { marginStart: spacing.medium },
++    RightComponent && { marginEnd: spacing.medium },
+   ]
+ 
+   return (
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index 28afc1d..ba8ee0f 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -24,6 +24,10 @@ export interface HeaderProps {
+    * Optional title style override.
+    */
+   titleStyle?: StyleProp<TextStyle>
++  /**
++   * Optional outer title container style override.
++   */
++  titleContainerStyle?: StyleProp<ViewStyle>
+   /**
+    * Optional inner header wrapper style override.
+    */
+@@ -160,6 +164,7 @@ export function Header(props: HeaderProps) {
+     titleMode = "center",
+     titleTx,
+     titleTxOptions,
++    titleContainerStyle: $titleContainerStyleOverride,
+     style: $styleOverride,
+     titleStyle: $titleStyleOverride,
+     containerStyle: $containerStyleOverride,
+@@ -184,16 +189,21 @@ export function Header(props: HeaderProps) {
+         />
+ 
+         {!!titleContent && (
+-          <Text
+-            weight="medium"
+-            size="md"
+-            text={titleContent}
++          <View
+             style={[
+-              titleMode === "center" && $centerTitle,
+-              titleMode === "flex" && $flexTitle,
+-              $titleStyleOverride,
++              titleMode === "center" && $titleWrapperCenter,
++              titleMode === "flex" && $titleWrapperFlex,
++              $titleContainerStyleOverride,
+             ]}
+-          />
++            pointerEvents="none"
++          >
++            <Text
++              weight="medium"
++              size="md"
++              text={titleContent}
++              style={[$title, $titleStyleOverride]}
++            />
++          </View>
+         )}
+ 
+         <HeaderAction
+@@ -258,16 +268,7 @@ const $container: ViewStyle = {
+   width: "100%",
+ }
+ 
+-const $centerTitle: TextStyle = {
+-  position: "absolute",
+-  width: "100%",
+-  textAlign: "center",
+-  paddingHorizontal: spacing.huge,
+-  zIndex: 1,
+-}
+-
+-const $flexTitle: TextStyle = {
+-  flex: 1,
++const $title: TextStyle = {
+   textAlign: "center",
+ }
+ 
+@@ -296,3 +297,18 @@ const $actionIconContainer: ViewStyle = {
+ const $actionFillerContainer: ViewStyle = {
+   width: 16,
+ }
++
++const $titleWrapperCenter: ViewStyle = {
++  alignItems: "center",
++  justifyContent: "center",
++  height: "100%",
++  width: "100%",
++  position: "absolute",
++  paddingHorizontal: spacing.huge,
++  zIndex: 1,
++}
++
++const $titleWrapperFlex: ViewStyle = {
++  justifyContent: "center",
++  flexGrow: 1,
++}
+diff --git a/IgniteDiffApp/app/components/Toggle.tsx b/IgniteDiffApp/app/components/Toggle.tsx
+index 6418fe8..3568905 100644
+--- a/IgniteDiffApp/app/components/Toggle.tsx
++++ b/IgniteDiffApp/app/components/Toggle.tsx
+@@ -1,4 +1,4 @@
+-import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
++import React, { ComponentType, FC, useMemo } from "react"
+ import {
+   GestureResponderEvent,
+   Image,
+@@ -12,20 +12,20 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import Animated, { FadeIn, useAnimatedStyle, withTiming } from "react-native-reanimated"
++import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
+ import { colors, spacing } from "../theme"
+-import { iconRegistry } from "./Icon"
++import { iconRegistry, IconTypes } from "./Icon"
+ import { Text, TextProps } from "./Text"
+ 
+ type Variants = "checkbox" | "switch" | "radio"
+ 
+-export interface ToggleProps extends Omit<TouchableOpacityProps, "style"> {
++interface BaseToggleProps extends Omit<TouchableOpacityProps, "style"> {
+   /**
+    * The variant of the toggle.
+    * Options: "checkbox", "switch", "radio"
+    * Default: "checkbox"
+    */
+-  variant?: Variants
++  variant?: unknown
+   /**
+    * A style modifier for different input states.
+    */
+@@ -60,13 +60,6 @@ export interface ToggleProps extends Omit<TouchableOpacityProps, "style"> {
+    * This gives the inputs their inner characteristics and "on" background-color.
+    */
+   inputInnerStyle?: ViewStyle
+-  /**
+-   * Optional input detail style override.
+-   * For checkbox, this affects the Image component.
+-   * For radio, this affects the dot View.
+-   * For switch, this affects the knob View.
+-   */
+-  inputDetailStyle?: ViewStyle & ImageStyle
+   /**
+    * The position of the label relative to the action component.
+    * Default: right
+@@ -110,20 +103,52 @@ export interface ToggleProps extends Omit<TouchableOpacityProps, "style"> {
+    * Pass any additional props directly to the helper Text component.
+    */
+   HelperTextProps?: TextProps
++}
++
++interface CheckboxToggleProps extends BaseToggleProps {
++  variant?: "checkbox"
++  /**
++   * Optional style prop that affects the Image component.
++   */
++  inputDetailStyle?: ImageStyle
++  /**
++   * Checkbox-only prop that changes the icon used for the "on" state.
++   */
++  checkboxIcon?: IconTypes
++}
++
++interface RadioToggleProps extends BaseToggleProps {
++  variant?: "radio"
++  /**
++   * Optional style prop that affects the dot View.
++   */
++  inputDetailStyle?: ViewStyle
++}
++
++interface SwitchToggleProps extends BaseToggleProps {
++  variant?: "switch"
+   /**
+-   * Special prop for the switch variant that adds a text/icon label for on/off states.
++   * Switch-only prop that adds a text/icon label for on/off states.
+    */
+   switchAccessibilityMode?: "text" | "icon"
++  /**
++   * Optional style prop that affects the knob View.
++   * Note: `width` and `height` rules should be points (numbers), not percentages.
++   */
++  inputDetailStyle?: Omit<ViewStyle, "width" | "height"> & { width?: number; height?: number }
+ }
+ 
++export type ToggleProps = CheckboxToggleProps | RadioToggleProps | SwitchToggleProps
++
+ interface ToggleInputProps {
+   on: boolean
+-  status: ToggleProps["status"]
++  status: BaseToggleProps["status"]
+   disabled: boolean
+   outerStyle: ViewStyle
+   innerStyle: ViewStyle
+-  detailStyle: ViewStyle & ImageStyle
+-  switchAccessibilityMode?: ToggleProps["switchAccessibilityMode"]
++  detailStyle: Omit<ViewStyle & ImageStyle, "overflow">
++  switchAccessibilityMode?: SwitchToggleProps["switchAccessibilityMode"]
++  checkboxIcon?: CheckboxToggleProps["checkboxIcon"]
+ }
+ 
+ /**
+@@ -150,7 +175,10 @@ export function Toggle(props: ToggleProps) {
+     ...WrapperProps
+   } = props
+ 
+-  const disabled = editable === false || status === "disabled"
++  const { switchAccessibilityMode } = props as SwitchToggleProps
++  const { checkboxIcon } = props as CheckboxToggleProps
++
++  const disabled = editable === false || status === "disabled" || props.disabled
+ 
+   const Wrapper = useMemo<ComponentType<TouchableOpacityProps>>(
+     () => (disabled ? View : TouchableOpacity),
+@@ -191,7 +219,8 @@ export function Toggle(props: ToggleProps) {
+           outerStyle={props.inputOuterStyle}
+           innerStyle={props.inputInnerStyle}
+           detailStyle={props.inputDetailStyle}
+-          switchAccessibilityMode={props.switchAccessibilityMode}
++          switchAccessibilityMode={switchAccessibilityMode}
++          checkboxIcon={checkboxIcon}
+         />
+ 
+         {labelPosition === "right" && <FieldLabel {...props} labelPosition={labelPosition} />}
+@@ -222,6 +251,7 @@ function Checkbox(props: ToggleInputProps) {
+     on,
+     status,
+     disabled,
++    checkboxIcon,
+     outerStyle: $outerStyleOverride,
+     innerStyle: $innerStyleOverride,
+     detailStyle: $detailStyleOverride,
+@@ -269,7 +299,7 @@ function Checkbox(props: ToggleInputProps) {
+         ]}
+       >
+         <Image
+-          source={iconRegistry.check}
++          source={iconRegistry[checkboxIcon] || iconRegistry.check}
+           style={[$checkboxDetail, { tintColor: iconTintColor }, $detailStyleOverride]}
+         />
+       </Animated.View>
+@@ -346,15 +376,15 @@ function Switch(props: ToggleInputProps) {
+     detailStyle: $detailStyleOverride,
+   } = props
+ 
+-  const knob = useRef<Animated.View>()
+-  const [renderedKnobWidth, setRenderedKnobWidth] = useState(null)
++  const knobSizeFallback = 2
+ 
+-  useEffect(() => {
+-    // measure knob subsquently if the override changes
+-    if (!knob.current) return
+-    if (renderedKnobWidth === null) return
+-    knob.current.measure((_x, _y, width) => setRenderedKnobWidth(width))
+-  }, [$detailStyleOverride?.width])
++  const knobWidth = [$detailStyleOverride?.width, $switchDetail?.width, knobSizeFallback].find(
++    (v) => typeof v === "number",
++  )
++
++  const knobHeight = [$detailStyleOverride?.height, $switchDetail?.height, knobSizeFallback].find(
++    (v) => typeof v === "number",
++  )
+ 
+   const offBackgroundColor = [
+     disabled && colors.palette.neutral400,
+@@ -387,8 +417,6 @@ function Switch(props: ToggleInputProps) {
+   })()
+ 
+   const $animatedSwitchKnob = useAnimatedStyle(() => {
+-    if (renderedKnobWidth === null) return {}
+-
+     const offsetLeft = ($innerStyleOverride?.paddingStart ||
+       $innerStyleOverride?.paddingLeft ||
+       $switchInner?.paddingStart ||
+@@ -402,10 +430,10 @@ function Switch(props: ToggleInputProps) {
+       0) as number
+ 
+     const start = withTiming(on ? "100%" : "0%")
+-    const marginStart = withTiming(on ? -(renderedKnobWidth || 0) - offsetRight : 0 + offsetLeft)
++    const marginStart = withTiming(on ? -(knobWidth || 0) - offsetRight : 0 + offsetLeft)
+ 
+     return { start, marginStart }
+-  }, [on, renderedKnobWidth])
++  }, [on, knobWidth])
+ 
+   return (
+     <View
+@@ -428,19 +456,13 @@ function Switch(props: ToggleInputProps) {
+       <SwitchAccessibilityLabel {...props} role="off" />
+ 
+       <Animated.View
+-        ref={knob}
+-        entering={FadeIn.delay(150).duration(150)}
+         style={[
+           $switchDetail,
+-          $animatedSwitchKnob,
+           $detailStyleOverride,
++          $animatedSwitchKnob,
++          { width: knobWidth, height: knobHeight },
+           { backgroundColor: knobBackgroundColor },
+         ]}
+-        onLayout={(e) => {
+-          // measure knob on load only once
+-          if (renderedKnobWidth !== null) return
+-          setRenderedKnobWidth(e.nativeEvent.layout.width)
+-        }}
+       />
+     </View>
+   )
+@@ -489,7 +511,7 @@ function SwitchAccessibilityLabel(props: ToggleInputProps & { role: "on" | "off"
+   )
+ }
+ 
+-function FieldLabel(props: ToggleProps) {
++function FieldLabel(props: BaseToggleProps) {
+   const {
+     status,
+     label,
+@@ -585,7 +607,7 @@ const $switchInner: ViewStyle = {
+   paddingEnd: 4,
+ }
+ 
+-const $switchDetail: ViewStyle = {
++const $switchDetail: SwitchToggleProps["inputDetailStyle"] = {
+   borderRadius: 12,
+   position: "absolute",
+   width: 24,
+@@ -601,11 +623,11 @@ const $label: TextStyle = {
+ }
+ 
+ const $labelRight: TextStyle = {
+-  marginLeft: spacing.medium,
++  marginStart: spacing.medium,
+ }
+ 
+ const $labelLeft: TextStyle = {
+-  marginRight: spacing.medium,
++  marginEnd: spacing.medium,
+ }
+ 
+ const $switchAccessibility: TextStyle = {
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index f6bd493..bdf331b 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -123,7 +123,7 @@ export function useNavigationPersistence(storage: any, persistenceKey: string) {
+       }
+     }
+ 
+-    // Save the current route name for later comparision
++    // Save the current route name for later comparison
+     routeNameRef.current = currentRouteName
+ 
+     // Persist state to storage
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 08e7951..3aa9ca8 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -329,7 +329,7 @@ const $iconContainer: ViewStyle = {
+   height: ICON_SIZE,
+   width: ICON_SIZE,
+   flexDirection: "row",
+-  marginRight: spacing.small,
++  marginEnd: spacing.small,
+ }
+ 
+ const $metadata: TextStyle = {
+@@ -340,7 +340,7 @@ const $metadata: TextStyle = {
+ 
+ const $metadataText: TextStyle = {
+   color: colors.textDim,
+-  marginRight: spacing.medium,
++  marginEnd: spacing.medium,
+   marginBottom: spacing.extraSmall,
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+index 6be705a..7fe7190 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+@@ -29,14 +29,14 @@ export function DemoDivider(props: DemoDividerProps) {
+             type === "horizontal" && {
+               width: 150,
+               height: 1,
+-              marginLeft: -75,
++              marginStart: -75,
+               marginTop: -1,
+             },
+             type === "vertical" && {
+               height: 50,
+               width: 1,
+               marginTop: -25,
+-              marginLeft: -1,
++              marginStart: -1,
+             },
+           ]}
+         />
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 352eaef..289a035 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -15,7 +15,7 @@ interface DrawerIconButtonProps extends PressableProps {
+   progress: SharedValue<number>
+ }
+ 
+-const AnimatedPressible = Animated.createAnimatedComponent(Pressable)
++const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+ 
+ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   const { open, progress, ...PressableProps } = props
+@@ -30,14 +30,14 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+ 
+   const animatedTopBarStyles = useAnimatedStyle(() => {
+     const backgroundColor = interpolateColor(progress.value, [0, 1], [colors.text, colors.tint])
+-    const marginLeft = interpolate(progress.value, [0, 1], [0, -11.5])
++    const marginStart = interpolate(progress.value, [0, 1], [0, -11.5])
+     const rotate = interpolate(progress.value, [0, 1], [0, isRTL ? 45 : -45])
+     const marginBottom = interpolate(progress.value, [0, 1], [0, -2])
+     const width = interpolate(progress.value, [0, 1], [18, 12])
+ 
+     return {
+       backgroundColor,
+-      marginLeft,
++      marginStart,
+       marginBottom,
+       width,
+       transform: [{ rotate: `${rotate}deg` }],
+@@ -57,13 +57,13 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   const animatedBottomBarStyles = useAnimatedStyle(() => {
+     const marginTop = interpolate(progress.value, [0, 1], [4, 2])
+     const backgroundColor = interpolateColor(progress.value, [0, 1], [colors.text, colors.tint])
+-    const marginLeft = interpolate(progress.value, [0, 1], [0, -11.5])
++    const marginStart = interpolate(progress.value, [0, 1], [0, -11.5])
+     const rotate = interpolate(progress.value, [0, 1], [0, isRTL ? -45 : 45])
+     const width = interpolate(progress.value, [0, 1], [18, 12])
+ 
+     return {
+       backgroundColor,
+-      marginLeft,
++      marginStart,
+       width,
+       marginTop,
+       transform: [{ rotate: `${rotate}deg` }],
+@@ -75,13 +75,13 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   }, [open, progress])
+ 
+   return (
+-    <AnimatedPressible {...PressableProps} style={[$container, animatedContainerStyles]}>
++    <AnimatedPressable {...PressableProps} style={[$container, animatedContainerStyles]}>
+       <Animated.View style={[$topBar, animatedTopBarStyles]} />
+ 
+       <Animated.View style={[$middleBar, animatedMiddleBarStyles]} />
+ 
+       <Animated.View style={[$bottomBar, animatedBottomBarStyles]} />
+-    </AnimatedPressible>
++    </AnimatedPressable>
+   )
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+index ccd5a13..9adbf08 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+@@ -133,7 +133,7 @@ export const DemoAutoImage: Demo = {
+           />
+         </View>
+ 
+-        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginLeft: spacing.small }]}>
++        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginStart: spacing.small }]}>
+           <View style={[$aspectRatioBox, { height: 32 }]} />
+           <Image
+             source={{
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+index 85b2006..5a101d5 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+@@ -162,6 +162,14 @@ export const DemoToggle: Demo = {
+         labelPosition="left"
+       />
+       <DemoDivider size={24} />
++      <ControlledToggle
++        variant="checkbox"
++        value
++        status="error"
++        checkboxIcon="ladybug"
++        label="Pass in a custom checkbox icon."
++      />
++      <DemoDivider size={24} />
+       <ControlledToggle
+         value
+         variant="switch"
+@@ -274,6 +282,7 @@ export const DemoToggle: Demo = {
+       <ControlledToggle
+         value
+         variant="checkbox"
++        checkboxIcon="ladybug"
+         containerStyle={$centeredOneThirdCol}
+         inputOuterStyle={{
+           width: 50,
+@@ -331,7 +340,7 @@ export const DemoToggle: Demo = {
+         inputDetailStyle={{
+           backgroundColor: colors.palette.accent300,
+           height: 36,
+-          width: 20,
++          width: 18,
+           borderRadius: 36,
+         }}
+         switchAccessibilityMode="icon"
