@@ -1,0 +1,22 @@
+diff --git a/IgniteDiffApp/bin/postInstall b/IgniteDiffApp/bin/postInstall
+index db77e75..ac88329 100755
+--- a/IgniteDiffApp/bin/postInstall
++++ b/IgniteDiffApp/bin/postInstall
+@@ -14,13 +14,10 @@ if (["darwin", "linux"].includes(process.platform)) {
+   run('pkill -f "cli.js start" || set exit 0')
+ }
+ 
+-/**
+- * On darwin machine:
+- *   1. Check if CocoaPods CLI is installed (and if not, install it)
+- *   2. Find an Xcode project dir
+- *   3. Run `pod install`, if fails run `pod repo update` and try again
+- */
+-run('npx pod-install')
++// On iOS, make sure CocoaPods are installed
++if (process.platform === "darwin") {
++  run('if [ -d "ios" ]; then cd ios && pod install && cd -; fi')
++}
+ 
+ // Run baby run
+ function run(command) {
