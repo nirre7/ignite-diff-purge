@@ -1,0 +1,2941 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 25cd0af..9b188e9 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -4,7 +4,6 @@
+   "expo": {
+     "name": "IgniteDiffApp",
+     "slug": "IgniteDiffApp",
+-    "scheme": "ignitediffapp",
+     "version": "1.0.0",
+     "orientation": "portrait",
+     "icon": "./assets/images/app-icon-all.png",
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index 718c626..d21d6e8 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -14,7 +14,6 @@ import "./utils/ignoreWarnings"
+ import { useFonts } from "expo-font"
+ import React from "react"
+ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
+-import * as Linking from "expo-linking"
+ import { useInitialRootStore } from "./models"
+ import { AppNavigator, useNavigationPersistence } from "./navigators"
+ import { ErrorBoundary } from "./screens/ErrorScreen/ErrorBoundary"
+@@ -40,27 +39,6 @@ setupReactotron({
+ 
+ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
+ 
+-// Web linking configuration
+-const prefix = Linking.createURL("/")
+-const config = {
+-  screens: {
+-    Login: {
+-      path: "",
+-    },
+-    Welcome: "welcome",
+-    Demo: {
+-      screens: {
+-        DemoShowroom: {
+-          path: "showroom/:queryIndex?/:itemIndex?",
+-        },
+-        DemoDebug: "debug",
+-        DemoPodcastList: "podcast",
+-        DemoCommunity: "community",
+-      },
+-    },
+-  },
+-}
+-
+ interface AppProps {
+   hideSplashScreen: () => Promise<void>
+ }
+@@ -96,17 +74,11 @@ function App(props: AppProps) {
+   // You can replace with your own loading component if you wish.
+   if (!rehydrated || !isNavigationStateRestored || !areFontsLoaded) return null
+ 
+-  const linking = {
+-    prefixes: [prefix],
+-    config,
+-  }
+-
+   // otherwise, we're ready to render the app
+   return (
+     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+       <ErrorBoundary catchErrors={Config.catchErrors}>
+         <AppNavigator
+-          linking={linking}
+           initialState={initialNavigationState}
+           onStateChange={onNavigationStateChange}
+         />
+diff --git a/IgniteDiffApp/app/components/Card.tsx b/IgniteDiffApp/app/components/Card.tsx
+index b118f73..6d4da5a 100644
+--- a/IgniteDiffApp/app/components/Card.tsx
++++ b/IgniteDiffApp/app/components/Card.tsx
+@@ -180,8 +180,8 @@ export function Card(props: CardProps) {
+   const $alignmentWrapperStyle = [
+     $alignmentWrapper,
+     { justifyContent: $alignmentWrapperFlexOptions[verticalAlignment] },
+-    LeftComponent && { marginStart: spacing.medium },
+-    RightComponent && { marginEnd: spacing.medium },
++    LeftComponent && { marginLeft: spacing.medium },
++    RightComponent && { marginRight: spacing.medium },
+   ]
+ 
+   return (
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index ba8ee0f..cbcaf42 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -7,11 +7,11 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import { isRTL, translate } from "../i18n"
++import { Edge, SafeAreaView, SafeAreaViewProps } from "react-native-safe-area-context"
+ import { colors, spacing } from "../theme"
+-import { ExtendedEdge, useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ import { Icon, IconTypes } from "./Icon"
+ import { Text, TextProps } from "./Text"
++import { isRTL, translate } from "../i18n"
+ 
+ export interface HeaderProps {
+   /**
+@@ -25,15 +25,7 @@ export interface HeaderProps {
+    */
+   titleStyle?: StyleProp<TextStyle>
+   /**
+-   * Optional outer title container style override.
+-   */
+-  titleContainerStyle?: StyleProp<ViewStyle>
+-  /**
+-   * Optional inner header wrapper style override.
+-   */
+-  style?: StyleProp<ViewStyle>
+-  /**
+-   * Optional outer header container style override.
++   * Optional header style override.
+    */
+   containerStyle?: StyleProp<ViewStyle>
+   /**
+@@ -122,7 +114,11 @@ export interface HeaderProps {
+   /**
+    * Override the default edges for the safe area.
+    */
+-  safeAreaEdges?: ExtendedEdge[]
++  safeAreaEdges?: Edge[]
++  /**
++   * Pass any additional props directly to the SafeAreaView component.
++   */
++  SafeAreaViewProps?: SafeAreaViewProps
+ }
+ 
+ interface HeaderActionProps {
+@@ -138,7 +134,7 @@ interface HeaderActionProps {
+ 
+ /**
+  * Header that appears on many screens. Will hold navigation buttons and screen title.
+- * The Header is meant to be used with the `screenOptions.header` option on navigators, routes, or screen components via `navigation.setOptions({ header })`.
++ * The Header is meant to be used with the `screenOptions.header` option on navigators,routes, or screen components via `navigation.setOptions({ header })`.
+  *
+  * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Header.md)
+  */
+@@ -160,23 +156,26 @@ export function Header(props: HeaderProps) {
+     rightTx,
+     rightTxOptions,
+     safeAreaEdges = ["top"],
++    SafeAreaViewProps,
+     title,
+     titleMode = "center",
+     titleTx,
+     titleTxOptions,
+-    titleContainerStyle: $titleContainerStyleOverride,
+-    style: $styleOverride,
+     titleStyle: $titleStyleOverride,
+     containerStyle: $containerStyleOverride,
+   } = props
+ 
+-  const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges)
++  const Wrapper = safeAreaEdges?.length ? SafeAreaView : View
+ 
+   const titleContent = titleTx ? translate(titleTx, titleTxOptions) : title
+ 
+   return (
+-    <View style={[$container, $containerInsets, { backgroundColor }, $containerStyleOverride]}>
+-      <View style={[$wrapper, $styleOverride]}>
++    <Wrapper
++      edges={safeAreaEdges}
++      {...SafeAreaViewProps}
++      style={[$safeArea, SafeAreaViewProps?.style, { backgroundColor }]}
++    >
++      <View style={[$container, $containerStyleOverride]}>
+         <HeaderAction
+           tx={leftTx}
+           text={leftText}
+@@ -189,21 +188,16 @@ export function Header(props: HeaderProps) {
+         />
+ 
+         {!!titleContent && (
+-          <View
++          <Text
++            weight="medium"
++            size="md"
++            text={titleContent}
+             style={[
+-              titleMode === "center" && $titleWrapperCenter,
+-              titleMode === "flex" && $titleWrapperFlex,
+-              $titleContainerStyleOverride,
++              titleMode === "center" && $centerTitle,
++              titleMode === "flex" && $flexTitle,
++              $titleStyleOverride,
+             ]}
+-            pointerEvents="none"
+-          >
+-            <Text
+-              weight="medium"
+-              size="md"
+-              text={titleContent}
+-              style={[$title, $titleStyleOverride]}
+-            />
+-          </View>
++          />
+         )}
+ 
+         <HeaderAction
+@@ -217,7 +211,7 @@ export function Header(props: HeaderProps) {
+           ActionComponent={RightActionComponent}
+         />
+       </View>
+-    </View>
++    </Wrapper>
+   )
+ }
+ 
+@@ -257,18 +251,27 @@ function HeaderAction(props: HeaderActionProps) {
+   return <View style={[$actionFillerContainer, { backgroundColor }]} />
+ }
+ 
+-const $wrapper: ViewStyle = {
++const $safeArea: ViewStyle = {
++  width: "100%",
++}
++
++const $container: ViewStyle = {
+   height: 56,
+   flexDirection: "row",
+   alignItems: "center",
+   justifyContent: "space-between",
+ }
+ 
+-const $container: ViewStyle = {
++const $centerTitle: TextStyle = {
++  position: "absolute",
+   width: "100%",
++  textAlign: "center",
++  paddingHorizontal: spacing.huge,
++  zIndex: 1,
+ }
+ 
+-const $title: TextStyle = {
++const $flexTitle: TextStyle = {
++  flex: 1,
+   textAlign: "center",
+ }
+ 
+@@ -297,18 +300,3 @@ const $actionIconContainer: ViewStyle = {
+ const $actionFillerContainer: ViewStyle = {
+   width: 16,
+ }
+-
+-const $titleWrapperCenter: ViewStyle = {
+-  alignItems: "center",
+-  justifyContent: "center",
+-  height: "100%",
+-  width: "100%",
+-  position: "absolute",
+-  paddingHorizontal: spacing.huge,
+-  zIndex: 1,
+-}
+-
+-const $titleWrapperFlex: ViewStyle = {
+-  justifyContent: "center",
+-  flexGrow: 1,
+-}
+diff --git a/IgniteDiffApp/app/components/Screen.tsx b/IgniteDiffApp/app/components/Screen.tsx
+index 9f209bf..c3c46b3 100644
+--- a/IgniteDiffApp/app/components/Screen.tsx
++++ b/IgniteDiffApp/app/components/Screen.tsx
+@@ -1,5 +1,3 @@
+-import { useScrollToTop } from "@react-navigation/native"
+-import { StatusBar, StatusBarProps } from "expo-status-bar"
+ import React, { useRef, useState } from "react"
+ import {
+   KeyboardAvoidingView,
+@@ -12,8 +10,10 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
++import { StatusBar, StatusBarProps } from "expo-status-bar"
++import { Edge, useSafeAreaInsets } from "react-native-safe-area-context"
++import { useScrollToTop } from "@react-navigation/native"
+ import { colors } from "../theme"
+-import { ExtendedEdge, useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ 
+ interface BaseScreenProps {
+   /**
+@@ -31,7 +31,7 @@ interface BaseScreenProps {
+   /**
+    * Override the default edges for the safe area.
+    */
+-  safeAreaEdges?: ExtendedEdge[]
++  safeAreaEdges?: Edge[]
+   /**
+    * Background color
+    */
+@@ -137,6 +137,18 @@ function useAutoPreset(props: AutoScreenProps) {
+   }
+ }
+ 
++function useSafeAreaInsetPadding(safeAreaEdges?: Edge[]) {
++  const insets = useSafeAreaInsets()
++
++  const insetStyles: ViewStyle = {}
++  safeAreaEdges?.forEach((edge: Edge) => {
++    const paddingProp = `padding${edge.charAt(0).toUpperCase()}${edge.slice(1)}`
++    insetStyles[paddingProp] = insets[edge]
++  })
++
++  return insetStyles
++}
++
+ function ScreenWithoutScrolling(props: ScreenProps) {
+   const { style, contentContainerStyle, children } = props
+   return (
+@@ -197,10 +209,10 @@ export function Screen(props: ScreenProps) {
+     statusBarStyle = "dark",
+   } = props
+ 
+-  const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges)
++  const insetPadding = useSafeAreaInsetPadding(safeAreaEdges)
+ 
+   return (
+-    <View style={[$containerStyle, { backgroundColor }, $containerInsets]}>
++    <View style={[$containerStyle, { backgroundColor }, insetPadding]}>
+       <StatusBar style={statusBarStyle} {...StatusBarProps} />
+ 
+       <KeyboardAvoidingView
+diff --git a/IgniteDiffApp/app/components/Toggle.tsx b/IgniteDiffApp/app/components/Toggle.tsx
+index 3568905..6418fe8 100644
+--- a/IgniteDiffApp/app/components/Toggle.tsx
++++ b/IgniteDiffApp/app/components/Toggle.tsx
+@@ -1,4 +1,4 @@
+-import React, { ComponentType, FC, useMemo } from "react"
++import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
+ import {
+   GestureResponderEvent,
+   Image,
+@@ -12,20 +12,20 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
++import Animated, { FadeIn, useAnimatedStyle, withTiming } from "react-native-reanimated"
+ import { colors, spacing } from "../theme"
+-import { iconRegistry, IconTypes } from "./Icon"
++import { iconRegistry } from "./Icon"
+ import { Text, TextProps } from "./Text"
+ 
+ type Variants = "checkbox" | "switch" | "radio"
+ 
+-interface BaseToggleProps extends Omit<TouchableOpacityProps, "style"> {
++export interface ToggleProps extends Omit<TouchableOpacityProps, "style"> {
+   /**
+    * The variant of the toggle.
+    * Options: "checkbox", "switch", "radio"
+    * Default: "checkbox"
+    */
+-  variant?: unknown
++  variant?: Variants
+   /**
+    * A style modifier for different input states.
+    */
+@@ -60,6 +60,13 @@ interface BaseToggleProps extends Omit<TouchableOpacityProps, "style"> {
+    * This gives the inputs their inner characteristics and "on" background-color.
+    */
+   inputInnerStyle?: ViewStyle
++  /**
++   * Optional input detail style override.
++   * For checkbox, this affects the Image component.
++   * For radio, this affects the dot View.
++   * For switch, this affects the knob View.
++   */
++  inputDetailStyle?: ViewStyle & ImageStyle
+   /**
+    * The position of the label relative to the action component.
+    * Default: right
+@@ -103,52 +110,20 @@ interface BaseToggleProps extends Omit<TouchableOpacityProps, "style"> {
+    * Pass any additional props directly to the helper Text component.
+    */
+   HelperTextProps?: TextProps
+-}
+-
+-interface CheckboxToggleProps extends BaseToggleProps {
+-  variant?: "checkbox"
+-  /**
+-   * Optional style prop that affects the Image component.
+-   */
+-  inputDetailStyle?: ImageStyle
+-  /**
+-   * Checkbox-only prop that changes the icon used for the "on" state.
+-   */
+-  checkboxIcon?: IconTypes
+-}
+-
+-interface RadioToggleProps extends BaseToggleProps {
+-  variant?: "radio"
+-  /**
+-   * Optional style prop that affects the dot View.
+-   */
+-  inputDetailStyle?: ViewStyle
+-}
+-
+-interface SwitchToggleProps extends BaseToggleProps {
+-  variant?: "switch"
+   /**
+-   * Switch-only prop that adds a text/icon label for on/off states.
++   * Special prop for the switch variant that adds a text/icon label for on/off states.
+    */
+   switchAccessibilityMode?: "text" | "icon"
+-  /**
+-   * Optional style prop that affects the knob View.
+-   * Note: `width` and `height` rules should be points (numbers), not percentages.
+-   */
+-  inputDetailStyle?: Omit<ViewStyle, "width" | "height"> & { width?: number; height?: number }
+ }
+ 
+-export type ToggleProps = CheckboxToggleProps | RadioToggleProps | SwitchToggleProps
+-
+ interface ToggleInputProps {
+   on: boolean
+-  status: BaseToggleProps["status"]
++  status: ToggleProps["status"]
+   disabled: boolean
+   outerStyle: ViewStyle
+   innerStyle: ViewStyle
+-  detailStyle: Omit<ViewStyle & ImageStyle, "overflow">
+-  switchAccessibilityMode?: SwitchToggleProps["switchAccessibilityMode"]
+-  checkboxIcon?: CheckboxToggleProps["checkboxIcon"]
++  detailStyle: ViewStyle & ImageStyle
++  switchAccessibilityMode?: ToggleProps["switchAccessibilityMode"]
+ }
+ 
+ /**
+@@ -175,10 +150,7 @@ export function Toggle(props: ToggleProps) {
+     ...WrapperProps
+   } = props
+ 
+-  const { switchAccessibilityMode } = props as SwitchToggleProps
+-  const { checkboxIcon } = props as CheckboxToggleProps
+-
+-  const disabled = editable === false || status === "disabled" || props.disabled
++  const disabled = editable === false || status === "disabled"
+ 
+   const Wrapper = useMemo<ComponentType<TouchableOpacityProps>>(
+     () => (disabled ? View : TouchableOpacity),
+@@ -219,8 +191,7 @@ export function Toggle(props: ToggleProps) {
+           outerStyle={props.inputOuterStyle}
+           innerStyle={props.inputInnerStyle}
+           detailStyle={props.inputDetailStyle}
+-          switchAccessibilityMode={switchAccessibilityMode}
+-          checkboxIcon={checkboxIcon}
++          switchAccessibilityMode={props.switchAccessibilityMode}
+         />
+ 
+         {labelPosition === "right" && <FieldLabel {...props} labelPosition={labelPosition} />}
+@@ -251,7 +222,6 @@ function Checkbox(props: ToggleInputProps) {
+     on,
+     status,
+     disabled,
+-    checkboxIcon,
+     outerStyle: $outerStyleOverride,
+     innerStyle: $innerStyleOverride,
+     detailStyle: $detailStyleOverride,
+@@ -299,7 +269,7 @@ function Checkbox(props: ToggleInputProps) {
+         ]}
+       >
+         <Image
+-          source={iconRegistry[checkboxIcon] || iconRegistry.check}
++          source={iconRegistry.check}
+           style={[$checkboxDetail, { tintColor: iconTintColor }, $detailStyleOverride]}
+         />
+       </Animated.View>
+@@ -376,15 +346,15 @@ function Switch(props: ToggleInputProps) {
+     detailStyle: $detailStyleOverride,
+   } = props
+ 
+-  const knobSizeFallback = 2
++  const knob = useRef<Animated.View>()
++  const [renderedKnobWidth, setRenderedKnobWidth] = useState(null)
+ 
+-  const knobWidth = [$detailStyleOverride?.width, $switchDetail?.width, knobSizeFallback].find(
+-    (v) => typeof v === "number",
+-  )
+-
+-  const knobHeight = [$detailStyleOverride?.height, $switchDetail?.height, knobSizeFallback].find(
+-    (v) => typeof v === "number",
+-  )
++  useEffect(() => {
++    // measure knob subsquently if the override changes
++    if (!knob.current) return
++    if (renderedKnobWidth === null) return
++    knob.current.measure((_x, _y, width) => setRenderedKnobWidth(width))
++  }, [$detailStyleOverride?.width])
+ 
+   const offBackgroundColor = [
+     disabled && colors.palette.neutral400,
+@@ -417,6 +387,8 @@ function Switch(props: ToggleInputProps) {
+   })()
+ 
+   const $animatedSwitchKnob = useAnimatedStyle(() => {
++    if (renderedKnobWidth === null) return {}
++
+     const offsetLeft = ($innerStyleOverride?.paddingStart ||
+       $innerStyleOverride?.paddingLeft ||
+       $switchInner?.paddingStart ||
+@@ -430,10 +402,10 @@ function Switch(props: ToggleInputProps) {
+       0) as number
+ 
+     const start = withTiming(on ? "100%" : "0%")
+-    const marginStart = withTiming(on ? -(knobWidth || 0) - offsetRight : 0 + offsetLeft)
++    const marginStart = withTiming(on ? -(renderedKnobWidth || 0) - offsetRight : 0 + offsetLeft)
+ 
+     return { start, marginStart }
+-  }, [on, knobWidth])
++  }, [on, renderedKnobWidth])
+ 
+   return (
+     <View
+@@ -456,13 +428,19 @@ function Switch(props: ToggleInputProps) {
+       <SwitchAccessibilityLabel {...props} role="off" />
+ 
+       <Animated.View
++        ref={knob}
++        entering={FadeIn.delay(150).duration(150)}
+         style={[
+           $switchDetail,
+-          $detailStyleOverride,
+           $animatedSwitchKnob,
+-          { width: knobWidth, height: knobHeight },
++          $detailStyleOverride,
+           { backgroundColor: knobBackgroundColor },
+         ]}
++        onLayout={(e) => {
++          // measure knob on load only once
++          if (renderedKnobWidth !== null) return
++          setRenderedKnobWidth(e.nativeEvent.layout.width)
++        }}
+       />
+     </View>
+   )
+@@ -511,7 +489,7 @@ function SwitchAccessibilityLabel(props: ToggleInputProps & { role: "on" | "off"
+   )
+ }
+ 
+-function FieldLabel(props: BaseToggleProps) {
++function FieldLabel(props: ToggleProps) {
+   const {
+     status,
+     label,
+@@ -607,7 +585,7 @@ const $switchInner: ViewStyle = {
+   paddingEnd: 4,
+ }
+ 
+-const $switchDetail: SwitchToggleProps["inputDetailStyle"] = {
++const $switchDetail: ViewStyle = {
+   borderRadius: 12,
+   position: "absolute",
+   width: 24,
+@@ -623,11 +601,11 @@ const $label: TextStyle = {
+ }
+ 
+ const $labelRight: TextStyle = {
+-  marginStart: spacing.medium,
++  marginLeft: spacing.medium,
+ }
+ 
+ const $labelLeft: TextStyle = {
+-  marginEnd: spacing.medium,
++  marginRight: spacing.medium,
+ }
+ 
+ const $switchAccessibility: TextStyle = {
+diff --git a/IgniteDiffApp/app/models/AuthenticationStore.ts b/IgniteDiffApp/app/models/AuthenticationStore.ts
+index 5896334..44c87d6 100644
+--- a/IgniteDiffApp/app/models/AuthenticationStore.ts
++++ b/IgniteDiffApp/app/models/AuthenticationStore.ts
+@@ -4,8 +4,8 @@ export const AuthenticationStoreModel = types
+   .model("AuthenticationStore")
+   .props({
+     authToken: types.maybe(types.string),
+-    authEmail: "",
+-    authPassword: "",
++    authEmail: types.optional(types.string, ""),
++    authPassword: types.optional(types.string, ""),
+   })
+   .views((store) => ({
+     get isAuthenticated() {
+@@ -44,16 +44,6 @@ export const AuthenticationStoreModel = types
+       store.authPassword = ""
+     },
+   }))
+-  .preProcessSnapshot((snapshot) => {
+-    // remove sensitive data from snapshot to avoid secrets
+-    // being stored in AsyncStorage in plain text if backing up store
+-    const { authToken, authPassword, ...rest } = snapshot // eslint-disable-line @typescript-eslint/no-unused-vars
+-
+-    // see the following for strategies to consider storing secrets on device
+-    // https://reactnative.dev/docs/security#storing-sensitive-info
+-
+-    return rest
+-  })
+ 
+ export interface AuthenticationStore extends Instance<typeof AuthenticationStoreModel> {}
+ export interface AuthenticationStoreSnapshot extends SnapshotOut<typeof AuthenticationStoreModel> {}
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 49e8036..c0d985b 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -12,7 +12,7 @@ import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
+ 
+ export type DemoTabParamList = {
+   DemoCommunity: undefined
+-  DemoShowroom: { queryIndex?: string; itemIndex?: string }
++  DemoShowroom: undefined
+   DemoDebug: undefined
+   DemoPodcastList: undefined
+ }
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index bdf331b..5305a01 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -8,7 +8,7 @@ import {
+ } from "@react-navigation/native"
+ import Config from "../config"
+ import type { PersistNavigationConfig } from "../config/config.base"
+-import { useIsMounted } from "../utils/useIsMounted"
++import { useIsMounted } from "../utils/isMounted"
+ 
+ /* eslint-disable */
+ export const RootNavigation = {
+@@ -123,7 +123,7 @@ export function useNavigationPersistence(storage: any, persistenceKey: string) {
+       }
+     }
+ 
+-    // Save the current route name for later comparison
++    // Save the current route name for later comparision
+     routeNameRef.current = currentRouteName
+ 
+     // Persist state to storage
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 3aa9ca8..08e7951 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -329,7 +329,7 @@ const $iconContainer: ViewStyle = {
+   height: ICON_SIZE,
+   width: ICON_SIZE,
+   flexDirection: "row",
+-  marginEnd: spacing.small,
++  marginRight: spacing.small,
+ }
+ 
+ const $metadata: TextStyle = {
+@@ -340,7 +340,7 @@ const $metadata: TextStyle = {
+ 
+ const $metadataText: TextStyle = {
+   color: colors.textDim,
+-  marginEnd: spacing.medium,
++  marginRight: spacing.medium,
+   marginBottom: spacing.extraSmall,
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+index 7fe7190..6be705a 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+@@ -29,14 +29,14 @@ export function DemoDivider(props: DemoDividerProps) {
+             type === "horizontal" && {
+               width: 150,
+               height: 1,
+-              marginStart: -75,
++              marginLeft: -75,
+               marginTop: -1,
+             },
+             type === "vertical" && {
+               height: 50,
+               width: 1,
+               marginTop: -25,
+-              marginStart: -1,
++              marginLeft: -1,
+             },
+           ]}
+         />
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index 7e796de..42e8b45 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -1,23 +1,12 @@
+-import { Link, RouteProp, useRoute } from "@react-navigation/native"
+ import React, { FC, ReactElement, useEffect, useRef, useState } from "react"
+-import {
+-  Dimensions,
+-  FlatList,
+-  Image,
+-  ImageStyle,
+-  Platform,
+-  SectionList,
+-  TextStyle,
+-  View,
+-  ViewStyle,
+-} from "react-native"
++import { FlatList, Image, ImageStyle, SectionList, TextStyle, View, ViewStyle } from "react-native"
+ import { DrawerLayout, DrawerState } from "react-native-gesture-handler"
+-import { useSharedValue, withTiming } from "react-native-reanimated"
++import { useSharedValue } from "react-native-reanimated"
++import { SafeAreaView } from "react-native-safe-area-context"
+ import { ListItem, Screen, Text } from "../../components"
+ import { isRTL } from "../../i18n"
+-import { DemoTabParamList, DemoTabScreenProps } from "../../navigators/DemoNavigator"
++import { DemoTabScreenProps } from "../../navigators/DemoNavigator"
+ import { colors, spacing } from "../../theme"
+-import { useSafeAreaInsetsStyle } from "../../utils/useSafeAreaInsetsStyle"
+ import * as Demos from "./demos"
+ import { DrawerIconButton } from "./DrawerIconButton"
+ 
+@@ -29,61 +18,6 @@ export interface Demo {
+   data: ReactElement[]
+ }
+ 
+-interface DemoListItem {
+-  item: { name: string; useCases: string[] }
+-  sectionIndex: number
+-  handleScroll?: (sectionIndex: number, itemIndex?: number) => void
+-}
+-
+-const slugify = (str) =>
+-  str
+-    .toLowerCase()
+-    .trim()
+-    .replace(/[^\w\s-]/g, "")
+-    .replace(/[\s_-]+/g, "-")
+-    .replace(/^-+|-+$/g, "")
+-
+-const WebListItem: FC<DemoListItem> = ({ item, sectionIndex }) => {
+-  const sectionSlug = item.name.toLowerCase()
+-
+-  return (
+-    <View>
+-      <Link to={`/showroom/${sectionSlug}`} style={$menuContainer}>
+-        <Text preset="bold">{item.name}</Text>
+-      </Link>
+-      {item.useCases.map((u) => {
+-        const itemSlug = slugify(u)
+-
+-        return (
+-          <Link key={`section${sectionIndex}-${u}`} to={`/showroom/${sectionSlug}/${itemSlug}`}>
+-            <Text>{u}</Text>
+-          </Link>
+-        )
+-      })}
+-    </View>
+-  )
+-}
+-
+-const NativeListItem: FC<DemoListItem> = ({ item, sectionIndex, handleScroll }) => {
+-  return (
+-    <View>
+-      <Text onPress={() => handleScroll(sectionIndex)} preset="bold" style={$menuContainer}>
+-        {item.name}
+-      </Text>
+-      {item.useCases.map((u, index) => (
+-        <ListItem
+-          key={`section${sectionIndex}-${u}`}
+-          onPress={() => handleScroll(sectionIndex, index + 1)}
+-          text={u}
+-          rightIcon={isRTL ? "caretLeft" : "caretRight"}
+-        />
+-      ))}
+-    </View>
+-  )
+-}
+-
+-const ShowroomListItem = Platform.select({ web: WebListItem, default: NativeListItem })
+-
+ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+   function DemoShowroomScreen(_props) {
+     const [open, setOpen] = useState(false)
+@@ -92,30 +26,6 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+     const listRef = useRef<SectionList>()
+     const menuRef = useRef<FlatList>()
+     const progress = useSharedValue(0)
+-    const route = useRoute<RouteProp<DemoTabParamList, "DemoShowroom">>()
+-    const params = route.params
+-
+-    // handle Web links
+-    React.useEffect(() => {
+-      if (route.params) {
+-        const demoValues = Object.values(Demos)
+-        const findSectionIndex = demoValues.findIndex(
+-          (x) => x.name.toLowerCase() === params.queryIndex,
+-        )
+-        let findItemIndex = 0
+-        if (params.itemIndex) {
+-          try {
+-            findItemIndex =
+-              demoValues[findSectionIndex].data.findIndex(
+-                (u) => slugify(u.props.name) === params.itemIndex,
+-              ) + 1
+-          } catch (err) {
+-            console.error(err)
+-          }
+-        }
+-        handleScroll(findSectionIndex, findItemIndex)
+-      }
+-    }, [route])
+ 
+     const toggleDrawer = () => {
+       if (!open) {
+@@ -157,12 +67,10 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+       return () => timeout.current && clearTimeout(timeout.current)
+     }, [])
+ 
+-    const $drawerInsets = useSafeAreaInsetsStyle(["top"])
+-
+     return (
+       <DrawerLayout
+         ref={drawerRef}
+-        drawerWidth={Platform.select({ default: 326, web: Dimensions.get("screen").width * 0.3 })}
++        drawerWidth={326}
+         drawerType={"slide"}
+         drawerPosition={isRTL ? "right" : "left"}
+         drawerBackgroundColor={colors.palette.neutral100}
+@@ -172,14 +80,11 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+         }}
+         onDrawerStateChanged={(newState: DrawerState, drawerWillShow: boolean) => {
+           if (newState === "Settling") {
+-            progress.value = withTiming(drawerWillShow ? 1 : 0, {
+-              duration: 250,
+-            })
+             setOpen(drawerWillShow)
+           }
+         }}
+         renderNavigationView={() => (
+-          <View style={[$drawer, $drawerInsets]}>
++          <SafeAreaView style={$drawer} edges={["top"]}>
+             <View style={$logoContainer}>
+               <Image source={logo} style={$logoImage} />
+             </View>
+@@ -193,13 +98,33 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+               }))}
+               keyExtractor={(item) => item.name}
+               renderItem={({ item, index: sectionIndex }) => (
+-                <ShowroomListItem {...{ item, sectionIndex, handleScroll }} />
++                <View>
++                  <Text
++                    onPress={() => handleScroll(sectionIndex)}
++                    preset="bold"
++                    style={$menuContainer}
++                  >
++                    {item.name}
++                  </Text>
++                  {item.useCases.map((u, index) => (
++                    <ListItem
++                      key={`section${sectionIndex}-${u}`}
++                      onPress={() => handleScroll(sectionIndex, index + 1)}
++                      text={u}
++                      rightIcon={isRTL ? "caretLeft" : "caretRight"}
++                    />
++                  ))}
++                </View>
+               )}
+             />
+-          </View>
++          </SafeAreaView>
+         )}
+       >
+-        <Screen preset="fixed" safeAreaEdges={["top"]} contentContainerStyle={$screenContainer}>
++        <Screen
++          preset="fixed"
++          safeAreaEdges={["top", "bottom"]}
++          contentContainerStyle={$screenContainer}
++        >
+           <DrawerIconButton onPress={toggleDrawer} {...{ open, progress }} />
+ 
+           <SectionList
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 289a035..352eaef 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -15,7 +15,7 @@ interface DrawerIconButtonProps extends PressableProps {
+   progress: SharedValue<number>
+ }
+ 
+-const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
++const AnimatedPressible = Animated.createAnimatedComponent(Pressable)
+ 
+ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   const { open, progress, ...PressableProps } = props
+@@ -30,14 +30,14 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+ 
+   const animatedTopBarStyles = useAnimatedStyle(() => {
+     const backgroundColor = interpolateColor(progress.value, [0, 1], [colors.text, colors.tint])
+-    const marginStart = interpolate(progress.value, [0, 1], [0, -11.5])
++    const marginLeft = interpolate(progress.value, [0, 1], [0, -11.5])
+     const rotate = interpolate(progress.value, [0, 1], [0, isRTL ? 45 : -45])
+     const marginBottom = interpolate(progress.value, [0, 1], [0, -2])
+     const width = interpolate(progress.value, [0, 1], [18, 12])
+ 
+     return {
+       backgroundColor,
+-      marginStart,
++      marginLeft,
+       marginBottom,
+       width,
+       transform: [{ rotate: `${rotate}deg` }],
+@@ -57,13 +57,13 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   const animatedBottomBarStyles = useAnimatedStyle(() => {
+     const marginTop = interpolate(progress.value, [0, 1], [4, 2])
+     const backgroundColor = interpolateColor(progress.value, [0, 1], [colors.text, colors.tint])
+-    const marginStart = interpolate(progress.value, [0, 1], [0, -11.5])
++    const marginLeft = interpolate(progress.value, [0, 1], [0, -11.5])
+     const rotate = interpolate(progress.value, [0, 1], [0, isRTL ? -45 : 45])
+     const width = interpolate(progress.value, [0, 1], [18, 12])
+ 
+     return {
+       backgroundColor,
+-      marginStart,
++      marginLeft,
+       width,
+       marginTop,
+       transform: [{ rotate: `${rotate}deg` }],
+@@ -75,13 +75,13 @@ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   }, [open, progress])
+ 
+   return (
+-    <AnimatedPressable {...PressableProps} style={[$container, animatedContainerStyles]}>
++    <AnimatedPressible {...PressableProps} style={[$container, animatedContainerStyles]}>
+       <Animated.View style={[$topBar, animatedTopBarStyles]} />
+ 
+       <Animated.View style={[$middleBar, animatedMiddleBarStyles]} />
+ 
+       <Animated.View style={[$bottomBar, animatedBottomBarStyles]} />
+-    </AnimatedPressable>
++    </AnimatedPressible>
+   )
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+index 9adbf08..ccd5a13 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+@@ -133,7 +133,7 @@ export const DemoAutoImage: Demo = {
+           />
+         </View>
+ 
+-        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginStart: spacing.small }]}>
++        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginLeft: spacing.small }]}>
+           <View style={[$aspectRatioBox, { height: 32 }]} />
+           <Image
+             source={{
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+index 98e8ecc..2ead507 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+@@ -97,10 +97,10 @@ export const DemoHeader: Demo = {
+       <Header title="Styled Title" titleStyle={$customTitle} safeAreaEdges={[]} />
+       <DemoDivider size={24} />
+       <Header
+-        title="Styled Wrapper"
++        title="Styled Container"
+         titleStyle={$customWhiteTitle}
+         backgroundColor={colors.error}
+-        style={{ height: 35 }}
++        containerStyle={{ height: 35 }}
+         safeAreaEdges={[]}
+       />
+       <DemoDivider size={24} />
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+index a831cf4..3791a36 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+@@ -102,7 +102,7 @@ export const DemoTextField: Demo = {
+ 
+       <TextField
+         label="RightAccessory"
+-        helper="This prop takes a function that returns a React element."
++        helper="This props takes a function that returns a React element."
+         value="Reprehenderit Lorem magna non consequat ullamco cupidatat."
+         RightAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} size={21} />}
+       />
+@@ -111,7 +111,7 @@ export const DemoTextField: Demo = {
+ 
+       <TextField
+         label="LeftAccessory"
+-        helper="This prop takes a function that returns a React element."
++        helper="This props takes a function that returns a React element."
+         value="Eiusmod exercitation mollit elit magna occaecat eiusmod Lorem minim veniam."
+         LeftAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} size={21} />}
+       />
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+index 5a101d5..85b2006 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+@@ -162,14 +162,6 @@ export const DemoToggle: Demo = {
+         labelPosition="left"
+       />
+       <DemoDivider size={24} />
+-      <ControlledToggle
+-        variant="checkbox"
+-        value
+-        status="error"
+-        checkboxIcon="ladybug"
+-        label="Pass in a custom checkbox icon."
+-      />
+-      <DemoDivider size={24} />
+       <ControlledToggle
+         value
+         variant="switch"
+@@ -282,7 +274,6 @@ export const DemoToggle: Demo = {
+       <ControlledToggle
+         value
+         variant="checkbox"
+-        checkboxIcon="ladybug"
+         containerStyle={$centeredOneThirdCol}
+         inputOuterStyle={{
+           width: 50,
+@@ -340,7 +331,7 @@ export const DemoToggle: Demo = {
+         inputDetailStyle={{
+           backgroundColor: colors.palette.accent300,
+           height: 36,
+-          width: 18,
++          width: 20,
+           borderRadius: 36,
+         }}
+         switchAccessibilityMode="icon"
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index 271c422..f1324ac 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -1,16 +1,19 @@
+ import { observer } from "mobx-react-lite"
+-import React, { FC } from "react"
++import React, {
++  FC,
++  useLayoutEffect, // @demo remove-current-line
++} from "react"
+ import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
++import { SafeAreaView } from "react-native-safe-area-context"
+ import {
+   Button, // @demo remove-current-line
++  Header, // @demo remove-current-line
+   Text,
+ } from "../components"
+ import { isRTL } from "../i18n"
+ import { useStores } from "../models" // @demo remove-current-line
+ import { AppStackScreenProps } from "../navigators" // @demo remove-current-line
+ import { colors, spacing } from "../theme"
+-import { useHeader } from "../utils/useHeader" // @demo remove-current-line
+-import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ 
+ const welcomeLogo = require("../../assets/images/logo.png")
+ const welcomeFace = require("../../assets/images/welcome-face.png")
+@@ -30,14 +33,14 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
+     navigation.navigate("Demo", { screen: "DemoShowroom" })
+   }
+ 
+-  useHeader({
+-    rightTx: "common.logOut",
+-    onRightPress: logout,
+-  })
++  useLayoutEffect(() => {
++    navigation.setOptions({
++      headerShown: true,
++      header: () => <Header rightTx="common.logOut" onRightPress={logout} />,
++    })
++  }, [])
+   // @demo remove-block-end
+ 
+-  const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
+-
+   return (
+     <View style={$container}>
+       <View style={$topContainer}>
+@@ -52,17 +55,19 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
+         <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
+       </View>
+ 
+-      <View style={[$bottomContainer, $bottomContainerInsets]}>
+-        <Text tx="welcomeScreen.postscript" size="md" />
+-        {/* @demo remove-block-start */}
+-        <Button
+-          testID="next-screen-button"
+-          preset="reversed"
+-          tx="welcomeScreen.letsGo"
+-          onPress={goNext}
+-        />
+-        {/* @demo remove-block-end */}
+-      </View>
++      <SafeAreaView style={$bottomContainer} edges={["bottom"]}>
++        <View style={$bottomContentContainer}>
++          <Text tx="welcomeScreen.postscript" size="md" />
++          {/* @demo remove-block-start */}
++          <Button
++            testID="next-screen-button"
++            preset="reversed"
++            tx="welcomeScreen.letsGo"
++            onPress={goNext}
++          />
++          {/* @demo remove-block-end */}
++        </View>
++      </SafeAreaView>
+     </View>
+   )
+ })
+@@ -87,9 +92,14 @@ const $bottomContainer: ViewStyle = {
+   backgroundColor: colors.palette.neutral100,
+   borderTopLeftRadius: 16,
+   borderTopRightRadius: 16,
++}
++
++const $bottomContentContainer: ViewStyle = {
++  flex: 1,
+   paddingHorizontal: spacing.large,
+   justifyContent: "space-around",
+ }
++
+ const $welcomeLogo: ImageStyle = {
+   height: 88,
+   width: "100%",
+diff --git a/IgniteDiffApp/app/utils/useIsMounted.ts b/IgniteDiffApp/app/utils/isMounted.ts
+similarity index 100%
+rename from IgniteDiffApp/app/utils/useIsMounted.ts
+rename to IgniteDiffApp/app/utils/isMounted.ts
+diff --git a/IgniteDiffApp/app/utils/useHeader.tsx b/IgniteDiffApp/app/utils/useHeader.tsx
+deleted file mode 100644
+index 0243cb8..0000000
+--- a/IgniteDiffApp/app/utils/useHeader.tsx
++++ /dev/null
+@@ -1,19 +0,0 @@
+-import React, { useLayoutEffect } from "react"
+-import { useNavigation } from "@react-navigation/native"
+-import { Header, HeaderProps } from "../components"
+-
+-/**
+- * A hook that can be used to easily set the Header of a react-navigation screen from within the screen's component.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Utils-useHeader.md)
+- */
+-export function useHeader(headerProps: HeaderProps, deps: any[] = []) {
+-  const navigation = useNavigation()
+-
+-  useLayoutEffect(() => {
+-    navigation.setOptions({
+-      headerShown: true,
+-      header: () => <Header {...headerProps} />,
+-    })
+-  }, deps)
+-}
+diff --git a/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts b/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts
+deleted file mode 100644
+index 5d4fd19..0000000
+--- a/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts
++++ /dev/null
+@@ -1,44 +0,0 @@
+-import { FlexStyle } from "react-native"
+-import { Edge, useSafeAreaInsets } from "react-native-safe-area-context"
+-
+-export type ExtendedEdge = Edge | "start" | "end"
+-
+-const propertySuffixMap = {
+-  top: "Top",
+-  bottom: "Bottom",
+-  left: "Start",
+-  right: "End",
+-  start: "Start",
+-  end: "End",
+-}
+-
+-const edgeInsetMap = {
+-  start: "left",
+-  end: "right",
+-}
+-
+-/**
+- * A hook that can be used to create a safe-area-aware style object that can be passed directly to a View.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Utils-useSafeAreaInsetsStyle.md)
+- */
+-export function useSafeAreaInsetsStyle(
+-  safeAreaEdges: ExtendedEdge[] = [],
+-  property: "padding" | "margin" = "padding",
+-): Pick<
+-  FlexStyle,
+-  | "marginBottom"
+-  | "marginEnd"
+-  | "marginStart"
+-  | "marginTop"
+-  | "paddingBottom"
+-  | "paddingEnd"
+-  | "paddingStart"
+-  | "paddingTop"
+-> {
+-  const insets = useSafeAreaInsets()
+-
+-  return safeAreaEdges.reduce((acc, e) => {
+-    return { ...acc, [`${property}${propertySuffixMap[e]}`]: insets[edgeInsetMap[e] ?? e] }
+-  }, {})
+-}
+diff --git a/IgniteDiffApp/bin/postInstall b/IgniteDiffApp/bin/postInstall
+index db77e75..ac88329 100755
+--- a/IgniteDiffApp/bin/postInstall
++++ b/IgniteDiffApp/bin/postInstall
+@@ -14,13 +14,10 @@ if (["darwin", "linux"].includes(process.platform)) {
+   run('pkill -f "cli.js start" || set exit 0')
+ }
+ 
+-/**
+- * On darwin machine:
+- *   1. Check if CocoaPods CLI is installed (and if not, install it)
+- *   2. Find an Xcode project dir
+- *   3. Run `pod install`, if fails run `pod repo update` and try again
+- */
+-run('npx pod-install')
++// On iOS, make sure CocoaPods are installed
++if (process.platform === "darwin") {
++  run('if [ -d "ios" ]; then cd ios && pod install && cd -; fi')
++}
+ 
+ // Run baby run
+ function run(command) {
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index ac52854..f333eb9 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -12,26 +12,26 @@ PODS:
+     - ExpoModulesCore
+   - EXFont (10.2.1):
+     - ExpoModulesCore
+-  - Expo (46.0.19):
++  - Expo (46.0.17):
+     - ExpoModulesCore
+   - ExpoKeepAwake (10.2.1):
+     - ExpoModulesCore
+   - ExpoLocalization (13.1.0):
+     - ExpoModulesCore
+-  - ExpoModulesCore (0.11.10):
++  - ExpoModulesCore (0.11.9):
+     - React-Core
+     - ReactCommon/turbomodule/core
+   - EXSplashScreen (0.16.2):
+     - ExpoModulesCore
+     - React-Core
+-  - FBLazyVector (0.69.7)
+-  - FBReactNativeSpec (0.69.7):
++  - FBLazyVector (0.69.6)
++  - FBReactNativeSpec (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - RCTRequired (= 0.69.7)
+-    - RCTTypeSafety (= 0.69.7)
+-    - React-Core (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
++    - RCTRequired (= 0.69.6)
++    - RCTTypeSafety (= 0.69.6)
++    - React-Core (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
+   - Flipper (0.157.0):
+     - Flipper-Folly (~> 2.6)
+   - Flipper-Boost-iOSX (1.76.0.1.11)
+@@ -94,7 +94,7 @@ PODS:
+     - FlipperKit/FlipperKitNetworkPlugin
+   - fmt (6.2.1)
+   - glog (0.3.5)
+-  - hermes-engine (0.69.7)
++  - hermes-engine (0.69.6)
+   - libevent (2.1.12)
+   - OpenSSL-Universal (1.1.1100)
+   - RCT-Folly (2021.06.28.00-v2):
+@@ -114,214 +114,214 @@ PODS:
+     - fmt (~> 6.2.1)
+     - glog
+     - libevent
+-  - RCTRequired (0.69.7)
+-  - RCTTypeSafety (0.69.7):
+-    - FBLazyVector (= 0.69.7)
+-    - RCTRequired (= 0.69.7)
+-    - React-Core (= 0.69.7)
+-  - React (0.69.7):
+-    - React-Core (= 0.69.7)
+-    - React-Core/DevSupport (= 0.69.7)
+-    - React-Core/RCTWebSocket (= 0.69.7)
+-    - React-RCTActionSheet (= 0.69.7)
+-    - React-RCTAnimation (= 0.69.7)
+-    - React-RCTBlob (= 0.69.7)
+-    - React-RCTImage (= 0.69.7)
+-    - React-RCTLinking (= 0.69.7)
+-    - React-RCTNetwork (= 0.69.7)
+-    - React-RCTSettings (= 0.69.7)
+-    - React-RCTText (= 0.69.7)
+-    - React-RCTVibration (= 0.69.7)
+-  - React-bridging (0.69.7):
++  - RCTRequired (0.69.6)
++  - RCTTypeSafety (0.69.6):
++    - FBLazyVector (= 0.69.6)
++    - RCTRequired (= 0.69.6)
++    - React-Core (= 0.69.6)
++  - React (0.69.6):
++    - React-Core (= 0.69.6)
++    - React-Core/DevSupport (= 0.69.6)
++    - React-Core/RCTWebSocket (= 0.69.6)
++    - React-RCTActionSheet (= 0.69.6)
++    - React-RCTAnimation (= 0.69.6)
++    - React-RCTBlob (= 0.69.6)
++    - React-RCTImage (= 0.69.6)
++    - React-RCTLinking (= 0.69.6)
++    - React-RCTNetwork (= 0.69.6)
++    - React-RCTSettings (= 0.69.6)
++    - React-RCTText (= 0.69.6)
++    - React-RCTVibration (= 0.69.6)
++  - React-bridging (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-jsi (= 0.69.7)
+-  - React-callinvoker (0.69.7)
+-  - React-Codegen (0.69.7):
+-    - FBReactNativeSpec (= 0.69.7)
++    - React-jsi (= 0.69.6)
++  - React-callinvoker (0.69.6)
++  - React-Codegen (0.69.6):
++    - FBReactNativeSpec (= 0.69.6)
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - RCTRequired (= 0.69.7)
+-    - RCTTypeSafety (= 0.69.7)
+-    - React-Core (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-Core (0.69.7):
++    - RCTRequired (= 0.69.6)
++    - RCTTypeSafety (= 0.69.6)
++    - React-Core (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-Core (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-Core/Default (= 0.69.7)
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-Core/Default (= 0.69.6)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/CoreModulesHeaders (0.69.7):
++  - React-Core/CoreModulesHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/Default (0.69.7):
++  - React-Core/Default (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/DevSupport (0.69.7):
++  - React-Core/DevSupport (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-Core/Default (= 0.69.7)
+-    - React-Core/RCTWebSocket (= 0.69.7)
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-jsinspector (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-Core/Default (= 0.69.6)
++    - React-Core/RCTWebSocket (= 0.69.6)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-jsinspector (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTActionSheetHeaders (0.69.7):
++  - React-Core/RCTActionSheetHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTAnimationHeaders (0.69.7):
++  - React-Core/RCTAnimationHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTBlobHeaders (0.69.7):
++  - React-Core/RCTBlobHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTImageHeaders (0.69.7):
++  - React-Core/RCTImageHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTLinkingHeaders (0.69.7):
++  - React-Core/RCTLinkingHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTNetworkHeaders (0.69.7):
++  - React-Core/RCTNetworkHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTSettingsHeaders (0.69.7):
++  - React-Core/RCTSettingsHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTTextHeaders (0.69.7):
++  - React-Core/RCTTextHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTVibrationHeaders (0.69.7):
++  - React-Core/RCTVibrationHeaders (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - React-Core/Default
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-Core/RCTWebSocket (0.69.7):
++  - React-Core/RCTWebSocket (0.69.6):
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-Core/Default (= 0.69.7)
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-Core/Default (= 0.69.6)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+     - Yoga
+-  - React-CoreModules (0.69.7):
++  - React-CoreModules (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - RCTTypeSafety (= 0.69.7)
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/CoreModulesHeaders (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-RCTImage (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-cxxreact (0.69.7):
++    - RCTTypeSafety (= 0.69.6)
++    - React-Codegen (= 0.69.6)
++    - React-Core/CoreModulesHeaders (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-RCTImage (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-cxxreact (0.69.6):
+     - boost (= 1.76.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-callinvoker (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsinspector (= 0.69.7)
+-    - React-logger (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
+-    - React-runtimeexecutor (= 0.69.7)
+-  - React-hermes (0.69.7):
++    - React-callinvoker (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsinspector (= 0.69.6)
++    - React-logger (= 0.69.6)
++    - React-perflogger (= 0.69.6)
++    - React-runtimeexecutor (= 0.69.6)
++  - React-hermes (0.69.6):
+     - DoubleConversion
+     - glog
+     - hermes-engine
+     - RCT-Folly (= 2021.06.28.00-v2)
+     - RCT-Folly/Futures (= 2021.06.28.00-v2)
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-jsiexecutor (= 0.69.7)
+-    - React-jsinspector (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
+-  - React-jsi (0.69.7):
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-jsiexecutor (= 0.69.6)
++    - React-jsinspector (= 0.69.6)
++    - React-perflogger (= 0.69.6)
++  - React-jsi (0.69.6):
+     - boost (= 1.76.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-jsi/Default (= 0.69.7)
+-  - React-jsi/Default (0.69.7):
++    - React-jsi/Default (= 0.69.6)
++  - React-jsi/Default (0.69.6):
+     - boost (= 1.76.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-  - React-jsiexecutor (0.69.7):
++  - React-jsiexecutor (0.69.6):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
+-  - React-jsinspector (0.69.7)
+-  - React-logger (0.69.7):
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-perflogger (= 0.69.6)
++  - React-jsinspector (0.69.6)
++  - React-logger (0.69.6):
+     - glog
+   - react-native-safe-area-context (4.3.4):
+     - RCT-Folly
+@@ -329,72 +329,72 @@ PODS:
+     - RCTTypeSafety
+     - React-Core
+     - ReactCommon/turbomodule/core
+-  - React-perflogger (0.69.7)
+-  - React-RCTActionSheet (0.69.7):
+-    - React-Core/RCTActionSheetHeaders (= 0.69.7)
+-  - React-RCTAnimation (0.69.7):
++  - React-perflogger (0.69.6)
++  - React-RCTActionSheet (0.69.6):
++    - React-Core/RCTActionSheetHeaders (= 0.69.6)
++  - React-RCTAnimation (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - RCTTypeSafety (= 0.69.7)
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/RCTAnimationHeaders (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-RCTBlob (0.69.7):
++    - RCTTypeSafety (= 0.69.6)
++    - React-Codegen (= 0.69.6)
++    - React-Core/RCTAnimationHeaders (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-RCTBlob (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/RCTBlobHeaders (= 0.69.7)
+-    - React-Core/RCTWebSocket (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-RCTNetwork (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-RCTImage (0.69.7):
++    - React-Codegen (= 0.69.6)
++    - React-Core/RCTBlobHeaders (= 0.69.6)
++    - React-Core/RCTWebSocket (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-RCTNetwork (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-RCTImage (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - RCTTypeSafety (= 0.69.7)
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/RCTImageHeaders (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-RCTNetwork (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-RCTLinking (0.69.7):
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/RCTLinkingHeaders (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-RCTNetwork (0.69.7):
++    - RCTTypeSafety (= 0.69.6)
++    - React-Codegen (= 0.69.6)
++    - React-Core/RCTImageHeaders (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-RCTNetwork (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-RCTLinking (0.69.6):
++    - React-Codegen (= 0.69.6)
++    - React-Core/RCTLinkingHeaders (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-RCTNetwork (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - RCTTypeSafety (= 0.69.7)
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/RCTNetworkHeaders (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-RCTSettings (0.69.7):
++    - RCTTypeSafety (= 0.69.6)
++    - React-Codegen (= 0.69.6)
++    - React-Core/RCTNetworkHeaders (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-RCTSettings (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - RCTTypeSafety (= 0.69.7)
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/RCTSettingsHeaders (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-RCTText (0.69.7):
+-    - React-Core/RCTTextHeaders (= 0.69.7)
+-  - React-RCTVibration (0.69.7):
++    - RCTTypeSafety (= 0.69.6)
++    - React-Codegen (= 0.69.6)
++    - React-Core/RCTSettingsHeaders (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-RCTText (0.69.6):
++    - React-Core/RCTTextHeaders (= 0.69.6)
++  - React-RCTVibration (0.69.6):
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-Codegen (= 0.69.7)
+-    - React-Core/RCTVibrationHeaders (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - ReactCommon/turbomodule/core (= 0.69.7)
+-  - React-runtimeexecutor (0.69.7):
+-    - React-jsi (= 0.69.7)
+-  - ReactCommon/turbomodule/core (0.69.7):
++    - React-Codegen (= 0.69.6)
++    - React-Core/RCTVibrationHeaders (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - ReactCommon/turbomodule/core (= 0.69.6)
++  - React-runtimeexecutor (0.69.6):
++    - React-jsi (= 0.69.6)
++  - ReactCommon/turbomodule/core (0.69.6):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.06.28.00-v2)
+-    - React-bridging (= 0.69.7)
+-    - React-callinvoker (= 0.69.7)
+-    - React-Core (= 0.69.7)
+-    - React-cxxreact (= 0.69.7)
+-    - React-jsi (= 0.69.7)
+-    - React-logger (= 0.69.7)
+-    - React-perflogger (= 0.69.7)
++    - React-bridging (= 0.69.6)
++    - React-callinvoker (= 0.69.6)
++    - React-Core (= 0.69.6)
++    - React-cxxreact (= 0.69.6)
++    - React-jsi (= 0.69.6)
++    - React-logger (= 0.69.6)
++    - React-perflogger (= 0.69.6)
+   - RNBootSplash (4.3.2):
+     - React-Core
+   - RNCAsyncStorage (1.17.11):
+@@ -642,13 +642,13 @@ SPEC CHECKSUMS:
+   EXDevice: 7647ca9b1fd8b269dfd896a7643d659343358054
+   EXFileSystem: 927e0a8885aa9c49e50fc38eaba2c2389f2f1019
+   EXFont: 06df627203afcb8a3b3152ec06eb2f11f46f0cff
+-  Expo: 2aa7370e08c458536b7089120e84ed8bd204357b
++  Expo: 4de8a31146bb0480353b3ed1850e015c4862625f
+   ExpoKeepAwake: 8b47e5358d54ea4922b630a74f2acb026ab7a28b
+   ExpoLocalization: 63204f4b9d4f653469d266332ceaa6c6ac8a305d
+-  ExpoModulesCore: 1b2f5f91eff132671f6d0642aad2ba7915c6ff41
++  ExpoModulesCore: f9d1730cc2dde38e46b0becb97628b3ebbd29f21
+   EXSplashScreen: 799bece80089219b2c989c1082d70f3b00995cda
+-  FBLazyVector: 6b7f5692909b4300d50e7359cdefbcd09dd30faa
+-  FBReactNativeSpec: affcf71d996f6b0c01f68883482588297b9d5e6e
++  FBLazyVector: 739d2f9719faecb463c7aa191591af31c8c94182
++  FBReactNativeSpec: 957de82f66e31f2f14bbec34e37242282fdd26de
+   Flipper: 19985db5fff887a746c0e15585917bf1ab304317
+   Flipper-Boost-iOSX: fd1e2b8cbef7e662a122412d7ac5f5bea715403c
+   Flipper-DoubleConversion: 2dc99b02f658daf147069aad9dbd29d8feb06d30
+@@ -660,44 +660,44 @@ SPEC CHECKSUMS:
+   FlipperKit: 29018ea7b7cfbd71767212e1480fe6be94d232ce
+   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
+   glog: 3d02b25ca00c2d456734d0bcff864cbc62f6ae1a
+-  hermes-engine: 51aaceb1f6dc1aed44b8bbf866f52ec146c00a89
++  hermes-engine: c2c873a670bc435451449f918c2b3ab3c39255fc
+   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
+   RCT-Folly: b9d9fe1fc70114b751c076104e52f3b1b5e5a95a
+-  RCTRequired: 54bff6aa61efd9598ab59d2a823c382b4fe13d27
+-  RCTTypeSafety: 47632bfa768df7befde08e339a9847e6cff6ff78
+-  React: 72a676de573cc5ee0e375e5535238af9a4bd435c
+-  React-bridging: 12b6677a30fbd46555a35aa6096331737a9af598
+-  React-callinvoker: bb574a923c2281d01be23ed3b5d405caa583f56d
+-  React-Codegen: a5e05592b65963a4a453808d2233a04edb7ac8cd
+-  React-Core: 138385d05068622b2b1873eee7dc5be9762f5383
+-  React-CoreModules: 3a9be624998677db102b19090b1c33c7564ead6d
+-  React-cxxreact: eb24a767b0b811259947f3d538e7c999467e7131
+-  React-hermes: 3a08a232d6783e21930b0f10f1c15d209ec9f7ad
+-  React-jsi: 9c1cc1173fc8a24b094e01c54d8e3b567fed7edc
+-  React-jsiexecutor: a73bec0218ba959fc92f811b581ad6c2270c6b6f
+-  React-jsinspector: 8134ee22182b8dd98dc0973db6266c398103ce6c
+-  React-logger: 1e7ac909607ee65fd5c4d8bea8c6e644f66b8843
++  RCTRequired: c8c080849a3670601d5c7056023a2176067a69d8
++  RCTTypeSafety: 710aef40f5ae246bc5fff7e873855b17ed11c180
++  React: b6bb382534be4de9d367ef3d04f92108c1768160
++  React-bridging: 0fca0337cef9305026814907dd29254a833a2db7
++  React-callinvoker: 700e6eb96b5f7f2fdd96d7263cd4627d2fa080ed
++  React-Codegen: fd21633c4b9f47d0681bbb54b173a203963a5e4d
++  React-Core: 8ec15c9727c8c01b1e4f14cad5bd21f7c1d56d49
++  React-CoreModules: 79486447bf901292a83df52d4f7acbecda296723
++  React-cxxreact: 9022135650dd9960a60a1361e9add424c6c37ab9
++  React-hermes: b5ce7fb460ff6d39e7bb9bbe1f523272c4b85c0b
++  React-jsi: 4ccb3599c422ad071e3895c5feab9b0afc40505d
++  React-jsiexecutor: c61b60de03b3474e5749b8a8fd8e6507630d62c4
++  React-jsinspector: eaacb698c5af7a99131bc1933806372c20222dfd
++  React-logger: ebb4d31bbbe4f1a8a1a9b658d7429210b8f68160
+   react-native-safe-area-context: dfe5aa13bee37a0c7e8059d14f72ffc076d120e9
+-  React-perflogger: 8e832d4e21fdfa613033c76d58d7e617341e804b
+-  React-RCTActionSheet: 9ca778182a9523991bff6381045885b6e808bb73
+-  React-RCTAnimation: 9ced26ad20b96e532ac791a8ab92a7b1ce2266b8
+-  React-RCTBlob: 2ca3402386d6ab8e9a9a39117305c7601ba2a7f8
+-  React-RCTImage: 7be51899367082a49e7a7560247ab3961e4dd248
+-  React-RCTLinking: 262229106f181d8187a5a041fa0dffe6e9726347
+-  React-RCTNetwork: 428b6f17bf4684ede387422eb789ca89365e33d3
+-  React-RCTSettings: eaef83489b80045528f1fe1ea5daefaa586ed763
+-  React-RCTText: d197cff9d5d7f68bdb88468d94617bbf2aa6a48d
+-  React-RCTVibration: 600a9f8b3537db360563d50fab3d040c262567d4
+-  React-runtimeexecutor: 65cd2782a57e1d59a68aa5d504edf94278578e41
+-  ReactCommon: 1e783348b9aa73ae68236271df972ba898560a95
++  React-perflogger: 1fb1ad5333b43a5137afd7608695f7a42c5efd27
++  React-RCTActionSheet: a435bd67689433575a1e5d7614b021d2c17f0726
++  React-RCTAnimation: d097c5ed2d00735958508617555abd85183b94e2
++  React-RCTBlob: f43a0fceb328e1a40aa52701a4eba955635444ab
++  React-RCTImage: 08f4428e931efe0eefb94443c8ca08cfb250a556
++  React-RCTLinking: 3a8851e818652582f87e5a7577302e6ad7e1de3e
++  React-RCTNetwork: 19f7c66b612e2336eefdfbc7ab3a9bd8ca4e21cf
++  React-RCTSettings: 9324e718a865ff01e4a96be4c65923581b2d5170
++  React-RCTText: 9cadcd5d982c1d25f7439f47354b1c1b75e60105
++  React-RCTVibration: 285f8538386c660e6b9497e204636acd93bf7fcc
++  React-runtimeexecutor: 0af71c94f968fa10015bf0119951bccd2e4d8865
++  ReactCommon: fe7580b9d10f00249facf25659e0ec051320cc8a
+   RNBootSplash: 5f346163977573d6b2aeba1b25df9d2245c0d73c
+   RNCAsyncStorage: 8616bd5a58af409453ea4e1b246521bb76578d60
+   RNGestureHandler: bad495418bcbd3ab47017a38d93d290ebd406f50
+   RNReanimated: 2cf7451318bb9cc430abeec8d67693f9cf4e039c
+   RNScreens: 4a1af06327774490d97342c00aee0c2bafb497b7
+   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+-  Yoga: 0b84a956f7393ef1f37f3bb213c516184e4a689d
++  Yoga: 75bf4b0131cfb46a659cd0c13309b79a6fcff66d
+   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+ 
+ PODFILE CHECKSUM: f5902b1ce7a6477cf819bb93fcf538051bee2370
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 15dcb32..e009302 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -45,13 +45,12 @@
+     "@react-navigation/stack": "~6.2.1",
+     "apisauce": "2.1.5",
+     "date-fns": "^2.29.2",
+-    "expo": "~46.0.17",
++    "expo": "~46.0.16",
+     "expo-application": "~4.2.2",
+     "expo-constants": "~13.2.3",
+     "expo-device": "~4.3.0",
+     "expo-file-system": "~14.1.0",
+     "expo-font": "~10.2.0",
+-    "expo-linking": "^3.2.3",
+     "expo-localization": "13.1.0",
+     "expo-modules-core": "~0.11.3",
+     "expo-splash-screen": "~0.16.1",
+@@ -61,7 +60,7 @@
+     "mobx-react-lite": "3.4.0",
+     "mobx-state-tree": "5.1.5",
+     "react": "18.0.0",
+-    "react-native": "0.69.7",
++    "react-native": "0.69.6",
+     "react-native-bootsplash": "4.3.2",
+     "react-native-gesture-handler": "~2.5.0",
+     "react-native-reanimated": "~2.9.1",
+@@ -126,8 +125,7 @@
+   },
+   "resolutions": {
+     "@types/react": "^17",
+-    "@types/react-dom": "^17",
+-    "@expo/dev-server": "0.1.120"
++    "@types/react-dom": "^17"
+   },
+   "prettier": {
+     "printWidth": 100,
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 40e7271..b556149 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -24,10 +24,10 @@
+   dependencies:
+     "@babel/highlight" "^7.18.6"
+ 
+-"@babel/compat-data@^7.17.7", "@babel/compat-data@^7.20.1", "@babel/compat-data@^7.20.5":
+-  version "7.20.10"
+-  resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.20.10.tgz#9d92fa81b87542fff50e848ed585b4212c1d34ec"
+-  integrity sha512-sEnuDPpOJR/fcafHMjpcpGN5M2jbUGUHwmuWKM/YdPzeEDJg8bgmbcWQFUfE32MQjti1koACvoPVsDe8Uq+idg==
++"@babel/compat-data@^7.17.7", "@babel/compat-data@^7.20.0", "@babel/compat-data@^7.20.1":
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.20.5.tgz#86f172690b093373a933223b4745deeb6049e733"
++  integrity sha512-KZXo2t10+/jxmkhNXc7pZTqRvSOIvVv/+lJwHS+B2rErwOyjuVRh60yVpb7liQ1U5t7lLJ1bz+t8tSypUZdm0g==
+ 
+ "@babel/core@7.9.0":
+   version "7.9.0"
+@@ -52,32 +52,32 @@
+     source-map "^0.5.0"
+ 
+ "@babel/core@^7.0.0", "@babel/core@^7.1.0", "@babel/core@^7.12.3", "@babel/core@^7.13.16", "@babel/core@^7.14.0", "@babel/core@^7.18.0", "@babel/core@^7.7.5":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.20.7.tgz#37072f951bd4d28315445f66e0ec9f6ae0c8c35f"
+-  integrity sha512-t1ZjCluspe5DW24bn2Rr1CDb2v9rn/hROtg9a2tmd0+QYf4bsloYfLQzjG4qHPNMhWtKdGC33R5AxGR2Af2cBw==
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.20.5.tgz#45e2114dc6cd4ab167f81daf7820e8fa1250d113"
++  integrity sha512-UdOWmk4pNWTm/4DlPUl/Pt4Gz4rcEMb7CY0Y3eJl5Yz1vI8ZJGmHWaVE55LoxRjdpx0z259GE9U5STA9atUinQ==
+   dependencies:
+     "@ampproject/remapping" "^2.1.0"
+     "@babel/code-frame" "^7.18.6"
+-    "@babel/generator" "^7.20.7"
+-    "@babel/helper-compilation-targets" "^7.20.7"
+-    "@babel/helper-module-transforms" "^7.20.7"
+-    "@babel/helpers" "^7.20.7"
+-    "@babel/parser" "^7.20.7"
+-    "@babel/template" "^7.20.7"
+-    "@babel/traverse" "^7.20.7"
+-    "@babel/types" "^7.20.7"
++    "@babel/generator" "^7.20.5"
++    "@babel/helper-compilation-targets" "^7.20.0"
++    "@babel/helper-module-transforms" "^7.20.2"
++    "@babel/helpers" "^7.20.5"
++    "@babel/parser" "^7.20.5"
++    "@babel/template" "^7.18.10"
++    "@babel/traverse" "^7.20.5"
++    "@babel/types" "^7.20.5"
+     convert-source-map "^1.7.0"
+     debug "^4.1.0"
+     gensync "^1.0.0-beta.2"
+     json5 "^2.2.1"
+     semver "^6.3.0"
+ 
+-"@babel/generator@^7.14.0", "@babel/generator@^7.20.7", "@babel/generator@^7.9.0":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.20.7.tgz#f8ef57c8242665c5929fe2e8d82ba75460187b4a"
+-  integrity sha512-7wqMOJq8doJMZmP4ApXTzLxSr7+oO2jroJURrVEp6XShrQUObV8Tq/D0NCcoYg2uHqUrjzO0zwBjoYzelxK+sw==
++"@babel/generator@^7.14.0", "@babel/generator@^7.20.5", "@babel/generator@^7.9.0":
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/generator/-/generator-7.20.5.tgz#cb25abee3178adf58d6814b68517c62bdbfdda95"
++  integrity sha512-jl7JY2Ykn9S0yj4DQP82sYvPU+T3g0HFcWTqDLqiuA9tGRNIj9VfbtXGAYTTkyNEnQk1jkMGOdYka8aG/lulCA==
+   dependencies:
+-    "@babel/types" "^7.20.7"
++    "@babel/types" "^7.20.5"
+     "@jridgewell/gen-mapping" "^0.3.2"
+     jsesc "^2.5.1"
+ 
+@@ -96,28 +96,27 @@
+     "@babel/helper-explode-assignable-expression" "^7.18.6"
+     "@babel/types" "^7.18.9"
+ 
+-"@babel/helper-compilation-targets@^7.17.7", "@babel/helper-compilation-targets@^7.18.9", "@babel/helper-compilation-targets@^7.20.0", "@babel/helper-compilation-targets@^7.20.7":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-compilation-targets/-/helper-compilation-targets-7.20.7.tgz#a6cd33e93629f5eb473b021aac05df62c4cd09bb"
+-  integrity sha512-4tGORmfQcrc+bvrjb5y3dG9Mx1IOZjsHqQVUz7XCNHO+iTmqxWnVg3KRygjGmpRLJGdQSKuvFinbIb0CnZwHAQ==
++"@babel/helper-compilation-targets@^7.17.7", "@babel/helper-compilation-targets@^7.18.9", "@babel/helper-compilation-targets@^7.20.0":
++  version "7.20.0"
++  resolved "https://registry.yarnpkg.com/@babel/helper-compilation-targets/-/helper-compilation-targets-7.20.0.tgz#6bf5374d424e1b3922822f1d9bdaa43b1a139d0a"
++  integrity sha512-0jp//vDGp9e8hZzBc6N/KwA5ZK3Wsm/pfm4CrY7vzegkVxc65SgSn6wYOnwHe9Js9HRQ1YTCKLGPzDtaS3RoLQ==
+   dependencies:
+-    "@babel/compat-data" "^7.20.5"
++    "@babel/compat-data" "^7.20.0"
+     "@babel/helper-validator-option" "^7.18.6"
+     browserslist "^4.21.3"
+-    lru-cache "^5.1.1"
+     semver "^6.3.0"
+ 
+-"@babel/helper-create-class-features-plugin@^7.18.0", "@babel/helper-create-class-features-plugin@^7.18.6", "@babel/helper-create-class-features-plugin@^7.20.5", "@babel/helper-create-class-features-plugin@^7.20.7":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-create-class-features-plugin/-/helper-create-class-features-plugin-7.20.7.tgz#d0e1f8d7e4ed5dac0389364d9c0c191d948ade6f"
+-  integrity sha512-LtoWbDXOaidEf50hmdDqn9g8VEzsorMexoWMQdQODbvmqYmaF23pBP5VNPAGIFHsFQCIeKokDiz3CH5Y2jlY6w==
++"@babel/helper-create-class-features-plugin@^7.18.0", "@babel/helper-create-class-features-plugin@^7.18.6", "@babel/helper-create-class-features-plugin@^7.20.2", "@babel/helper-create-class-features-plugin@^7.20.5":
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/helper-create-class-features-plugin/-/helper-create-class-features-plugin-7.20.5.tgz#327154eedfb12e977baa4ecc72e5806720a85a06"
++  integrity sha512-3RCdA/EmEaikrhayahwToF0fpweU/8o2p8vhc1c/1kftHOdTKuC65kik/TLc+qfbS8JKw4qqJbne4ovICDhmww==
+   dependencies:
+     "@babel/helper-annotate-as-pure" "^7.18.6"
+     "@babel/helper-environment-visitor" "^7.18.9"
+     "@babel/helper-function-name" "^7.19.0"
+-    "@babel/helper-member-expression-to-functions" "^7.20.7"
++    "@babel/helper-member-expression-to-functions" "^7.18.9"
+     "@babel/helper-optimise-call-expression" "^7.18.6"
+-    "@babel/helper-replace-supers" "^7.20.7"
++    "@babel/helper-replace-supers" "^7.19.1"
+     "@babel/helper-split-export-declaration" "^7.18.6"
+ 
+ "@babel/helper-create-regexp-features-plugin@^7.18.6", "@babel/helper-create-regexp-features-plugin@^7.20.5":
+@@ -167,12 +166,12 @@
+   dependencies:
+     "@babel/types" "^7.18.6"
+ 
+-"@babel/helper-member-expression-to-functions@^7.20.7":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-member-expression-to-functions/-/helper-member-expression-to-functions-7.20.7.tgz#a6f26e919582275a93c3aa6594756d71b0bb7f05"
+-  integrity sha512-9J0CxJLq315fEdi4s7xK5TQaNYjZw+nDVpVqr1axNGKzdrdwYBD5b4uKv3n75aABG0rCCTK8Im8Ww7eYfMrZgw==
++"@babel/helper-member-expression-to-functions@^7.18.9":
++  version "7.18.9"
++  resolved "https://registry.yarnpkg.com/@babel/helper-member-expression-to-functions/-/helper-member-expression-to-functions-7.18.9.tgz#1531661e8375af843ad37ac692c132841e2fd815"
++  integrity sha512-RxifAh2ZoVU67PyKIO4AMi1wTenGfMR/O/ae0CCRqwgBAt5v7xjdtRw7UoSbsreKrQn5t7r89eruK/9JjYHuDg==
+   dependencies:
+-    "@babel/types" "^7.20.7"
++    "@babel/types" "^7.18.9"
+ 
+ "@babel/helper-module-imports@^7.18.6":
+   version "7.18.6"
+@@ -181,19 +180,19 @@
+   dependencies:
+     "@babel/types" "^7.18.6"
+ 
+-"@babel/helper-module-transforms@^7.18.6", "@babel/helper-module-transforms@^7.20.11", "@babel/helper-module-transforms@^7.20.7", "@babel/helper-module-transforms@^7.9.0":
+-  version "7.20.11"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-module-transforms/-/helper-module-transforms-7.20.11.tgz#df4c7af713c557938c50ea3ad0117a7944b2f1b0"
+-  integrity sha512-uRy78kN4psmji1s2QtbtcCSaj/LILFDp0f/ymhpQH5QY3nljUZCaNWz9X1dEj/8MBdBEFECs7yRhKn8i7NjZgg==
++"@babel/helper-module-transforms@^7.18.6", "@babel/helper-module-transforms@^7.19.6", "@babel/helper-module-transforms@^7.20.2", "@babel/helper-module-transforms@^7.9.0":
++  version "7.20.2"
++  resolved "https://registry.yarnpkg.com/@babel/helper-module-transforms/-/helper-module-transforms-7.20.2.tgz#ac53da669501edd37e658602a21ba14c08748712"
++  integrity sha512-zvBKyJXRbmK07XhMuujYoJ48B5yvvmM6+wcpv6Ivj4Yg6qO7NOZOSnvZN9CRl1zz1Z4cKf8YejmCMh8clOoOeA==
+   dependencies:
+     "@babel/helper-environment-visitor" "^7.18.9"
+     "@babel/helper-module-imports" "^7.18.6"
+     "@babel/helper-simple-access" "^7.20.2"
+     "@babel/helper-split-export-declaration" "^7.18.6"
+     "@babel/helper-validator-identifier" "^7.19.1"
+-    "@babel/template" "^7.20.7"
+-    "@babel/traverse" "^7.20.10"
+-    "@babel/types" "^7.20.7"
++    "@babel/template" "^7.18.10"
++    "@babel/traverse" "^7.20.1"
++    "@babel/types" "^7.20.2"
+ 
+ "@babel/helper-optimise-call-expression@^7.18.6":
+   version "7.18.6"
+@@ -207,7 +206,7 @@
+   resolved "https://registry.yarnpkg.com/@babel/helper-plugin-utils/-/helper-plugin-utils-7.20.2.tgz#d1b9000752b18d0877cff85a5c376ce5c3121629"
+   integrity sha512-8RvlJG2mj4huQ4pZ+rU9lqKi9ZKiRmuvGuM2HlWmkmgOhbs6zEAw6IEiJ5cQqGbDzGZOhwuOQNtZMi/ENLjZoQ==
+ 
+-"@babel/helper-remap-async-to-generator@^7.18.9":
++"@babel/helper-remap-async-to-generator@^7.18.6", "@babel/helper-remap-async-to-generator@^7.18.9":
+   version "7.18.9"
+   resolved "https://registry.yarnpkg.com/@babel/helper-remap-async-to-generator/-/helper-remap-async-to-generator-7.18.9.tgz#997458a0e3357080e54e1d79ec347f8a8cd28519"
+   integrity sha512-dI7q50YKd8BAv3VEfgg7PS7yD3Rtbi2J1XMXaalXO0W0164hYLnh8zpjRS0mte9MfVp/tltvr/cfdXPvJr1opA==
+@@ -217,26 +216,25 @@
+     "@babel/helper-wrap-function" "^7.18.9"
+     "@babel/types" "^7.18.9"
+ 
+-"@babel/helper-replace-supers@^7.18.2", "@babel/helper-replace-supers@^7.18.6", "@babel/helper-replace-supers@^7.20.7":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/helper-replace-supers/-/helper-replace-supers-7.20.7.tgz#243ecd2724d2071532b2c8ad2f0f9f083bcae331"
+-  integrity sha512-vujDMtB6LVfNW13jhlCrp48QNslK6JXi7lQG736HVbHz/mbf4Dc7tIRh1Xf5C0rF7BP8iiSxGMCmY6Ci1ven3A==
++"@babel/helper-replace-supers@^7.18.2", "@babel/helper-replace-supers@^7.18.6", "@babel/helper-replace-supers@^7.19.1":
++  version "7.19.1"
++  resolved "https://registry.yarnpkg.com/@babel/helper-replace-supers/-/helper-replace-supers-7.19.1.tgz#e1592a9b4b368aa6bdb8784a711e0bcbf0612b78"
++  integrity sha512-T7ahH7wV0Hfs46SFh5Jz3s0B6+o8g3c+7TMxu7xKfmHikg7EAZ3I2Qk9LFhjxXq8sL7UkP5JflezNwoZa8WvWw==
+   dependencies:
+     "@babel/helper-environment-visitor" "^7.18.9"
+-    "@babel/helper-member-expression-to-functions" "^7.20.7"
++    "@babel/helper-member-expression-to-functions" "^7.18.9"
+     "@babel/helper-optimise-call-expression" "^7.18.6"
+-    "@babel/template" "^7.20.7"
+-    "@babel/traverse" "^7.20.7"
+-    "@babel/types" "^7.20.7"
++    "@babel/traverse" "^7.19.1"
++    "@babel/types" "^7.19.0"
+ 
+-"@babel/helper-simple-access@^7.20.2":
++"@babel/helper-simple-access@^7.19.4", "@babel/helper-simple-access@^7.20.2":
+   version "7.20.2"
+   resolved "https://registry.yarnpkg.com/@babel/helper-simple-access/-/helper-simple-access-7.20.2.tgz#0ab452687fe0c2cfb1e2b9e0015de07fc2d62dd9"
+   integrity sha512-+0woI/WPq59IrqDYbVGfshjT5Dmk/nnbdpcF8SnMhhXObpTq2KNBdLFRFrkVdbDOyUmHBCxzm5FHV1rACIkIbA==
+   dependencies:
+     "@babel/types" "^7.20.2"
+ 
+-"@babel/helper-skip-transparent-expression-wrappers@^7.20.0":
++"@babel/helper-skip-transparent-expression-wrappers@^7.18.9":
+   version "7.20.0"
+   resolved "https://registry.yarnpkg.com/@babel/helper-skip-transparent-expression-wrappers/-/helper-skip-transparent-expression-wrappers-7.20.0.tgz#fbe4c52f60518cab8140d77101f0e63a8a230684"
+   integrity sha512-5y1JYeNKfvnT8sZcK9DVRtpTbGiomYIHviSP3OQWmDPU3DeH4a1ZlT/N2lyQ5P8egjcRaT/Y9aNqUxK0WsnIIg==
+@@ -275,14 +273,14 @@
+     "@babel/traverse" "^7.20.5"
+     "@babel/types" "^7.20.5"
+ 
+-"@babel/helpers@^7.20.7", "@babel/helpers@^7.9.0":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.20.7.tgz#04502ff0feecc9f20ecfaad120a18f011a8e6dce"
+-  integrity sha512-PBPjs5BppzsGaxHQCDKnZ6Gd9s6xl8bBCluz3vEInLGRJmnZan4F6BYCeqtyXqkk4W5IlPmjK4JlOuZkpJ3xZA==
++"@babel/helpers@^7.20.5", "@babel/helpers@^7.9.0":
++  version "7.20.6"
++  resolved "https://registry.yarnpkg.com/@babel/helpers/-/helpers-7.20.6.tgz#e64778046b70e04779dfbdf924e7ebb45992c763"
++  integrity sha512-Pf/OjgfgFRW5bApskEz5pvidpim7tEDPlFtKcNRXWmfHGn9IEI2W2flqRQXTFb7gIPTyK++N6rVHuwKut4XK6w==
+   dependencies:
+-    "@babel/template" "^7.20.7"
+-    "@babel/traverse" "^7.20.7"
+-    "@babel/types" "^7.20.7"
++    "@babel/template" "^7.18.10"
++    "@babel/traverse" "^7.20.5"
++    "@babel/types" "^7.20.5"
+ 
+ "@babel/highlight@^7.10.4", "@babel/highlight@^7.18.6":
+   version "7.18.6"
+@@ -293,10 +291,10 @@
+     chalk "^2.0.0"
+     js-tokens "^4.0.0"
+ 
+-"@babel/parser@^7.1.0", "@babel/parser@^7.13.16", "@babel/parser@^7.14.0", "@babel/parser@^7.14.7", "@babel/parser@^7.20.7", "@babel/parser@^7.9.0":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.20.7.tgz#66fe23b3c8569220817d5feb8b9dcdc95bb4f71b"
+-  integrity sha512-T3Z9oHybU+0vZlY9CiDSJQTD5ZapcW18ZctFMi0MOAl/4BjFF4ul7NVSARLdbGO5vDqy9eQiGTV0LtKfvCYvcg==
++"@babel/parser@^7.1.0", "@babel/parser@^7.13.16", "@babel/parser@^7.14.0", "@babel/parser@^7.14.7", "@babel/parser@^7.18.10", "@babel/parser@^7.20.5", "@babel/parser@^7.9.0":
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.20.5.tgz#7f3c7335fe417665d929f34ae5dceae4c04015e8"
++  integrity sha512-r27t/cy/m9uKLXQNWWebeCUHgnAZq0CpG1OwKRxzJMP1vpSU4bSIK2hq+/cp0bQxetkXx38n09rNu8jVkcK/zA==
+ 
+ "@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@^7.18.6":
+   version "7.18.6"
+@@ -306,21 +304,21 @@
+     "@babel/helper-plugin-utils" "^7.18.6"
+ 
+ "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@^7.18.9":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining/-/plugin-bugfix-v8-spread-parameters-in-optional-chaining-7.20.7.tgz#d9c85589258539a22a901033853101a6198d4ef1"
+-  integrity sha512-sbr9+wNE5aXMBBFBICk01tt7sBf2Oc9ikRFEcem/ZORup9IMUdNhW7/wVLEbbtlWOsEubJet46mHAL2C8+2jKQ==
++  version "7.18.9"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining/-/plugin-bugfix-v8-spread-parameters-in-optional-chaining-7.18.9.tgz#a11af19aa373d68d561f08e0a57242350ed0ec50"
++  integrity sha512-AHrP9jadvH7qlOj6PINbgSuphjQUAK7AOT7DPjBo9EHoLhQTnnK5u45e1Hd4DbSQEO9nqPWtQ89r+XEOWFScKg==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/helper-skip-transparent-expression-wrappers" "^7.20.0"
+-    "@babel/plugin-proposal-optional-chaining" "^7.20.7"
++    "@babel/helper-plugin-utils" "^7.18.9"
++    "@babel/helper-skip-transparent-expression-wrappers" "^7.18.9"
++    "@babel/plugin-proposal-optional-chaining" "^7.18.9"
+ 
+ "@babel/plugin-proposal-async-generator-functions@^7.0.0", "@babel/plugin-proposal-async-generator-functions@^7.20.1":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-generator-functions/-/plugin-proposal-async-generator-functions-7.20.7.tgz#bfb7276d2d573cb67ba379984a2334e262ba5326"
+-  integrity sha512-xMbiLsn/8RK7Wq7VeVytytS2L6qE69bXPB10YCmMdDZbKF4okCqY74pI/jJQ/8U0b/F6NrT2+14b8/P9/3AMGA==
++  version "7.20.1"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-generator-functions/-/plugin-proposal-async-generator-functions-7.20.1.tgz#352f02baa5d69f4e7529bdac39aaa02d41146af9"
++  integrity sha512-Gh5rchzSwE4kC+o/6T8waD0WHEQIsDmjltY8WnWRXHUdH8axZhuH86Ov9M72YhJfDrZseQwuuWaaIT/TmePp3g==
+   dependencies:
+     "@babel/helper-environment-visitor" "^7.18.9"
+-    "@babel/helper-plugin-utils" "^7.20.2"
++    "@babel/helper-plugin-utils" "^7.19.0"
+     "@babel/helper-remap-async-to-generator" "^7.18.9"
+     "@babel/plugin-syntax-async-generators" "^7.8.4"
+ 
+@@ -333,12 +331,12 @@
+     "@babel/helper-plugin-utils" "^7.18.6"
+ 
+ "@babel/plugin-proposal-class-static-block@^7.18.6":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-class-static-block/-/plugin-proposal-class-static-block-7.20.7.tgz#92592e9029b13b15be0f7ce6a7aedc2879ca45a7"
+-  integrity sha512-AveGOoi9DAjUYYuUAG//Ig69GlazLnoyzMw68VCDux+c1tsnnH/OkYcpz/5xzMkEFC6UxjR5Gw1c+iY2wOGVeQ==
++  version "7.18.6"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-class-static-block/-/plugin-proposal-class-static-block-7.18.6.tgz#8aa81d403ab72d3962fc06c26e222dacfc9b9020"
++  integrity sha512-+I3oIiNxrCpup3Gi8n5IGMwj0gOCAjcJUSQEcotNnCCPMEnixawOQ+KeJPlgfjzx+FKQ1QSyZOWe7wmoJp7vhw==
+   dependencies:
+-    "@babel/helper-create-class-features-plugin" "^7.20.7"
+-    "@babel/helper-plugin-utils" "^7.20.2"
++    "@babel/helper-create-class-features-plugin" "^7.18.6"
++    "@babel/helper-plugin-utils" "^7.18.6"
+     "@babel/plugin-syntax-class-static-block" "^7.14.5"
+ 
+ "@babel/plugin-proposal-decorators@7.18.2":
+@@ -354,13 +352,13 @@
+     charcodes "^0.2.0"
+ 
+ "@babel/plugin-proposal-decorators@^7.12.9":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-decorators/-/plugin-proposal-decorators-7.20.7.tgz#05d37453c2ce818f3e47bbeda9468c8de947eecc"
+-  integrity sha512-JB45hbUweYpwAGjkiM7uCyXMENH2lG+9r3G2E+ttc2PRXAoEkpfd/KW5jDg4j8RS6tLtTG1jZi9LbHZVSfs1/A==
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-decorators/-/plugin-proposal-decorators-7.20.5.tgz#28ba1a0e5044664a512967a19407d7fc26925394"
++  integrity sha512-Lac7PpRJXcC3s9cKsBfl+uc+DYXU5FD06BrTFunQO6QIQT+DwyzDPURAowI3bcvD1dZF/ank1Z5rstUJn3Hn4Q==
+   dependencies:
+-    "@babel/helper-create-class-features-plugin" "^7.20.7"
++    "@babel/helper-create-class-features-plugin" "^7.20.5"
+     "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/helper-replace-supers" "^7.20.7"
++    "@babel/helper-replace-supers" "^7.19.1"
+     "@babel/helper-split-export-declaration" "^7.18.6"
+     "@babel/plugin-syntax-decorators" "^7.19.0"
+ 
+@@ -397,11 +395,11 @@
+     "@babel/plugin-syntax-json-strings" "^7.8.3"
+ 
+ "@babel/plugin-proposal-logical-assignment-operators@^7.18.9":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-logical-assignment-operators/-/plugin-proposal-logical-assignment-operators-7.20.7.tgz#dfbcaa8f7b4d37b51e8bfb46d94a5aea2bb89d83"
+-  integrity sha512-y7C7cZgpMIjWlKE5T7eJwp+tnRYM89HmRvWM5EQuB5BoHEONjmQ8lSNmBUwOyy/GFRsohJED51YBF79hE1djug==
++  version "7.18.9"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-logical-assignment-operators/-/plugin-proposal-logical-assignment-operators-7.18.9.tgz#8148cbb350483bf6220af06fa6db3690e14b2e23"
++  integrity sha512-128YbMpjCrP35IOExw2Fq+x55LMP42DzhOhX2aNNIdI9avSWl2PI0yuBWarr3RYpZBSPtabfadkH2yeRiMD61Q==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.20.2"
++    "@babel/helper-plugin-utils" "^7.18.9"
+     "@babel/plugin-syntax-logical-assignment-operators" "^7.10.4"
+ 
+ "@babel/plugin-proposal-nullish-coalescing-operator@^7.0.0", "@babel/plugin-proposal-nullish-coalescing-operator@^7.13.8", "@babel/plugin-proposal-nullish-coalescing-operator@^7.18.6":
+@@ -421,15 +419,15 @@
+     "@babel/plugin-syntax-numeric-separator" "^7.10.4"
+ 
+ "@babel/plugin-proposal-object-rest-spread@^7.0.0", "@babel/plugin-proposal-object-rest-spread@^7.12.13", "@babel/plugin-proposal-object-rest-spread@^7.20.2":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-object-rest-spread/-/plugin-proposal-object-rest-spread-7.20.7.tgz#aa662940ef425779c75534a5c41e9d936edc390a"
+-  integrity sha512-d2S98yCiLxDVmBmE8UjGcfPvNEUbA1U5q5WxaWFUGRzJSVAZqm5W6MbPct0jxnegUZ0niLeNX+IOzEs7wYg9Dg==
++  version "7.20.2"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-object-rest-spread/-/plugin-proposal-object-rest-spread-7.20.2.tgz#a556f59d555f06961df1e572bb5eca864c84022d"
++  integrity sha512-Ks6uej9WFK+fvIMesSqbAto5dD8Dz4VuuFvGJFKgIGSkJuRGcrwGECPA1fDgQK3/DbExBJpEkTeYeB8geIFCSQ==
+   dependencies:
+-    "@babel/compat-data" "^7.20.5"
+-    "@babel/helper-compilation-targets" "^7.20.7"
++    "@babel/compat-data" "^7.20.1"
++    "@babel/helper-compilation-targets" "^7.20.0"
+     "@babel/helper-plugin-utils" "^7.20.2"
+     "@babel/plugin-syntax-object-rest-spread" "^7.8.3"
+-    "@babel/plugin-transform-parameters" "^7.20.7"
++    "@babel/plugin-transform-parameters" "^7.20.1"
+ 
+ "@babel/plugin-proposal-optional-catch-binding@7.16.7":
+   version "7.16.7"
+@@ -447,13 +445,13 @@
+     "@babel/helper-plugin-utils" "^7.18.6"
+     "@babel/plugin-syntax-optional-catch-binding" "^7.8.3"
+ 
+-"@babel/plugin-proposal-optional-chaining@^7.0.0", "@babel/plugin-proposal-optional-chaining@^7.13.12", "@babel/plugin-proposal-optional-chaining@^7.18.9", "@babel/plugin-proposal-optional-chaining@^7.20.7":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-optional-chaining/-/plugin-proposal-optional-chaining-7.20.7.tgz#49f2b372519ab31728cc14115bb0998b15bfda55"
+-  integrity sha512-T+A7b1kfjtRM51ssoOfS1+wbyCVqorfyZhT99TvxxLMirPShD8CzKMRepMlCBGM5RpHMbn8s+5MMHnPstJH6mQ==
++"@babel/plugin-proposal-optional-chaining@^7.0.0", "@babel/plugin-proposal-optional-chaining@^7.13.12", "@babel/plugin-proposal-optional-chaining@^7.18.9":
++  version "7.18.9"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-optional-chaining/-/plugin-proposal-optional-chaining-7.18.9.tgz#e8e8fe0723f2563960e4bf5e9690933691915993"
++  integrity sha512-v5nwt4IqBXihxGsW2QmCWMDS3B3bzGIk/EQVZz2ei7f3NJl8NzAJVvUmpDW5q1CRNY+Beb/k58UAH1Km1N411w==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/helper-skip-transparent-expression-wrappers" "^7.20.0"
++    "@babel/helper-plugin-utils" "^7.18.9"
++    "@babel/helper-skip-transparent-expression-wrappers" "^7.18.9"
+     "@babel/plugin-syntax-optional-chaining" "^7.8.3"
+ 
+ "@babel/plugin-proposal-private-methods@^7.18.6":
+@@ -637,20 +635,20 @@
+     "@babel/helper-plugin-utils" "^7.19.0"
+ 
+ "@babel/plugin-transform-arrow-functions@^7.0.0", "@babel/plugin-transform-arrow-functions@^7.18.6":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-arrow-functions/-/plugin-transform-arrow-functions-7.20.7.tgz#bea332b0e8b2dab3dafe55a163d8227531ab0551"
+-  integrity sha512-3poA5E7dzDomxj9WXWwuD6A5F3kc7VXwIJO+E+J8qtDtS+pXPAhrgEyh+9GBwBgPq1Z+bB+/JD60lp5jsN7JPQ==
++  version "7.18.6"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-arrow-functions/-/plugin-transform-arrow-functions-7.18.6.tgz#19063fcf8771ec7b31d742339dac62433d0611fe"
++  integrity sha512-9S9X9RUefzrsHZmKMbDXxweEH+YlE8JJEuat9FdvW9Qh1cw7W64jELCtWNkPBPX5En45uy28KGvA/AySqUh8CQ==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.20.2"
++    "@babel/helper-plugin-utils" "^7.18.6"
+ 
+ "@babel/plugin-transform-async-to-generator@^7.0.0", "@babel/plugin-transform-async-to-generator@^7.18.6":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-async-to-generator/-/plugin-transform-async-to-generator-7.20.7.tgz#dfee18623c8cb31deb796aa3ca84dda9cea94354"
+-  integrity sha512-Uo5gwHPT9vgnSXQxqGtpdufUiWp96gk7yiP4Mp5bm1QMkEmLXBO7PAGYbKoJ6DhAwiNkcHFBol/x5zZZkL/t0Q==
++  version "7.18.6"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-async-to-generator/-/plugin-transform-async-to-generator-7.18.6.tgz#ccda3d1ab9d5ced5265fdb13f1882d5476c71615"
++  integrity sha512-ARE5wZLKnTgPW7/1ftQmSi1CmkqqHo2DNmtztFhvgtOWSDfq0Cq9/9L+KnZNYSNrydBekhW3rwShduf59RoXag==
+   dependencies:
+     "@babel/helper-module-imports" "^7.18.6"
+-    "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/helper-remap-async-to-generator" "^7.18.9"
++    "@babel/helper-plugin-utils" "^7.18.6"
++    "@babel/helper-remap-async-to-generator" "^7.18.6"
+ 
+ "@babel/plugin-transform-block-scoped-functions@^7.0.0", "@babel/plugin-transform-block-scoped-functions@^7.18.6":
+   version "7.18.6"
+@@ -660,39 +658,38 @@
+     "@babel/helper-plugin-utils" "^7.18.6"
+ 
+ "@babel/plugin-transform-block-scoping@^7.0.0", "@babel/plugin-transform-block-scoping@^7.20.2":
+-  version "7.20.11"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.20.11.tgz#9f5a3424bd112a3f32fe0cf9364fbb155cff262a"
+-  integrity sha512-tA4N427a7fjf1P0/2I4ScsHGc5jcHPbb30xMbaTke2gxDuWpUfXDuX1FEymJwKk4tuGUvGcejAR6HdZVqmmPyw==
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-block-scoping/-/plugin-transform-block-scoping-7.20.5.tgz#401215f9dc13dc5262940e2e527c9536b3d7f237"
++  integrity sha512-WvpEIW9Cbj9ApF3yJCjIEEf1EiNJLtXagOrL5LNWEZOo3jv8pmPoYTSNJQvqej8OavVlgOoOPw6/htGZro6IkA==
+   dependencies:
+     "@babel/helper-plugin-utils" "^7.20.2"
+ 
+ "@babel/plugin-transform-classes@^7.0.0", "@babel/plugin-transform-classes@^7.20.2":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-classes/-/plugin-transform-classes-7.20.7.tgz#f438216f094f6bb31dc266ebfab8ff05aecad073"
+-  integrity sha512-LWYbsiXTPKl+oBlXUGlwNlJZetXD5Am+CyBdqhPsDVjM9Jc8jwBJFrKhHf900Kfk2eZG1y9MAG3UNajol7A4VQ==
++  version "7.20.2"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-classes/-/plugin-transform-classes-7.20.2.tgz#c0033cf1916ccf78202d04be4281d161f6709bb2"
++  integrity sha512-9rbPp0lCVVoagvtEyQKSo5L8oo0nQS/iif+lwlAz29MccX2642vWDlSZK+2T2buxbopotId2ld7zZAzRfz9j1g==
+   dependencies:
+     "@babel/helper-annotate-as-pure" "^7.18.6"
+-    "@babel/helper-compilation-targets" "^7.20.7"
++    "@babel/helper-compilation-targets" "^7.20.0"
+     "@babel/helper-environment-visitor" "^7.18.9"
+     "@babel/helper-function-name" "^7.19.0"
+     "@babel/helper-optimise-call-expression" "^7.18.6"
+     "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/helper-replace-supers" "^7.20.7"
++    "@babel/helper-replace-supers" "^7.19.1"
+     "@babel/helper-split-export-declaration" "^7.18.6"
+     globals "^11.1.0"
+ 
+ "@babel/plugin-transform-computed-properties@^7.0.0", "@babel/plugin-transform-computed-properties@^7.18.9":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-computed-properties/-/plugin-transform-computed-properties-7.20.7.tgz#704cc2fd155d1c996551db8276d55b9d46e4d0aa"
+-  integrity sha512-Lz7MvBK6DTjElHAmfu6bfANzKcxpyNPeYBGEafyA6E5HtRpjpZwU+u7Qrgz/2OR0z+5TvKYbPdphfSaAcZBrYQ==
++  version "7.18.9"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-computed-properties/-/plugin-transform-computed-properties-7.18.9.tgz#2357a8224d402dad623caf6259b611e56aec746e"
++  integrity sha512-+i0ZU1bCDymKakLxn5srGHrsAPRELC2WIbzwjLhHW9SIE1cPYkLCL0NlnXMZaM1vhfgA2+M7hySk42VBvrkBRw==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/template" "^7.20.7"
++    "@babel/helper-plugin-utils" "^7.18.9"
+ 
+ "@babel/plugin-transform-destructuring@^7.0.0", "@babel/plugin-transform-destructuring@^7.20.2":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.20.7.tgz#8bda578f71620c7de7c93af590154ba331415454"
+-  integrity sha512-Xwg403sRrZb81IVB79ZPqNQME23yhugYVqgTxAhT99h485F4f+GMELFhhOsscDUB7HCswepKeCKLn/GZvUKoBA==
++  version "7.20.2"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.20.2.tgz#c23741cfa44ddd35f5e53896e88c75331b8b2792"
++  integrity sha512-mENM+ZHrvEgxLTBXUiQ621rRXZes3KWUv6NdQlrnr1TkWVw+hUjQBZuP2X32qKlrlG2BzgR95gkuCRSkJl8vIw==
+   dependencies:
+     "@babel/helper-plugin-utils" "^7.20.2"
+ 
+@@ -758,30 +755,30 @@
+     "@babel/helper-plugin-utils" "^7.18.6"
+ 
+ "@babel/plugin-transform-modules-amd@^7.19.6":
+-  version "7.20.11"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-amd/-/plugin-transform-modules-amd-7.20.11.tgz#3daccca8e4cc309f03c3a0c4b41dc4b26f55214a"
+-  integrity sha512-NuzCt5IIYOW0O30UvqktzHYR2ud5bOWbY0yaxWZ6G+aFzOMJvrs5YHNikrbdaT15+KNO31nPOy5Fim3ku6Zb5g==
++  version "7.19.6"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-amd/-/plugin-transform-modules-amd-7.19.6.tgz#aca391801ae55d19c4d8d2ebfeaa33df5f2a2cbd"
++  integrity sha512-uG3od2mXvAtIFQIh0xrpLH6r5fpSQN04gIVovl+ODLdUMANokxQLZnPBHcjmv3GxRjnqwLuHvppjjcelqUFZvg==
+   dependencies:
+-    "@babel/helper-module-transforms" "^7.20.11"
+-    "@babel/helper-plugin-utils" "^7.20.2"
++    "@babel/helper-module-transforms" "^7.19.6"
++    "@babel/helper-plugin-utils" "^7.19.0"
+ 
+ "@babel/plugin-transform-modules-commonjs@^7.0.0", "@babel/plugin-transform-modules-commonjs@^7.13.8", "@babel/plugin-transform-modules-commonjs@^7.19.6":
+-  version "7.20.11"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.20.11.tgz#8cb23010869bf7669fd4b3098598b6b2be6dc607"
+-  integrity sha512-S8e1f7WQ7cimJQ51JkAaDrEtohVEitXjgCGAS2N8S31Y42E+kWwfSz83LYz57QdBm7q9diARVqanIaH2oVgQnw==
++  version "7.19.6"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.19.6.tgz#25b32feef24df8038fc1ec56038917eacb0b730c"
++  integrity sha512-8PIa1ym4XRTKuSsOUXqDG0YaOlEuTVvHMe5JCfgBMOtHvJKw/4NGovEGN33viISshG/rZNVrACiBmPQLvWN8xQ==
+   dependencies:
+-    "@babel/helper-module-transforms" "^7.20.11"
+-    "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/helper-simple-access" "^7.20.2"
++    "@babel/helper-module-transforms" "^7.19.6"
++    "@babel/helper-plugin-utils" "^7.19.0"
++    "@babel/helper-simple-access" "^7.19.4"
+ 
+ "@babel/plugin-transform-modules-systemjs@^7.19.6":
+-  version "7.20.11"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-systemjs/-/plugin-transform-modules-systemjs-7.20.11.tgz#467ec6bba6b6a50634eea61c9c232654d8a4696e"
+-  integrity sha512-vVu5g9BPQKSFEmvt2TA4Da5N+QVS66EX21d8uoOihC+OCpUoGvzVsXeqFdtAEfVa5BILAeFt+U7yVmLbQnAJmw==
++  version "7.19.6"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-systemjs/-/plugin-transform-modules-systemjs-7.19.6.tgz#59e2a84064b5736a4471b1aa7b13d4431d327e0d"
++  integrity sha512-fqGLBepcc3kErfR9R3DnVpURmckXP7gj7bAlrTQyBxrigFqszZCkFkcoxzCp2v32XmwXLvbw+8Yq9/b+QqksjQ==
+   dependencies:
+     "@babel/helper-hoist-variables" "^7.18.6"
+-    "@babel/helper-module-transforms" "^7.20.11"
+-    "@babel/helper-plugin-utils" "^7.20.2"
++    "@babel/helper-module-transforms" "^7.19.6"
++    "@babel/helper-plugin-utils" "^7.19.0"
+     "@babel/helper-validator-identifier" "^7.19.1"
+ 
+ "@babel/plugin-transform-modules-umd@^7.18.6":
+@@ -822,10 +819,10 @@
+     "@babel/helper-plugin-utils" "^7.18.6"
+     "@babel/helper-replace-supers" "^7.18.6"
+ 
+-"@babel/plugin-transform-parameters@^7.0.0", "@babel/plugin-transform-parameters@^7.20.1", "@babel/plugin-transform-parameters@^7.20.7":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-parameters/-/plugin-transform-parameters-7.20.7.tgz#0ee349e9d1bc96e78e3b37a7af423a4078a7083f"
+-  integrity sha512-WiWBIkeHKVOSYPO0pWkxGPfKeWrCJyD3NJ53+Lrp/QMSZbsVPovrVl2aWZ19D/LTVnaDv5Ap7GJ/B2CTOZdrfA==
++"@babel/plugin-transform-parameters@^7.0.0", "@babel/plugin-transform-parameters@^7.20.1":
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-parameters/-/plugin-transform-parameters-7.20.5.tgz#f8f9186c681d10c3de7620c916156d893c8a019e"
++  integrity sha512-h7plkOmcndIUWXZFLgpbrh2+fXAi47zcUX7IrOQuZdLD0I0KvjJ6cvo3BEcAOsDOcZhVKGJqv07mkSqK0y2isQ==
+   dependencies:
+     "@babel/helper-plugin-utils" "^7.20.2"
+ 
+@@ -858,15 +855,15 @@
+     "@babel/helper-plugin-utils" "^7.19.0"
+ 
+ "@babel/plugin-transform-react-jsx@^7.0.0", "@babel/plugin-transform-react-jsx@^7.12.17":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-react-jsx/-/plugin-transform-react-jsx-7.20.7.tgz#025d85a1935fd7e19dfdcb1b1d4df34d4da484f7"
+-  integrity sha512-Tfq7qqD+tRj3EoDhY00nn2uP2hsRxgYGi5mLQ5TimKav0a9Lrpd4deE+fcLXU8zFYRjlKPHZhpCvfEA6qnBxqQ==
++  version "7.19.0"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-react-jsx/-/plugin-transform-react-jsx-7.19.0.tgz#b3cbb7c3a00b92ec8ae1027910e331ba5c500eb9"
++  integrity sha512-UVEvX3tXie3Szm3emi1+G63jyw1w5IcMY0FSKM+CRnKRI5Mr1YbCNgsSTwoTwKphQEG9P+QqmuRFneJPZuHNhg==
+   dependencies:
+     "@babel/helper-annotate-as-pure" "^7.18.6"
+     "@babel/helper-module-imports" "^7.18.6"
+-    "@babel/helper-plugin-utils" "^7.20.2"
++    "@babel/helper-plugin-utils" "^7.19.0"
+     "@babel/plugin-syntax-jsx" "^7.18.6"
+-    "@babel/types" "^7.20.7"
++    "@babel/types" "^7.19.0"
+ 
+ "@babel/plugin-transform-regenerator@^7.18.6":
+   version "7.20.5"
+@@ -903,12 +900,12 @@
+     "@babel/helper-plugin-utils" "^7.18.6"
+ 
+ "@babel/plugin-transform-spread@^7.0.0", "@babel/plugin-transform-spread@^7.19.0":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-spread/-/plugin-transform-spread-7.20.7.tgz#c2d83e0b99d3bf83e07b11995ee24bf7ca09401e"
+-  integrity sha512-ewBbHQ+1U/VnH1fxltbJqDeWBU1oNLG8Dj11uIv3xVf7nrQu0bPGe5Rf716r7K5Qz+SqtAOVswoVunoiBtGhxw==
++  version "7.19.0"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-spread/-/plugin-transform-spread-7.19.0.tgz#dd60b4620c2fec806d60cfaae364ec2188d593b6"
++  integrity sha512-RsuMk7j6n+r752EtzyScnWkQyuJdli6LdO5Klv8Yx0OfPVTcQkIUfS8clx5e9yHXzlnhOZF3CbQ8C2uP5j074w==
+   dependencies:
+-    "@babel/helper-plugin-utils" "^7.20.2"
+-    "@babel/helper-skip-transparent-expression-wrappers" "^7.20.0"
++    "@babel/helper-plugin-utils" "^7.19.0"
++    "@babel/helper-skip-transparent-expression-wrappers" "^7.18.9"
+ 
+ "@babel/plugin-transform-sticky-regex@^7.0.0", "@babel/plugin-transform-sticky-regex@^7.18.6":
+   version "7.18.6"
+@@ -932,11 +929,11 @@
+     "@babel/helper-plugin-utils" "^7.18.9"
+ 
+ "@babel/plugin-transform-typescript@^7.18.6", "@babel/plugin-transform-typescript@^7.5.0":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-typescript/-/plugin-transform-typescript-7.20.7.tgz#673f49499cd810ae32a1ea5f3f8fab370987e055"
+-  integrity sha512-m3wVKEvf6SoszD8pu4NZz3PvfKRCMgk6D6d0Qi9hNnlM5M6CFS92EgF4EiHVLKbU0r/r7ty1hg7NPZwE7WRbYw==
++  version "7.20.2"
++  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-typescript/-/plugin-transform-typescript-7.20.2.tgz#91515527b376fc122ba83b13d70b01af8fe98f3f"
++  integrity sha512-jvS+ngBfrnTUBfOQq8NfGnSbF9BrqlR6hjJ2yVxMkmO5nL/cdifNbI30EfjRlN4g5wYWNnMPyj5Sa6R1pbLeag==
+   dependencies:
+-    "@babel/helper-create-class-features-plugin" "^7.20.7"
++    "@babel/helper-create-class-features-plugin" "^7.20.2"
+     "@babel/helper-plugin-utils" "^7.20.2"
+     "@babel/plugin-syntax-typescript" "^7.20.0"
+ 
+@@ -1077,41 +1074,41 @@
+     source-map-support "^0.5.16"
+ 
+ "@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.14.0", "@babel/runtime@^7.18.3", "@babel/runtime@^7.18.6", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.7.tgz#fcb41a5a70550e04a7b708037c7c32f7f356d8fd"
+-  integrity sha512-UF0tvkUtxwAgZ5W/KrkHf0Rn0fdnLDU9ScxBrEVNUprE/MzirjK4MJUX1/BVDv00Sv8cljtukVK1aky++X1SjQ==
++  version "7.20.6"
++  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.6.tgz#facf4879bfed9b5326326273a64220f099b0fce3"
++  integrity sha512-Q+8MqP7TiHMWzSfwiJwXCjyf4GYA4Dgw3emg/7xmwsdLJOZUp+nMqcOwOzzYheuM1rhDu8FSj2l0aoMygEuXuA==
+   dependencies:
+     regenerator-runtime "^0.13.11"
+ 
+-"@babel/template@^7.0.0", "@babel/template@^7.18.10", "@babel/template@^7.20.7", "@babel/template@^7.3.3", "@babel/template@^7.8.6":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.20.7.tgz#a15090c2839a83b02aa996c0b4994005841fd5a8"
+-  integrity sha512-8SegXApWe6VoNw0r9JHpSteLKTpTiLZ4rMlGIm9JQ18KiCtyQiAMEazujAHrUS5flrcqYZa75ukev3P6QmUwUw==
++"@babel/template@^7.0.0", "@babel/template@^7.18.10", "@babel/template@^7.3.3", "@babel/template@^7.8.6":
++  version "7.18.10"
++  resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.18.10.tgz#6f9134835970d1dbf0835c0d100c9f38de0c5e71"
++  integrity sha512-TI+rCtooWHr3QJ27kJxfjutghu44DLnasDMwpDqCXVTal9RLp3RSYNh4NdBrRP2cQAoG9A8juOQl6P6oZG4JxA==
+   dependencies:
+     "@babel/code-frame" "^7.18.6"
+-    "@babel/parser" "^7.20.7"
+-    "@babel/types" "^7.20.7"
++    "@babel/parser" "^7.18.10"
++    "@babel/types" "^7.18.10"
+ 
+-"@babel/traverse@^7.1.0", "@babel/traverse@^7.14.0", "@babel/traverse@^7.16.0", "@babel/traverse@^7.20.10", "@babel/traverse@^7.20.5", "@babel/traverse@^7.20.7", "@babel/traverse@^7.7.4", "@babel/traverse@^7.9.0":
+-  version "7.20.10"
+-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.20.10.tgz#2bf98239597fcec12f842756f186a9dde6d09230"
+-  integrity sha512-oSf1juCgymrSez8NI4A2sr4+uB/mFd9MXplYGPEBnfAuWmmyeVcHa6xLPiaRBcXkcb/28bgxmQLTVwFKE1yfsg==
++"@babel/traverse@^7.1.0", "@babel/traverse@^7.14.0", "@babel/traverse@^7.16.0", "@babel/traverse@^7.19.1", "@babel/traverse@^7.20.1", "@babel/traverse@^7.20.5", "@babel/traverse@^7.7.4", "@babel/traverse@^7.9.0":
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.20.5.tgz#78eb244bea8270fdda1ef9af22a5d5e5b7e57133"
++  integrity sha512-WM5ZNN3JITQIq9tFZaw1ojLU3WgWdtkxnhM1AegMS+PvHjkM5IXjmYEGY7yukz5XS4sJyEf2VzWjI8uAavhxBQ==
+   dependencies:
+     "@babel/code-frame" "^7.18.6"
+-    "@babel/generator" "^7.20.7"
++    "@babel/generator" "^7.20.5"
+     "@babel/helper-environment-visitor" "^7.18.9"
+     "@babel/helper-function-name" "^7.19.0"
+     "@babel/helper-hoist-variables" "^7.18.6"
+     "@babel/helper-split-export-declaration" "^7.18.6"
+-    "@babel/parser" "^7.20.7"
+-    "@babel/types" "^7.20.7"
++    "@babel/parser" "^7.20.5"
++    "@babel/types" "^7.20.5"
+     debug "^4.1.0"
+     globals "^11.1.0"
+ 
+-"@babel/types@^7.0.0", "@babel/types@^7.18.6", "@babel/types@^7.18.9", "@babel/types@^7.19.0", "@babel/types@^7.20.0", "@babel/types@^7.20.2", "@babel/types@^7.20.5", "@babel/types@^7.20.7", "@babel/types@^7.3.0", "@babel/types@^7.3.3", "@babel/types@^7.4.4", "@babel/types@^7.9.0":
+-  version "7.20.7"
+-  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.20.7.tgz#54ec75e252318423fc07fb644dc6a58a64c09b7f"
+-  integrity sha512-69OnhBxSSgK0OzTJai4kyPDiKTIe3j+ctaHdIGVbRahTLAT7L3R9oeXHC2aVSuGYt3cVnoAMDmOCgJ2yaiLMvg==
++"@babel/types@^7.0.0", "@babel/types@^7.18.10", "@babel/types@^7.18.6", "@babel/types@^7.18.9", "@babel/types@^7.19.0", "@babel/types@^7.20.0", "@babel/types@^7.20.2", "@babel/types@^7.20.5", "@babel/types@^7.3.0", "@babel/types@^7.3.3", "@babel/types@^7.4.4", "@babel/types@^7.9.0":
++  version "7.20.5"
++  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.20.5.tgz#e206ae370b5393d94dfd1d04cd687cace53efa84"
++  integrity sha512-c9fst/h2/dcF7H+MJKZ2T0KjEQ8hY/BNnDk/H3XY8C4Aw/eWQXWn/lWntHF9ooUBnGmEvbfGrTgLWc+um0YDUg==
+   dependencies:
+     "@babel/helper-string-parser" "^7.19.4"
+     "@babel/helper-validator-identifier" "^7.19.1"
+@@ -1138,14 +1135,14 @@
+     "@types/hammerjs" "^2.0.36"
+ 
+ "@eslint/eslintrc@^1.3.0":
+-  version "1.4.0"
+-  resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-1.4.0.tgz#8ec64e0df3e7a1971ee1ff5158da87389f167a63"
+-  integrity sha512-7yfvXy6MWLgWSFsLhz5yH3iQ52St8cdUY6FoGieKkRDVxuxmrNuUetIuu6cmjNWwniUHiWXjxCr5tTXDrbYS5A==
++  version "1.3.3"
++  resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-1.3.3.tgz#2b044ab39fdfa75b4688184f9e573ce3c5b0ff95"
++  integrity sha512-uj3pT6Mg+3t39fvLrj8iuCIJ38zKO9FpGtJ4BBJebJhEwjoT+KLVNCcHT5QC9NGRIEi7fZ0ZR8YRb884auB4Lg==
+   dependencies:
+     ajv "^6.12.4"
+     debug "^4.3.2"
+     espree "^9.4.0"
+-    globals "^13.19.0"
++    globals "^13.15.0"
+     ignore "^5.2.0"
+     import-fresh "^3.2.1"
+     js-yaml "^4.1.0"
+@@ -1332,18 +1329,21 @@
+     xcode "^3.0.0"
+     xml-js "^1.6.11"
+ 
+-"@expo/dev-server@0.1.120", "@expo/dev-server@~0.1.120":
+-  version "0.1.120"
+-  resolved "https://registry.yarnpkg.com/@expo/dev-server/-/dev-server-0.1.120.tgz#0c7aff4e29d98298214129127f5df951cb7b81dd"
+-  integrity sha512-x5/jCv0EOpz6FyehXpI5bgDQTVsGZYvgISkAw7n60RhtG+aid6N2CCR9SDMCH70XaUpFnfTW9qvderpCEj7Puw==
++"@expo/dev-server@~0.1.120":
++  version "0.1.123"
++  resolved "https://registry.yarnpkg.com/@expo/dev-server/-/dev-server-0.1.123.tgz#71304323b47db9ce300b9a774571ef2312b9d581"
++  integrity sha512-N6UVzzeemfX0AONUSWInvkAAbqon8hRXpyYE/nMPaC6TvAmgGY5ILZAGoXwlpxwY2VKNT0Lx4s/UJ53ytIaHbA==
+   dependencies:
+     "@expo/bunyan" "4.0.0"
+-    "@expo/metro-config" "~0.4.0"
++    "@expo/metro-config" "~0.5.1"
+     "@expo/osascript" "2.0.33"
++    "@expo/spawn-async" "^1.5.0"
+     body-parser "1.19.0"
+     chalk "^4.0.0"
+     connect "^3.7.0"
+     fs-extra "9.0.0"
++    is-docker "^2.0.0"
++    is-wsl "^2.1.1"
+     node-fetch "^2.6.0"
+     open "^8.3.0"
+     resolve-from "^5.0.0"
+@@ -1427,6 +1427,20 @@
+     resolve-from "^5.0.0"
+     sucrase "^3.20.0"
+ 
++"@expo/metro-config@~0.5.1":
++  version "0.5.1"
++  resolved "https://registry.yarnpkg.com/@expo/metro-config/-/metro-config-0.5.1.tgz#58c715041e1773ad653519535c017138bfc766de"
++  integrity sha512-Rvy4ZFgKNDfXO401z2OQF8fWbPj1lLVDL4GF1aqCIhCDHCKrezbwB0xejpcUyndJRCxBL2BMAM+P24t6cKv9Fw==
++  dependencies:
++    "@expo/config" "~7.0.2"
++    "@expo/json-file" "8.2.36"
++    chalk "^4.1.0"
++    debug "^4.3.2"
++    find-yarn-workspace-root "~2.0.0"
++    getenv "^1.0.0"
++    resolve-from "^5.0.0"
++    sucrase "^3.20.0"
++
+ "@expo/ngrok-bin-darwin-ia32@2.2.8":
+   version "2.2.8"
+   resolved "https://registry.yarnpkg.com/@expo/ngrok-bin-darwin-ia32/-/ngrok-bin-darwin-ia32-2.2.8.tgz#46ed6d485a87396acf4af317beeaab7a1f607315"
+@@ -2491,11 +2505,11 @@
+   integrity sha512-K0aGNn1TjalKj+65D7ycc1//H9roAQ51GJVk5ZJQFb2teECGmzd86bYDC0aYdbRf7gtovescq4Zt6FR0tgXiHQ==
+ 
+ "@react-navigation/bottom-tabs@^6.3.2":
+-  version "6.5.2"
+-  resolved "https://registry.yarnpkg.com/@react-navigation/bottom-tabs/-/bottom-tabs-6.5.2.tgz#15031640fcef8a8a167bd080f2c3d41835ec0bcf"
+-  integrity sha512-iN3B1cgXdo64lqXdsTsCjN7n+5ILYKRexAu0VtW6EO8E6Z/0obK5JcCEropSiimRqVRs0kyuYj3F94Oth+hMrw==
++  version "6.5.1"
++  resolved "https://registry.yarnpkg.com/@react-navigation/bottom-tabs/-/bottom-tabs-6.5.1.tgz#ef146502674e68736cbb47500ba1e3e481456869"
++  integrity sha512-XhY3rdfI/lxiG/TfdxvYYKSJR6N6K42VEBBQX8yvGBq+7aeCKaX5D7MF6yiI6ViVZ8uPhGyh/MJM3srUW+Yj7w==
+   dependencies:
+-    "@react-navigation/elements" "^1.3.12"
++    "@react-navigation/elements" "^1.3.11"
+     color "^4.2.3"
+     warn-once "^0.1.0"
+ 
+@@ -2511,17 +2525,17 @@
+     react-is "^16.13.0"
+     use-latest-callback "^0.1.5"
+ 
+-"@react-navigation/elements@^1.3.12", "@react-navigation/elements@^1.3.5":
+-  version "1.3.12"
+-  resolved "https://registry.yarnpkg.com/@react-navigation/elements/-/elements-1.3.12.tgz#14ac1189e0778039c178bd4a6f8da075094896b4"
+-  integrity sha512-iVcLIYg/XJk1p6X1rSFhNhCjAJ3ORqNT2/bJqw7I/liujeJAoz1oZ5JDoEcZaA0wMDts1txxLuqAYJmhCgU2aA==
++"@react-navigation/elements@^1.3.11", "@react-navigation/elements@^1.3.5":
++  version "1.3.11"
++  resolved "https://registry.yarnpkg.com/@react-navigation/elements/-/elements-1.3.11.tgz#135c2cb3ae4a31bc835bb731110fd1ef9c38e237"
++  integrity sha512-o4J0g4ofJbbn68e4TpuGkuZLtq5mLll7Ndz9C4O4RvD2chchLuGQ5TycIPTKP428cz8JzuTCFqUe/ZhOPSsudw==
+ 
+ "@react-navigation/native-stack@^6.0.2":
+-  version "6.9.7"
+-  resolved "https://registry.yarnpkg.com/@react-navigation/native-stack/-/native-stack-6.9.7.tgz#9211fc8933825a41f19011b935133a6ed58b4ce1"
+-  integrity sha512-YsBv4LldFErwQbqLCI/aWWDTpMf9SFS4IW3Qcefm+TZli9Ee7XpZMmFdotiZTz4KoYHbqhO1fuExjl2O7ZHrAQ==
++  version "6.9.6"
++  resolved "https://registry.yarnpkg.com/@react-navigation/native-stack/-/native-stack-6.9.6.tgz#d88cc332f19415fa2c57b8f2b9a6fc2cabf9733e"
++  integrity sha512-Puqo5Y7MwYZvGELN73nMzaWTMdJu58stp9M809h4eoi4SzS0u/mFtypquEcW1gXdmRlDMmqXTtR/NBPSc2kLJg==
+   dependencies:
+-    "@react-navigation/elements" "^1.3.12"
++    "@react-navigation/elements" "^1.3.11"
+     warn-once "^0.1.0"
+ 
+ "@react-navigation/native@~6.0.1":
+@@ -2639,9 +2653,9 @@
+     "@hapi/hoek" "^9.0.0"
+ 
+ "@sideway/formula@^3.0.0":
+-  version "3.0.1"
+-  resolved "https://registry.yarnpkg.com/@sideway/formula/-/formula-3.0.1.tgz#80fcbcbaf7ce031e0ef2dd29b1bfc7c3f583611f"
+-  integrity sha512-/poHZJJVjx3L+zVD6g9KgHfYnb443oi7wLu/XKojDviHy6HOEOA6z1Trk5aR1dGcmPenJEgb2sK2I80LeS3MIg==
++  version "3.0.0"
++  resolved "https://registry.yarnpkg.com/@sideway/formula/-/formula-3.0.0.tgz#fe158aee32e6bd5de85044be615bc08478a0a13c"
++  integrity sha512-vHe7wZ4NOXVfkoRb8T5otiENVlT7a3IAiw7H5M2+GO+9CDgcVUUsX1zalAztCmwyOr2RUTGJdgB+ZvSVqmdHmg==
+ 
+ "@sideway/pinpoint@^2.0.0":
+   version "2.0.0"
+@@ -2791,9 +2805,9 @@
+   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
+ 
+ "@types/node@*":
+-  version "18.11.18"
+-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.18.tgz#8dfb97f0da23c2293e554c5a50d61ef134d7697f"
+-  integrity sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==
++  version "18.11.14"
++  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.14.tgz#a8571b25f3a31e9ded14e3ab9488509adef831d8"
++  integrity sha512-0KXV57tENYmmJMl+FekeW9V3O/rlcqGQQJ/hNh9r8pKIj304pskWuEd8fCyNT86g/TpO0gcOTiLzsHLEURFMIQ==
+ 
+ "@types/node@16.9.1":
+   version "16.9.1"
+@@ -2806,9 +2820,9 @@
+   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
+ 
+ "@types/prettier@^2.0.0":
+-  version "2.7.2"
+-  resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.7.2.tgz#6c2324641cc4ba050a8c710b2b251b377581fbf0"
+-  integrity sha512-KufADq8uQqo1pYKVIYzfKbJfBAc0sOeXqGbFaSpv8MRmC/zXgowNZmFcbngndGk922QDmOASEXUZCaY48gs4cg==
++  version "2.7.1"
++  resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.7.1.tgz#dfd20e2dc35f027cdd6c1908e80a5ddc7499670e"
++  integrity sha512-ri0UmynRRvZiiUJdiz38MmIblKK+oH30MztdBVR95dv/Ubw6neWSb8u1XpRb72L4qsZOhz+L+z9JD40SJmfWow==
+ 
+ "@types/prop-types@*":
+   version "15.7.5"
+@@ -2820,11 +2834,6 @@
+   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.5.tgz#75a2a8e7d8ab4b230414505d92335d1dcb53a6df"
+   integrity sha512-L28j2FcJfSZOnL1WBjDYp2vUHCeIFlyYI/53EwD/rKUBQ7MtUUfbQWiyKJGpcnv4/WgrhWsFKrcPstcAt/J0tQ==
+ 
+-"@types/qs@^6.5.3":
+-  version "6.9.7"
+-  resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.7.tgz#63bb7d067db107cc1e457c303bc25d511febf6cb"
+-  integrity sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==
+-
+ "@types/react-dom@^17":
+   version "17.0.18"
+   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.18.tgz#8f7af38f5d9b42f79162eea7492e5a1caff70dc2"
+@@ -3255,9 +3264,9 @@ address@1.1.2:
+   integrity sha512-aT6camzM4xEA54YVJYSqxz1kv4IHnQZRtThJJHhUMRExaU5spC7jX5ugSwTaTgJliIgs4VhZOk7htClvQ/LmRA==
+ 
+ address@^1.0.1:
+-  version "1.2.2"
+-  resolved "https://registry.yarnpkg.com/address/-/address-1.2.2.tgz#2b5248dac5485a6390532c6a517fda2e3faac89e"
+-  integrity sha512-4B/qKCfeE/ODUaAUpSwfzazo5x29WD4r3vXiWsB7I2mSDAihwEqKO+g8GELZUQSSAo5e1XTYh3ZVfLyxBc12nA==
++  version "1.2.1"
++  resolved "https://registry.yarnpkg.com/address/-/address-1.2.1.tgz#25bb61095b7522d65b357baa11bc05492d4c8acd"
++  integrity sha512-B+6bi5D34+fDYENiH5qOlA0cV2rAGKuWZ9LeyUUehbXy8e0VS9e498yO0Jeeh+iM+6KbfudHTFjXw2MmJD4QRA==
+ 
+ agent-base@4, agent-base@^4.3.0:
+   version "4.3.0"
+@@ -4562,9 +4571,9 @@ caniuse-api@^3.0.0:
+     lodash.uniq "^4.5.0"
+ 
+ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001400:
+-  version "1.0.30001441"
+-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001441.tgz#987437b266260b640a23cd18fbddb509d7f69f3e"
+-  integrity sha512-OyxRR4Vof59I3yGWXws6i908EtGbMzVUi3ganaZQHmydk1iwDhRnvaPG2WaR0KcqrDFKrxVZHULT396LEPhXfg==
++  version "1.0.30001439"
++  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001439.tgz#ab7371faeb4adff4b74dad1718a6fd122e45d9cb"
++  integrity sha512-1MgUzEkoMO6gKfXflStpYgZDlFM7M/ck/bgfVCACO5vnAf0fXoNVHdWtqGU+MYca+4bL9Z5bpOVmR33cWW9G2A==
+ 
+ capture-exit@^2.0.0:
+   version "2.0.0"
+@@ -5100,9 +5109,9 @@ copy-webpack-plugin@~6.0.3:
+     webpack-sources "^1.4.3"
+ 
+ core-js-compat@^3.25.1:
+-  version "3.27.1"
+-  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.27.1.tgz#b5695eb25c602d72b1d30cbfba3cb7e5e4cf0a67"
+-  integrity sha512-Dg91JFeCDA17FKnneN7oCMz4BkQ4TcffkgHP4OWwp9yx3pi7ubqMDXXSacfNak1PQqjc95skyt+YBLHQJnkJwA==
++  version "3.26.1"
++  resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.26.1.tgz#0e710b09ebf689d719545ac36e49041850f943df"
++  integrity sha512-622/KzTudvXCDLRw70iHW4KKs1aGpcRcowGWyYJr2DEBfRrd6hNJybxSWJFuZYD4ma86xhrwDDHxmDaIq4EA8A==
+   dependencies:
+     browserslist "^4.21.4"
+ 
+@@ -6590,20 +6599,20 @@ expo-application@~4.2.2:
+   resolved "https://registry.yarnpkg.com/expo-application/-/expo-application-4.2.2.tgz#c9500819723c59eaee5ca9832bf17d1fd4139f74"
+   integrity sha512-bFEaFRUdV6aK2iBd+HzkHNPYsyj88EAhaQW5leznmO0qQMJxpAQ3eoUXMey1hfDBh1qgkkHgSyCZ9BIgMAGJ1g==
+ 
+-expo-asset@~8.6.3:
+-  version "8.6.3"
+-  resolved "https://registry.yarnpkg.com/expo-asset/-/expo-asset-8.6.3.tgz#fd8e8e8d9a7bbbe3c202459a17746b923fb9bdda"
+-  integrity sha512-AOuB0FBbwYUfuLKtQtIsKUvm08d9OAPWZu9NZjUyIvAxmmdVKPUdN5tFUZQXXLRy3SYmk2z76JVQCoaHgJ5wvw==
++expo-asset@~8.6.1:
++  version "8.6.2"
++  resolved "https://registry.yarnpkg.com/expo-asset/-/expo-asset-8.6.2.tgz#607dbbed988f7fc54a6f37cd33f86a2388264b4b"
++  integrity sha512-XqlXjkuUCEiojbHwbHPjQs1oboRz6w3eV96+9NBD+wb3EUqgAAYY2Do+IWyVCAl8UIFbFi3xzMiqk0Xm9+H8uQ==
+   dependencies:
+     blueimp-md5 "^2.10.0"
+-    expo-constants "~13.2.2"
+-    expo-file-system "~14.1.0"
++    expo-constants "~14.0.0"
++    expo-file-system "~15.1.0"
+     invariant "^2.2.4"
+     md5-file "^3.2.3"
+     path-browserify "^1.0.0"
+     url-parse "^1.5.9"
+ 
+-expo-constants@~13.2.2, expo-constants@~13.2.3, expo-constants@~13.2.4:
++expo-constants@~13.2.3, expo-constants@~13.2.4:
+   version "13.2.4"
+   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-13.2.4.tgz#eab4a553f074b2c60ad7a158d3b82e3484a94606"
+   integrity sha512-Zobau8EuTk2GgafwkfGnWM6CmSLB7X8qnQXVuXe0nd3v92hfQUmRWGhJwH88uxXj3LrfqctM6PaJ8taG1vxfBw==
+@@ -6648,6 +6657,13 @@ expo-file-system@~14.1.0:
+     "@expo/config-plugins" "~5.0.0"
+     uuid "^3.4.0"
+ 
++expo-file-system@~15.1.0:
++  version "15.1.1"
++  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-15.1.1.tgz#724090f83ff1e6378cadc0a64b83552f769eb16b"
++  integrity sha512-MYYDKxjLo9VOkvGHqym5EOAUS+ero9O66X5zI+EXJzqNznKvnfScdXeeAaQzShmWtmLkdVDCoYFGOaTvTA1wTQ==
++  dependencies:
++    uuid "^3.4.0"
++
+ expo-font@~10.2.0, expo-font@~10.2.1:
+   version "10.2.1"
+   resolved "https://registry.yarnpkg.com/expo-font/-/expo-font-10.2.1.tgz#c13e65e864befaa4710504096b68635c6f7e48d8"
+@@ -6660,17 +6676,6 @@ expo-keep-awake@~10.2.0:
+   resolved "https://registry.yarnpkg.com/expo-keep-awake/-/expo-keep-awake-10.2.1.tgz#af6d6f7f08cc2a01d6c728c36c5419060006d98d"
+   integrity sha512-UBge1BwzDPhUFX0gKu9eDLwEFj4LGiqrOogNoEYxcosM1SwhkbWwPrd3zZtl53LLz02TxEi/CI/MUGJJsrVQLw==
+ 
+-expo-linking@^3.2.3:
+-  version "3.3.0"
+-  resolved "https://registry.yarnpkg.com/expo-linking/-/expo-linking-3.3.0.tgz#3860af9da374f0187db75036f353ca6fe9231a15"
+-  integrity sha512-wXPzI2kijnql2L2F6i8zP1zINTkYlcRXyh1iV3P6Bt57v6yZiiniZBnb6grJVj19LOmluNs0PYrbX1ZsHBChCg==
+-  dependencies:
+-    "@types/qs" "^6.5.3"
+-    expo-constants "~14.0.0"
+-    invariant "^2.2.4"
+-    qs "^6.9.1"
+-    url-parse "^1.5.9"
+-
+ expo-localization@13.1.0:
+   version "13.1.0"
+   resolved "https://registry.yarnpkg.com/expo-localization/-/expo-localization-13.1.0.tgz#a69eac5dfee3f1e7b3a443bdd61fd38de5e4e28b"
+@@ -6700,10 +6705,10 @@ expo-modules-autolinking@0.10.3:
+     find-up "^5.0.0"
+     fs-extra "^9.1.0"
+ 
+-expo-modules-core@0.11.10, expo-modules-core@~0.11.3:
+-  version "0.11.10"
+-  resolved "https://registry.yarnpkg.com/expo-modules-core/-/expo-modules-core-0.11.10.tgz#84800ea62431a3842661966276747260f7e33b37"
+-  integrity sha512-wn7bdL1AXMNuuDEFhuIeE65A+dlvBL+6nC5fGy4NO7x3TXPBR1xCgL28i8d8WWyK5evI4z4TVvJp3YYzdapbqQ==
++expo-modules-core@0.11.9, expo-modules-core@~0.11.3:
++  version "0.11.9"
++  resolved "https://registry.yarnpkg.com/expo-modules-core/-/expo-modules-core-0.11.9.tgz#43763bca72b72f268ad5d7f1f0fc1c7cc75a6e9f"
++  integrity sha512-6AlOE4KHN3/WWbY8hH7W6ceuIFj0qbk1N+UhmMhiCEUas3NvXA6wcH3xjO+8JZ+BRcIB9M4QEeX72j6vDDuExg==
+   dependencies:
+     compare-versions "^3.4.0"
+     invariant "^2.2.4"
+@@ -6731,10 +6736,10 @@ expo-status-bar@~1.4.0:
+   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-1.4.2.tgz#14f2b9a6dc7d550578421f07e0046f5fafc2b403"
+   integrity sha512-ZWjO6D4ARGYfAd3SWDD3STNudHDhyBZDZjhhseqoEmsf7bS9ykny8KKOhlzJW24qIQNPhkgdvHhaw9fQwMJy3Q==
+ 
+-expo@~46.0.17:
+-  version "46.0.19"
+-  resolved "https://registry.yarnpkg.com/expo/-/expo-46.0.19.tgz#85fe0aa047bdee4ee01fa0f934b28d03166a813d"
+-  integrity sha512-nOMwWd54Y5awLYMo7Skf0jFyD83xeLph8Vb9z0awsTctlAhxPulHFHD/nzN2LxvzfCOQORUctvtX+qknL7MEDQ==
++expo@~46.0.16:
++  version "46.0.17"
++  resolved "https://registry.yarnpkg.com/expo/-/expo-46.0.17.tgz#d558aa11056007269d2a38481982f1ebbe0852f3"
++  integrity sha512-rB+KMvjU3lFMkec5LcVFFn0Q2iJUEIoyB9TckKMirA15H5mW4yZMao0ilR7239fJ5ytVoDC8SIf7ZAvTmiMuMw==
+   dependencies:
+     "@babel/runtime" "^7.14.0"
+     "@expo/cli" "0.3.2"
+@@ -6742,13 +6747,13 @@ expo@~46.0.17:
+     babel-preset-expo "~9.2.0"
+     cross-spawn "^6.0.5"
+     expo-application "~4.2.2"
+-    expo-asset "~8.6.3"
++    expo-asset "~8.6.1"
+     expo-constants "~13.2.4"
+     expo-file-system "~14.1.0"
+     expo-font "~10.2.1"
+     expo-keep-awake "~10.2.0"
+     expo-modules-autolinking "0.10.3"
+-    expo-modules-core "0.11.10"
++    expo-modules-core "0.11.9"
+     fbemitter "^3.0.0"
+     getenv "^1.0.0"
+     invariant "^2.2.4"
+@@ -7196,9 +7201,9 @@ flatted@^3.1.0:
+   integrity sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==
+ 
+ flow-parser@0.*:
+-  version "0.196.3"
+-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.196.3.tgz#dd923f29a6c194770a4f999f8026ef1da79d428b"
+-  integrity sha512-R8wj12eHW6og+IBWeRS6aihkdac1Prh4zw1bfxtt/aeu8r5OFmQEZjnmINcjO/5Q+OKvI4Eg367ygz2SHvtH+w==
++  version "0.195.2"
++  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.195.2.tgz#4891428828c9ab0c1cdb12c9a8bafa72ce4f216d"
++  integrity sha512-zPXwya4KhbT1xuRN/oqJ5BITjJl9OGCDmaG7qhABgewb4/2wmy4SV0ULRaGoZB5BWt4kWzLG4qve/1mRbpfSOA==
+ 
+ flow-parser@^0.121.0:
+   version "0.121.0"
+@@ -7481,7 +7486,7 @@ get-caller-file@^2.0.1, get-caller-file@^2.0.5:
+   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
+   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
+ 
+-get-intrinsic@^1.0.2, get-intrinsic@^1.1.1, get-intrinsic@^1.1.3:
++get-intrinsic@^1.0.2, get-intrinsic@^1.1.0, get-intrinsic@^1.1.1, get-intrinsic@^1.1.3:
+   version "1.1.3"
+   resolved "https://registry.yarnpkg.com/get-intrinsic/-/get-intrinsic-1.1.3.tgz#063c84329ad93e83893c7f4f243ef63ffa351385"
+   integrity sha512-QJVz1Tj7MS099PevUG5jvnt9tSkXN8K14dxQlikJuPt4uD9hHAHjLyLBiLR5zELelBdD9QNRAXZzsJx0WaDL9A==
+@@ -7662,7 +7667,7 @@ globals@^11.1.0:
+   resolved "https://registry.yarnpkg.com/globals/-/globals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
+   integrity sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==
+ 
+-globals@^13.15.0, globals@^13.19.0:
++globals@^13.15.0:
+   version "13.19.0"
+   resolved "https://registry.yarnpkg.com/globals/-/globals-13.19.0.tgz#7a42de8e6ad4f7242fbcca27ea5b23aca367b5c8"
+   integrity sha512-dkQ957uSRWHw7CFXLUtUHQI3g3aWApYhfNR2O6jn/907riyTYKVBmxYVROkBcY614FSSeSJh7Xm7SrUWCxvJMQ==
+@@ -8254,9 +8259,9 @@ ignore-walk@^3.0.1:
+     minimatch "^3.0.4"
+ 
+ ignore@^5.1.1, ignore@^5.1.4, ignore@^5.2.0:
+-  version "5.2.4"
+-  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.4.tgz#a291c0c6178ff1b960befe47fcdec301674a6324"
+-  integrity sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==
++  version "5.2.1"
++  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.1.tgz#c2b1f76cb999ede1502f3a226a9310fdfe88d46c"
++  integrity sha512-d2qQLzTJ9WxQftPAuEQpSPmKqzxePjzVbpAVv62AQ64NTL+wR4JkrVqR/LqFsFEUsHDAiId52mJteHDFuDkElA==
+ 
+ image-q@^4.0.0:
+   version "4.0.0"
+@@ -8403,11 +8408,11 @@ internal-ip@4.3.0, internal-ip@^4.3.0:
+     ipaddr.js "^1.9.0"
+ 
+ internal-slot@^1.0.3:
+-  version "1.0.4"
+-  resolved "https://registry.yarnpkg.com/internal-slot/-/internal-slot-1.0.4.tgz#8551e7baf74a7a6ba5f749cfb16aa60722f0d6f3"
+-  integrity sha512-tA8URYccNzMo94s5MQZgH8NB/XTa6HsOo0MLfXTKKEnHVVdegzaQoFZ7Jp44bdvLvY2waT5dc+j5ICEswhi7UQ==
++  version "1.0.3"
++  resolved "https://registry.yarnpkg.com/internal-slot/-/internal-slot-1.0.3.tgz#7347e307deeea2faac2ac6205d4bc7d34967f59c"
++  integrity sha512-O0DB1JC/sPyZl7cIo78n5dR7eUSwwpYPiXRhTzNxZVAMUuB8vlnRFyLxdrVToks6XPLVnFfbzaVd5WLjhgg+vA==
+   dependencies:
+-    get-intrinsic "^1.1.3"
++    get-intrinsic "^1.1.0"
+     has "^1.0.3"
+     side-channel "^1.0.4"
+ 
+@@ -9687,9 +9692,9 @@ json3@^3.3.2:
+   integrity sha512-c7/8mbUsKigAbLkD5B010BK4D9LZm7A1pNItkEwiUZRpIN66exu/e7YQWysGun+TRKaJp8MhemM+VkfWv42aCA==
+ 
+ json5@2.x, json5@^2.1.0, json5@^2.1.2, json5@^2.2.1:
+-  version "2.2.2"
+-  resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.2.tgz#64471c5bdcc564c18f7c1d4df2e2297f2457c5ab"
+-  integrity sha512-46Tk9JiOL2z7ytNQWFLpj99RZkVgeHf87yGQKsIkaPz1qSH9UczKH1rO7K3wgRselo0tYMUNfecYpm/p1vC7tQ==
++  version "2.2.1"
++  resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.1.tgz#655d50ed1e6f95ad1a3caababd2b0efda10b395c"
++  integrity sha512-1hqLFMSrGHRHxav9q9gNjJ5EXznIxGVO09xQRrwplcS8qs28pZ8s8hupZAmqDwZUmVZ2Qb2jnyPOWcDH8m8dlA==
+ 
+ json5@^0.5.1:
+   version "0.5.1"
+@@ -11299,9 +11304,9 @@ node-releases@^1.1.61:
+   integrity sha512-rB1DUFUNAN4Gn9keO2K1efO35IDK7yKHCdCaIMvFO7yUYmmZYeDjnGKle26G4rwj+LKRQpjyUUvMkPglwGCYNQ==
+ 
+ node-releases@^2.0.6:
+-  version "2.0.8"
+-  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.8.tgz#0f349cdc8fcfa39a92ac0be9bc48b7706292b9ae"
+-  integrity sha512-dFSmB8fFHEH/s81Xi+Y/15DQY6VHW81nXRj86EMSL3lmuTmK1e+aT4wrFCkTbm+gSwkw4KpX+rT/pMM2c1mF+A==
++  version "2.0.7"
++  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.7.tgz#593edbc7c22860ee4d32d3933cfebdfab0c0e0e5"
++  integrity sha512-EJ3rzxL9pTWPjk5arA0s0dgXpnyiAbJDE6wHT62g7VsgrgQgmmZ+Ru++M1BFofncWja+Pnn3rEr3fieRySAdKQ==
+ 
+ node-stream-zip@^1.9.1:
+   version "1.15.0"
+@@ -12810,7 +12815,7 @@ qrcode-terminal@0.11.0:
+   resolved "https://registry.yarnpkg.com/qrcode-terminal/-/qrcode-terminal-0.11.0.tgz#ffc6c28a2fc0bfb47052b47e23f4f446a5fbdb9e"
+   integrity sha512-Uu7ii+FQy4Qf82G4xu7ShHhjhGahEpCWc3x8UavY3CTcWV+ufmmCtwkr7ZKsX42jdL0kr1B5FKUeqJvAn51jzQ==
+ 
+-qs@6.11.0, qs@^6.5.1, qs@^6.9.1:
++qs@6.11.0, qs@^6.5.1:
+   version "6.11.0"
+   resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.0.tgz#fd0d963446f7a65e1367e01abd85429453f0c37a"
+   integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
+@@ -13137,10 +13142,10 @@ react-native-web@^0.18.7:
+     postcss-value-parser "^4.2.0"
+     styleq "^0.1.2"
+ 
+-react-native@0.69.7:
+-  version "0.69.7"
+-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.69.7.tgz#891ba4ed7722f1ab570099ce097c355bef8ceb05"
+-  integrity sha512-T3z2utgRcE/+mMML3Wg4vvpnFoGWJcqWskq+8vdFS4ASM1zYg5Hab5vPlKZp9uncD8weYiGsYwkWXzrvZrsayQ==
++react-native@0.69.6:
++  version "0.69.6"
++  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.69.6.tgz#cdd1a5757d902b91b165c28fdda4e518ed6f683a"
++  integrity sha512-wwXpqM+12kdEYdBZCJUb5SBu95CzgejrwFeYJ78RzHZV/Sj6DBRekbsHGrDDsY4R25QXALQxy4DQYQCObVvWjA==
+   dependencies:
+     "@jest/create-cache-key-function" "^27.0.1"
+     "@react-native-community/cli" "^8.0.4"
+@@ -14769,9 +14774,9 @@ stylehacks@^4.0.0:
+     postcss-selector-parser "^3.0.0"
+ 
+ styleq@^0.1.2:
+-  version "0.1.3"
+-  resolved "https://registry.yarnpkg.com/styleq/-/styleq-0.1.3.tgz#8efb2892debd51ce7b31dc09c227ad920decab71"
+-  integrity sha512-3ZUifmCDCQanjeej1f6kyl/BeP/Vae5EYkQ9iJfUm/QwZvlgnZzyflqAsAWYURdtea8Vkvswu2GrC57h3qffcA==
++  version "0.1.2"
++  resolved "https://registry.yarnpkg.com/styleq/-/styleq-0.1.2.tgz#052b46af5ca4f920b1bdae2735ffb1e3970f53cd"
++  integrity sha512-EBNuMVSxpssuFcJq/c4zmZ4tpCyX9E27hz5xPJhw4URjRHcYXPHh8rDHY/tJsw5gtP0+tIL3IBYeQVIYjdZFhg==
+ 
+ sucrase@^3.20.0:
+   version "3.29.0"
+@@ -15129,9 +15134,9 @@ timsort@^0.3.0:
+   integrity sha512-qsdtZH+vMoCARQtyod4imc2nIJwg9Cc7lPRrw9CzF8ZKR0khdr8+2nX80PBhET3tcyTtJDxAffGh2rXH4tyU8A==
+ 
+ tinycolor2@^1.4.1:
+-  version "1.5.1"
+-  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.5.1.tgz#df11c5f14e6b7fdd8a9c27c2c6a5f2565fb776b7"
+-  integrity sha512-BHlrsGeYN2OpkRpfAgkEwCMu6w8Quq8JkK/mp4c55NZP7OwceJObR1CPZt62TqiA0Y3J5pwuDX+fXDqc35REtg==
++  version "1.4.2"
++  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.4.2.tgz#3f6a4d1071ad07676d7fa472e1fac40a719d8803"
++  integrity sha512-vJhccZPs965sV/L2sU4oRQVAos0pQXwsvTLkWYdqJ+a8Q5kPFzJTuOFwy7UniPli44NKQGAglksjvOcpo95aZA==
+ 
+ tmp@^0.0.33:
+   version "0.0.33"
