@@ -1,0 +1,12 @@
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 3aa9ca8..a9987e3 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -177,6 +177,7 @@ const EpisodeCard = observer(function EpisodeCard({
+     () =>
+       Platform.select<AccessibilityProps>({
+         ios: {
++          accessibilityLabel: episode.title,
+           accessibilityHint: translate("demoPodcastListScreen.accessibility.cardHint", {
+             action: isFavorite ? "unfavorite" : "favorite",
+           }),
