@@ -1,0 +1,166 @@
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 0ce305a..a9987e3 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -1,5 +1,5 @@
+ // Interested in migrating from FlatList to FlashList? Check out the recipe in our Ignite Cookbook
+-// https://ignitecookbook.com/docs/recipes/MigratingToFlashList
++// https://infinitered.github.io/ignite-cookbook/docs/MigratingToFlashList
+ import { observer } from "mobx-react-lite"
+ import React, { FC, useEffect, useMemo } from "react"
+ import {
+diff --git a/IgniteDiffApp/babel.config.js b/IgniteDiffApp/babel.config.js
+index a5ec071..eb69568 100644
+--- a/IgniteDiffApp/babel.config.js
++++ b/IgniteDiffApp/babel.config.js
+@@ -1,19 +1,4 @@
+ const plugins = [
+-  [
+-    "babel-plugin-root-import",
+-    {
+-      paths: [
+-        {
+-          rootPathPrefix: "app/",
+-          rootPathSuffix: "app",
+-        },
+-        {
+-          rootPathPrefix: "assets/",
+-          rootPathSuffix: "assets",
+-        },
+-      ],
+-    },
+-  ],
+   [
+     "@babel/plugin-proposal-decorators",
+     {
+@@ -21,7 +6,6 @@ const plugins = [
+     },
+   ],
+   ["@babel/plugin-proposal-optional-catch-binding"],
+-  "@babel/plugin-proposal-export-namespace-from",
+   "react-native-reanimated/plugin", // NOTE: this must be last in the plugins
+ ]
+ 
+diff --git a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+index 0fe6436..aac4ca1 100644
+--- a/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/component/NAME.tsx.ejs
+@@ -1,14 +1,14 @@
+ ---
+ patch:
+   path: "app/components/index.ts"
+-  append: "export * from \"./<%= props.subdirectory %><%= props.pascalCaseName %>\"\n"
++  append: "export * from \"./<%= props.pascalCaseName %>\"\n"
+   skip: <%= props.skipIndexFile %>
+ ---
+ import * as React from "react"
+ import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
+ import { observer } from "mobx-react-lite"
+-import { colors, typography } from "app/theme"
+-import { Text } from "app/components/Text"
++import { colors, typography } from "../theme"
++import { Text } from "./Text"
+ 
+ export interface <%= props.pascalCaseName %>Props {
+   /**
+diff --git a/IgniteDiffApp/ignite/templates/navigator/NAMENavigator.tsx.ejs b/IgniteDiffApp/ignite/templates/navigator/NAMENavigator.tsx.ejs
+index bafaf73..d6701ac 100644
+--- a/IgniteDiffApp/ignite/templates/navigator/NAMENavigator.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/navigator/NAMENavigator.tsx.ejs
+@@ -9,7 +9,7 @@ import React from "react"
+ import { createStackNavigator } from "@react-navigation/stack"
+ import {
+   WelcomeScreen
+-} from "app/screens"
++} from "../screens"
+ 
+ export type <%= props.pascalCaseName %>NavigatorParamList = {
+   Demo: undefined
+diff --git a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+index 6fe9d57..6d08d1a 100644
+--- a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+@@ -8,10 +8,10 @@ import React, { FC } from "react"
+ import { observer } from "mobx-react-lite"
+ import { ViewStyle } from "react-native"
+ import { StackScreenProps } from "@react-navigation/stack"
+-import { AppStackScreenProps } from "app/navigators"
+-import { Screen, Text } from "app/components"
++import { AppStackScreenProps } from "../navigators"
++import { Screen, Text } from "../components"
+ // import { useNavigation } from "@react-navigation/native"
+-// import { useStores } from "app/models"
++// import { useStores } from "../models"
+ 
+ // STOP! READ ME FIRST!
+ // To fix the TS error below, you'll need to add the following things in your navigation config:
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index fcc362c..ca3c54b 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -37,7 +37,7 @@
+   },
+   "dependencies": {
+     "@expo-google-fonts/space-grotesk": "^0.2.2",
+-    "@expo/webpack-config": "^0.17.4",
++    "@expo/webpack-config": "^0.17.2",
+     "@react-native-async-storage/async-storage": "~1.17.3",
+     "@react-navigation/bottom-tabs": "^6.3.2",
+     "@react-navigation/native": "~6.0.1",
+@@ -74,7 +74,6 @@
+   "devDependencies": {
+     "@babel/core": "^7.19.3",
+     "@babel/plugin-proposal-decorators": "7.18.2",
+-    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
+     "@babel/plugin-proposal-optional-catch-binding": "7.16.7",
+     "@babel/preset-env": "^7.16.11",
+     "@babel/runtime": "^7.18.3",
+@@ -89,7 +88,6 @@
+     "@typescript-eslint/parser": "5.28.0",
+     "babel-jest": "26.6.3",
+     "babel-loader": "8.2.5",
+-    "babel-plugin-root-import": "^6.6.0",
+     "detox": "19.12.1",
+     "detox-expo-helpers": "0.6.0",
+     "eslint": "8.17.0",
+diff --git a/IgniteDiffApp/tsconfig.json b/IgniteDiffApp/tsconfig.json
+index 3ba90f5..e6ca3ac 100644
+--- a/IgniteDiffApp/tsconfig.json
++++ b/IgniteDiffApp/tsconfig.json
+@@ -14,8 +14,7 @@
+     "target": "esnext",
+     "lib": ["esnext", "dom"],
+     "skipLibCheck": true,
+-    "resolveJsonModule": true,
+-    "baseUrl": "./"
++    "resolveJsonModule": true
+   },
+   "exclude": ["node_modules"],
+   "include": ["index.js", "App.js", "app", "test"],
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index f86103f..17dde5b 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -1657,7 +1657,7 @@
+   resolved "https://registry.yarnpkg.com/@expo/vector-icons/-/vector-icons-13.0.0.tgz#e2989b85e95a82bce216f88cf8fb583ab050ec95"
+   integrity sha512-TI+l71+5aSKnShYclFa14Kum+hQMZ86b95SH6tQUG3qZEmLTarvWpKwqtTwQKqvlJSJrpFiSFu3eCuZokY6zWA==
+ 
+-"@expo/webpack-config@^0.17.4":
++"@expo/webpack-config@^0.17.2":
+   version "0.17.4"
+   resolved "https://registry.yarnpkg.com/@expo/webpack-config/-/webpack-config-0.17.4.tgz#c2cb670a8f431dc76a645d183a38465ed235e3a7"
+   integrity sha512-vn37RDhYowfLc2oRaXhmbI/9FStjQFXPONG3yRLfwUnA4dRtfXapJUSKHJKRwOy4fBBmTrb2tthtsdb4zeWmsw==
+@@ -4029,13 +4029,6 @@ babel-plugin-react-native-web@~0.18.2:
+   resolved "https://registry.yarnpkg.com/babel-plugin-react-native-web/-/babel-plugin-react-native-web-0.18.12.tgz#3e9764484492ea612a16b40135b07c2d05b7969d"
+   integrity sha512-4djr9G6fMdwQoD6LQ7hOKAm39+y12flWgovAqS1k5O8f42YQ3A1FFMyV5kKfetZuGhZO5BmNmOdRRZQ1TixtDw==
+ 
+-babel-plugin-root-import@^6.6.0:
+-  version "6.6.0"
+-  resolved "https://registry.yarnpkg.com/babel-plugin-root-import/-/babel-plugin-root-import-6.6.0.tgz#85940840f308a8c292f66ca0b5bdd314046273ed"
+-  integrity sha512-SPzVOHd7nDh5loZwZBxtX/oOu1MXeKjTkz+1VnnzLWC0dk8sJIGC2IDQ2uWIBjE5mUtXlQ35MTHSqN0Xn7qHrg==
+-  dependencies:
+-    slash "^3.0.0"
+-
+ babel-plugin-syntax-trailing-function-commas@^7.0.0-beta.0:
+   version "7.0.0-beta.0"
+   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-trailing-function-commas/-/babel-plugin-syntax-trailing-function-commas-7.0.0-beta.0.tgz#aa213c1435e2bffeb6fca842287ef534ad05d5cf"
