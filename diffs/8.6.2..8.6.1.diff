@@ -1,0 +1,1082 @@
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index a72d295..bdf331b 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -153,7 +153,7 @@ export function useNavigationPersistence(storage: any, persistenceKey: string) {
+  */
+ export function navigate(name: any, params?: any) {
+   if (navigationRef.isReady()) {
+-    ;(navigationRef.navigate as any)(name, params)
++    navigationRef.navigate(name as never, params as never)
+   }
+ }
+ 
+diff --git a/IgniteDiffApp/app/services/api/apiProblem.ts b/IgniteDiffApp/app/services/api/apiProblem.ts
+index 547f8cf..9c2aa49 100644
+--- a/IgniteDiffApp/app/services/api/apiProblem.ts
++++ b/IgniteDiffApp/app/services/api/apiProblem.ts
+@@ -43,7 +43,7 @@ export type GeneralApiProblem =
+  *
+  * @param response The api response.
+  */
+-export function getGeneralApiProblem(response: ApiResponse<any>): GeneralApiProblem | null {
++export function getGeneralApiProblem(response: ApiResponse<any>): GeneralApiProblem | void {
+   switch (response.problem) {
+     case "CONNECTION_ERROR":
+       return { kind: "cannot-connect", temporary: true }
+diff --git a/IgniteDiffApp/detox/README.md b/IgniteDiffApp/detox/README.md
+index 5f4399a..2741057 100644
+--- a/IgniteDiffApp/detox/README.md
++++ b/IgniteDiffApp/detox/README.md
+@@ -77,7 +77,7 @@ yarn expo:build:detox
+ yarn expo:test:detox
+ ```
+ 
+-For more information, make sure to check out the official [Detox Docs](https://github.com/wix/Detox/blob/master/README.md)
++For more information, make sure to check out the official [Detox Docs](https://github.com/wix/Detox/blob/master/docs/README.md)
+ 
+ ## Debugging Flaky Detox Tests
+ 
+diff --git a/IgniteDiffApp/detox/firstTest.spec.js b/IgniteDiffApp/detox/firstTest.spec.js
+index 625ffb7..d15e407 100644
+--- a/IgniteDiffApp/detox/firstTest.spec.js
++++ b/IgniteDiffApp/detox/firstTest.spec.js
+@@ -1,5 +1,5 @@
+ // For more info on how to write Detox tests, see the official docs:
+-// https://github.com/wix/Detox/blob/master/README.md
++// https://github.com/wix/Detox/blob/master/docs/README.md
+ 
+ const { reloadApp } = require("./reload")
+ 
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index 2bffac2..1dccf62 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -24,14 +24,14 @@ PODS:
+   - EXSplashScreen (0.17.5):
+     - ExpoModulesCore
+     - React-Core
+-  - FBLazyVector (0.70.8)
+-  - FBReactNativeSpec (0.70.8):
++  - FBLazyVector (0.70.5)
++  - FBReactNativeSpec (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - RCTRequired (= 0.70.8)
+-    - RCTTypeSafety (= 0.70.8)
+-    - React-Core (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
++    - RCTRequired (= 0.70.5)
++    - RCTTypeSafety (= 0.70.5)
++    - React-Core (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
+   - Flipper (0.125.0):
+     - Flipper-Folly (~> 2.6)
+     - Flipper-RSocket (~> 1.4)
+@@ -95,7 +95,7 @@ PODS:
+     - FlipperKit/FlipperKitNetworkPlugin
+   - fmt (6.2.1)
+   - glog (0.3.5)
+-  - hermes-engine (0.70.8)
++  - hermes-engine (0.70.5)
+   - libevent (2.1.12)
+   - OpenSSL-Universal (1.1.1100)
+   - RCT-Folly (2021.07.22.00):
+@@ -115,214 +115,214 @@ PODS:
+     - fmt (~> 6.2.1)
+     - glog
+     - libevent
+-  - RCTRequired (0.70.8)
+-  - RCTTypeSafety (0.70.8):
+-    - FBLazyVector (= 0.70.8)
+-    - RCTRequired (= 0.70.8)
+-    - React-Core (= 0.70.8)
+-  - React (0.70.8):
+-    - React-Core (= 0.70.8)
+-    - React-Core/DevSupport (= 0.70.8)
+-    - React-Core/RCTWebSocket (= 0.70.8)
+-    - React-RCTActionSheet (= 0.70.8)
+-    - React-RCTAnimation (= 0.70.8)
+-    - React-RCTBlob (= 0.70.8)
+-    - React-RCTImage (= 0.70.8)
+-    - React-RCTLinking (= 0.70.8)
+-    - React-RCTNetwork (= 0.70.8)
+-    - React-RCTSettings (= 0.70.8)
+-    - React-RCTText (= 0.70.8)
+-    - React-RCTVibration (= 0.70.8)
+-  - React-bridging (0.70.8):
++  - RCTRequired (0.70.5)
++  - RCTTypeSafety (0.70.5):
++    - FBLazyVector (= 0.70.5)
++    - RCTRequired (= 0.70.5)
++    - React-Core (= 0.70.5)
++  - React (0.70.5):
++    - React-Core (= 0.70.5)
++    - React-Core/DevSupport (= 0.70.5)
++    - React-Core/RCTWebSocket (= 0.70.5)
++    - React-RCTActionSheet (= 0.70.5)
++    - React-RCTAnimation (= 0.70.5)
++    - React-RCTBlob (= 0.70.5)
++    - React-RCTImage (= 0.70.5)
++    - React-RCTLinking (= 0.70.5)
++    - React-RCTNetwork (= 0.70.5)
++    - React-RCTSettings (= 0.70.5)
++    - React-RCTText (= 0.70.5)
++    - React-RCTVibration (= 0.70.5)
++  - React-bridging (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-jsi (= 0.70.8)
+-  - React-callinvoker (0.70.8)
+-  - React-Codegen (0.70.8):
+-    - FBReactNativeSpec (= 0.70.8)
++    - React-jsi (= 0.70.5)
++  - React-callinvoker (0.70.5)
++  - React-Codegen (0.70.5):
++    - FBReactNativeSpec (= 0.70.5)
+     - RCT-Folly (= 2021.07.22.00)
+-    - RCTRequired (= 0.70.8)
+-    - RCTTypeSafety (= 0.70.8)
+-    - React-Core (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-Core (0.70.8):
++    - RCTRequired (= 0.70.5)
++    - RCTTypeSafety (= 0.70.5)
++    - React-Core (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-Core (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-Core/Default (= 0.70.8)
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-Core/Default (= 0.70.5)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/CoreModulesHeaders (0.70.8):
++  - React-Core/CoreModulesHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/Default (0.70.8):
++  - React-Core/Default (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/DevSupport (0.70.8):
++  - React-Core/DevSupport (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-Core/Default (= 0.70.8)
+-    - React-Core/RCTWebSocket (= 0.70.8)
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-jsinspector (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-Core/Default (= 0.70.5)
++    - React-Core/RCTWebSocket (= 0.70.5)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-jsinspector (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTActionSheetHeaders (0.70.8):
++  - React-Core/RCTActionSheetHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTAnimationHeaders (0.70.8):
++  - React-Core/RCTAnimationHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTBlobHeaders (0.70.8):
++  - React-Core/RCTBlobHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTImageHeaders (0.70.8):
++  - React-Core/RCTImageHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTLinkingHeaders (0.70.8):
++  - React-Core/RCTLinkingHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTNetworkHeaders (0.70.8):
++  - React-Core/RCTNetworkHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTSettingsHeaders (0.70.8):
++  - React-Core/RCTSettingsHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTTextHeaders (0.70.8):
++  - React-Core/RCTTextHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTVibrationHeaders (0.70.8):
++  - React-Core/RCTVibrationHeaders (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+     - React-Core/Default
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-Core/RCTWebSocket (0.70.8):
++  - React-Core/RCTWebSocket (0.70.5):
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-Core/Default (= 0.70.8)
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-Core/Default (= 0.70.5)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+     - Yoga
+-  - React-CoreModules (0.70.8):
++  - React-CoreModules (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - RCTTypeSafety (= 0.70.8)
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/CoreModulesHeaders (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-RCTImage (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-cxxreact (0.70.8):
++    - RCTTypeSafety (= 0.70.5)
++    - React-Codegen (= 0.70.5)
++    - React-Core/CoreModulesHeaders (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-RCTImage (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-cxxreact (0.70.5):
+     - boost (= 1.76.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-callinvoker (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsinspector (= 0.70.8)
+-    - React-logger (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
+-    - React-runtimeexecutor (= 0.70.8)
+-  - React-hermes (0.70.8):
++    - React-callinvoker (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsinspector (= 0.70.5)
++    - React-logger (= 0.70.5)
++    - React-perflogger (= 0.70.5)
++    - React-runtimeexecutor (= 0.70.5)
++  - React-hermes (0.70.5):
+     - DoubleConversion
+     - glog
+     - hermes-engine
+     - RCT-Folly (= 2021.07.22.00)
+     - RCT-Folly/Futures (= 2021.07.22.00)
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-jsiexecutor (= 0.70.8)
+-    - React-jsinspector (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
+-  - React-jsi (0.70.8):
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-jsiexecutor (= 0.70.5)
++    - React-jsinspector (= 0.70.5)
++    - React-perflogger (= 0.70.5)
++  - React-jsi (0.70.5):
+     - boost (= 1.76.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-jsi/Default (= 0.70.8)
+-  - React-jsi/Default (0.70.8):
++    - React-jsi/Default (= 0.70.5)
++  - React-jsi/Default (0.70.5):
+     - boost (= 1.76.0)
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-  - React-jsiexecutor (0.70.8):
++  - React-jsiexecutor (0.70.5):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
+-  - React-jsinspector (0.70.8)
+-  - React-logger (0.70.8):
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-perflogger (= 0.70.5)
++  - React-jsinspector (0.70.5)
++  - React-logger (0.70.5):
+     - glog
+   - react-native-safe-area-context (4.4.1):
+     - RCT-Folly
+@@ -330,79 +330,79 @@ PODS:
+     - RCTTypeSafety
+     - React-Core
+     - ReactCommon/turbomodule/core
+-  - React-perflogger (0.70.8)
+-  - React-RCTActionSheet (0.70.8):
+-    - React-Core/RCTActionSheetHeaders (= 0.70.8)
+-  - React-RCTAnimation (0.70.8):
++  - React-perflogger (0.70.5)
++  - React-RCTActionSheet (0.70.5):
++    - React-Core/RCTActionSheetHeaders (= 0.70.5)
++  - React-RCTAnimation (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - RCTTypeSafety (= 0.70.8)
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/RCTAnimationHeaders (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-RCTBlob (0.70.8):
++    - RCTTypeSafety (= 0.70.5)
++    - React-Codegen (= 0.70.5)
++    - React-Core/RCTAnimationHeaders (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-RCTBlob (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/RCTBlobHeaders (= 0.70.8)
+-    - React-Core/RCTWebSocket (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-RCTNetwork (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-RCTImage (0.70.8):
++    - React-Codegen (= 0.70.5)
++    - React-Core/RCTBlobHeaders (= 0.70.5)
++    - React-Core/RCTWebSocket (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-RCTNetwork (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-RCTImage (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - RCTTypeSafety (= 0.70.8)
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/RCTImageHeaders (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-RCTNetwork (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-RCTLinking (0.70.8):
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/RCTLinkingHeaders (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-RCTNetwork (0.70.8):
++    - RCTTypeSafety (= 0.70.5)
++    - React-Codegen (= 0.70.5)
++    - React-Core/RCTImageHeaders (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-RCTNetwork (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-RCTLinking (0.70.5):
++    - React-Codegen (= 0.70.5)
++    - React-Core/RCTLinkingHeaders (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-RCTNetwork (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - RCTTypeSafety (= 0.70.8)
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/RCTNetworkHeaders (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-RCTSettings (0.70.8):
++    - RCTTypeSafety (= 0.70.5)
++    - React-Codegen (= 0.70.5)
++    - React-Core/RCTNetworkHeaders (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-RCTSettings (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - RCTTypeSafety (= 0.70.8)
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/RCTSettingsHeaders (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-RCTText (0.70.8):
+-    - React-Core/RCTTextHeaders (= 0.70.8)
+-  - React-RCTVibration (0.70.8):
++    - RCTTypeSafety (= 0.70.5)
++    - React-Codegen (= 0.70.5)
++    - React-Core/RCTSettingsHeaders (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-RCTText (0.70.5):
++    - React-Core/RCTTextHeaders (= 0.70.5)
++  - React-RCTVibration (0.70.5):
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-Codegen (= 0.70.8)
+-    - React-Core/RCTVibrationHeaders (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - ReactCommon/turbomodule/core (= 0.70.8)
+-  - React-runtimeexecutor (0.70.8):
+-    - React-jsi (= 0.70.8)
+-  - ReactCommon/turbomodule/core (0.70.8):
++    - React-Codegen (= 0.70.5)
++    - React-Core/RCTVibrationHeaders (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - ReactCommon/turbomodule/core (= 0.70.5)
++  - React-runtimeexecutor (0.70.5):
++    - React-jsi (= 0.70.5)
++  - ReactCommon/turbomodule/core (0.70.5):
+     - DoubleConversion
+     - glog
+     - RCT-Folly (= 2021.07.22.00)
+-    - React-bridging (= 0.70.8)
+-    - React-callinvoker (= 0.70.8)
+-    - React-Core (= 0.70.8)
+-    - React-cxxreact (= 0.70.8)
+-    - React-jsi (= 0.70.8)
+-    - React-logger (= 0.70.8)
+-    - React-perflogger (= 0.70.8)
++    - React-bridging (= 0.70.5)
++    - React-callinvoker (= 0.70.5)
++    - React-Core (= 0.70.5)
++    - React-cxxreact (= 0.70.5)
++    - React-jsi (= 0.70.5)
++    - React-logger (= 0.70.5)
++    - React-perflogger (= 0.70.5)
+   - RNBootSplash (4.3.2):
+     - React-Core
+   - RNCAsyncStorage (1.17.12):
+     - React-Core
+-  - RNGestureHandler (2.8.0):
++  - RNGestureHandler (2.9.0):
+     - React-Core
+-  - RNReanimated (2.12.0):
++  - RNReanimated (2.14.4):
+     - DoubleConversion
+     - FBLazyVector
+     - FBReactNativeSpec
+@@ -648,8 +648,8 @@ SPEC CHECKSUMS:
+   ExpoLocalization: e202d1e2a4950df17ac8d0889d65a1ffd7532d7e
+   ExpoModulesCore: 485dff3a59b036a33b6050c0a5aea3cf1037fdd1
+   EXSplashScreen: 3e989924f61a8dd07ee4ea584c6ba14be9b51949
+-  FBLazyVector: ce6c993e675c5e9684e3b83aa0c346eb116c3ec6
+-  FBReactNativeSpec: d8772db98ada3c2daf8f65e2105ada77bf209c02
++  FBLazyVector: affa4ba1bfdaac110a789192f4d452b053a86624
++  FBReactNativeSpec: fe8b5f1429cfe83a8d72dc8ed61dc7704cac8745
+   Flipper: 26fc4b7382499f1281eb8cb921e5c3ad6de91fe0
+   Flipper-Boost-iOSX: fd1e2b8cbef7e662a122412d7ac5f5bea715403c
+   Flipper-DoubleConversion: 2dc99b02f658daf147069aad9dbd29d8feb06d30
+@@ -661,44 +661,44 @@ SPEC CHECKSUMS:
+   FlipperKit: cbdee19bdd4e7f05472a66ce290f1b729ba3cb86
+   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
+   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+-  hermes-engine: 0b19f33a9c2ec1dbdede3232606eeb1101db4cec
++  hermes-engine: 7fe5fc6ef707b7fdcb161b63898ec500e285653d
+   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
+   RCT-Folly: 0080d0a6ebf2577475bda044aa59e2ca1f909cda
+-  RCTRequired: 35a7977a5a3cb2d3830c3fef7352b7b116115829
+-  RCTTypeSafety: 259790fb8b16c94e57e0d3d1e2479e69a2b93f50
+-  React: 89f0551b8f7a555e38ce016a81c50bc68f1972a8
+-  React-bridging: 2e425b6bc8536206918fa55bf9dd37016f99bb33
+-  React-callinvoker: 1c733126b1e4d95d0d412d95c51cedf06b3b979d
+-  React-Codegen: 41d2ddcd966eac2a5f2698d5cd21e3d741e999bd
+-  React-Core: 3021f04b6b1a2064952e166470a58db671ed65b1
+-  React-CoreModules: f569f295874d0864bfd7a686dad3f828f4e8813a
+-  React-cxxreact: a6c952ae24061777510f7e60b808b673e624009e
+-  React-hermes: be32d1db90d052cc025a38ec2ea4e1a493d33c6a
+-  React-jsi: 3d7bafe69dddd780fb3527b7f939dfcbfd6790b5
+-  React-jsiexecutor: bc8556d76f83a1a9075cdee207aad7c0b7b30a33
+-  React-jsinspector: 5e5497c844f2381e8648ec3a7d0ad25b3f27f23e
+-  React-logger: b277ad8f4473f2506fb30b762b6348534a3de10e
++  RCTRequired: 21229f84411088e5d8538f21212de49e46cc83e2
++  RCTTypeSafety: 62eed57a32924b09edaaf170a548d1fc96223086
++  React: f0254ccddeeef1defe66c6b1bb9133a4f040792b
++  React-bridging: e46911666b7ec19538a620a221d6396cd293d687
++  React-callinvoker: 66b62e2c34546546b2f21ab0b7670346410a2b53
++  React-Codegen: b6999435966df3bdf82afa3f319ba0d6f9a8532a
++  React-Core: dabbc9d1fe0a11d884e6ee1599789cf8eb1058a5
++  React-CoreModules: 5b6b7668f156f73a56420df9ec68ca2ec8f2e818
++  React-cxxreact: c7ca2baee46db22a30fce9e639277add3c3f6ad1
++  React-hermes: c93e1d759ad5560dfea54d233013d7d2c725c286
++  React-jsi: a565dcb49130ed20877a9bb1105ffeecbb93d02d
++  React-jsiexecutor: 31564fa6912459921568e8b0e49024285a4d584b
++  React-jsinspector: badd81696361249893a80477983e697aab3c1a34
++  React-logger: fdda34dd285bdb0232e059b19d9606fa0ec3bb9c
+   react-native-safe-area-context: 99b24a0c5acd0d5dcac2b1a7f18c49ea317be99a
+-  React-perflogger: e9249a18e055cae96fdf685bf6145cbea62506c8
+-  React-RCTActionSheet: a6d2a544a4605a111ce80fa9319cc870ca3ea778
+-  React-RCTAnimation: 21b776b15aa5451a0b5bcb342fd2f346817c1101
+-  React-RCTBlob: 95f54d45305b4103b29d8b2c1e705b5c3183239a
+-  React-RCTImage: 1b76ab9e3b60313edd85bc3fd3e07c29cec6ab68
+-  React-RCTLinking: 7176da2a80f3056152a51587812d6d0c451b1f7b
+-  React-RCTNetwork: d36f896304e6ef2998f58cd4199a0239bd312318
+-  React-RCTSettings: 004b9a1afb5870f4bcd06521c088e738c1558940
+-  React-RCTText: a2606a79fdb52dd2bde0d7fde7726160fa16b70c
+-  React-RCTVibration: 19d21a3ed620352180800447771f68a101f196e9
+-  React-runtimeexecutor: f795fd426264709901c09432c6ce072f8400147e
+-  ReactCommon: c440e7f15075e81eb29802521c58a1f38b1aa903
++  React-perflogger: e68d3795cf5d247a0379735cbac7309adf2fb931
++  React-RCTActionSheet: 05452c3b281edb27850253db13ecd4c5a65bc247
++  React-RCTAnimation: 578eebac706428e68466118e84aeacf3a282b4da
++  React-RCTBlob: f47a0aa61e7d1fb1a0e13da832b0da934939d71a
++  React-RCTImage: 60f54b66eed65d86b6dffaf4733d09161d44929d
++  React-RCTLinking: 91073205aeec4b29450ca79b709277319368ac9e
++  React-RCTNetwork: ca91f2c9465a7e335c8a5fae731fd7f10572213b
++  React-RCTSettings: 1a9a5d01337d55c18168c1abe0f4a589167d134a
++  React-RCTText: c591e8bd9347a294d8416357ca12d779afec01d5
++  React-RCTVibration: 8e5c8c5d17af641f306d7380d8d0fe9b3c142c48
++  React-runtimeexecutor: 7401c4a40f8728fd89df4a56104541b760876117
++  ReactCommon: c9246996e73bf75a2c6c3ff15f1e16707cdc2da9
+   RNBootSplash: 5f346163977573d6b2aeba1b25df9d2245c0d73c
+   RNCAsyncStorage: 09fc8595e6d6f6d5abf16b23a56b257d9c6b7c5b
+-  RNGestureHandler: 62232ba8f562f7dea5ba1b3383494eb5bf97a4d3
+-  RNReanimated: 2a91e85fcd343f8af3c58d3425b99fdd285590a5
++  RNGestureHandler: 071d7a9ad81e8b83fe7663b303d132406a7d8f39
++  RNReanimated: 6668b0587bebd4b15dd849b99e5a9c70fc12ed95
+   RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
+   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+-  Yoga: d6133108734e69e8c0becc6ba587294b94829687
++  Yoga: eca980a5771bf114c41a754098cd85e6e0d90ed7
+   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+ 
+ PODFILE CHECKSUM: ecf1ab1a5f9fdf12f2d3e24d1ade4588d77add46
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 6bed387..8634d95 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -61,10 +61,10 @@
+     "mobx-react-lite": "3.4.0",
+     "mobx-state-tree": "5.1.5",
+     "react": "18.1.0",
+-    "react-native": "0.70.8",
++    "react-native": "0.70.5",
+     "react-native-bootsplash": "4.3.2",
+-    "react-native-gesture-handler": "~2.8.0",
+-    "react-native-reanimated": "~2.12.0",
++    "react-native-gesture-handler": "~2.9.0",
++    "react-native-reanimated": "~2.14.0",
+     "react-native-safe-area-context": "4.4.1",
+     "react-native-screens": "~3.18.0",
+     "reactotron-mst": "3.1.4",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 215da1c..11ec342 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -2,10 +2,10 @@
+ # yarn lockfile v1
+ 
+ 
+-"@0no-co/graphql.web@^1.0.1":
+-  version "1.0.1"
+-  resolved "https://registry.yarnpkg.com/@0no-co/graphql.web/-/graphql.web-1.0.1.tgz#db3da0d2cd41548b50f0583c0d2f4743c767e56b"
+-  integrity sha512-6Yaxyv6rOwRkLIvFaL0NrLDgfNqC/Ng9QOPmTmlqW4mORXMEKmh5NYGkIvvt5Yw8fZesnMAqkj8cIqTj8f40cQ==
++"@0no-co/graphql.web@^1.0.0":
++  version "1.0.0"
++  resolved "https://registry.yarnpkg.com/@0no-co/graphql.web/-/graphql.web-1.0.0.tgz#af3f5e3b9359d2f011bc37a93654348b92d4d893"
++  integrity sha512-JBq2pWyDchE1vVjj/+c4dzZ8stbpew4RrzpZ3vYdn1WJFGHfYg6YIX1fDdMKtSXJJM9FUlsoDOxemr9WMM2p+A==
+ 
+ "@ampproject/remapping@^2.2.0":
+   version "2.2.1"
+@@ -1819,6 +1819,13 @@
+   dependencies:
+     "@jest/types" "^27.5.1"
+ 
++"@jest/create-cache-key-function@^29.0.3":
++  version "29.5.0"
++  resolved "https://registry.yarnpkg.com/@jest/create-cache-key-function/-/create-cache-key-function-29.5.0.tgz#24e019d03e634be4affe8bcee787d75a36ae57a2"
++  integrity sha512-LIDZyZgnZss7uikvBKBB/USWwG+GO8+GnwRWT+YkCGDGsqLQlhm9BC3z6+7+eMs1kUlvXQIWEzBR8Q2Pnvx6lg==
++  dependencies:
++    "@jest/types" "^29.5.0"
++
+ "@jest/environment@^26.6.2":
+   version "26.6.2"
+   resolved "https://registry.yarnpkg.com/@jest/environment/-/environment-26.6.2.tgz#ba364cc72e221e79cc8f0a99555bf5d7577cf92c"
+@@ -1882,6 +1889,13 @@
+   optionalDependencies:
+     node-notifier "^8.0.0"
+ 
++"@jest/schemas@^29.4.3":
++  version "29.4.3"
++  resolved "https://registry.yarnpkg.com/@jest/schemas/-/schemas-29.4.3.tgz#39cf1b8469afc40b6f5a2baaa146e332c4151788"
++  integrity sha512-VLYKXQmtmuEz6IxJsrZwzG9NvtkQsWNnWMsKxqWNu3+CnfzJQhp0WDDKWLVV9hLKr0l3SLLFRqcYHjhtyuDVxg==
++  dependencies:
++    "@sinclair/typebox" "^0.25.16"
++
+ "@jest/source-map@^26.6.2":
+   version "26.6.2"
+   resolved "https://registry.yarnpkg.com/@jest/source-map/-/source-map-26.6.2.tgz#29af5e1e2e324cafccc936f218309f54ab69d535"
+@@ -1965,6 +1979,18 @@
+     "@types/yargs" "^16.0.0"
+     chalk "^4.0.0"
+ 
++"@jest/types@^29.5.0":
++  version "29.5.0"
++  resolved "https://registry.yarnpkg.com/@jest/types/-/types-29.5.0.tgz#f59ef9b031ced83047c67032700d8c807d6e1593"
++  integrity sha512-qbu7kN6czmVRc3xWFQcAN03RAUamgppVUdXrvl1Wr3jlNF93o9mJbGcDWrwGB6ht44u7efB1qCFgVQmca24Uog==
++  dependencies:
++    "@jest/schemas" "^29.4.3"
++    "@types/istanbul-lib-coverage" "^2.0.0"
++    "@types/istanbul-reports" "^3.0.0"
++    "@types/node" "*"
++    "@types/yargs" "^17.0.8"
++    chalk "^4.0.0"
++
+ "@jimp/bmp@^0.16.13":
+   version "0.16.13"
+   resolved "https://registry.yarnpkg.com/@jimp/bmp/-/bmp-0.16.13.tgz#57ffa5b17417b5a181f6f184bdabc8218e8448ef"
+@@ -2364,7 +2390,7 @@
+   dependencies:
+     serve-static "^1.13.1"
+ 
+-"@react-native-community/cli-doctor@^9.3.0":
++"@react-native-community/cli-doctor@^9.2.1":
+   version "9.3.0"
+   resolved "https://registry.yarnpkg.com/@react-native-community/cli-doctor/-/cli-doctor-9.3.0.tgz#8817a3fd564453467def5b5bc8aecdc4205eff50"
+   integrity sha512-/fiuG2eDGC2/OrXMOWI5ifq4X1gdYTQhvW2m0TT5Lk1LuFiZsbTCp1lR+XILKekuTvmYNjEGdVpeDpdIWlXdEA==
+@@ -2386,7 +2412,7 @@
+     sudo-prompt "^9.0.0"
+     wcwidth "^1.0.1"
+ 
+-"@react-native-community/cli-hermes@^9.3.1":
++"@react-native-community/cli-hermes@^9.2.1":
+   version "9.3.1"
+   resolved "https://registry.yarnpkg.com/@react-native-community/cli-hermes/-/cli-hermes-9.3.1.tgz#569d27c1effd684ba451ad4614e29a99228cec49"
+   integrity sha512-Mq4PK8m5YqIdaVq5IdRfp4qK09aVO+aiCtd6vjzjNUgk1+1X5cgUqV6L65h4N+TFJYJHcp2AnB+ik1FAYXvYPQ==
+@@ -2397,7 +2423,20 @@
+     hermes-profile-transformer "^0.0.6"
+     ip "^1.1.5"
+ 
+-"@react-native-community/cli-platform-android@9.3.1", "@react-native-community/cli-platform-android@^9.3.1":
++"@react-native-community/cli-platform-android@9.2.1":
++  version "9.2.1"
++  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-9.2.1.tgz#cd73cb6bbaeb478cafbed10bd12dfc01b484d488"
++  integrity sha512-VamCZ8nido3Q3Orhj6pBIx48itORNPLJ7iTfy3nucD1qISEDih3DOzCaQCtmqdEBgUkNkNl0O+cKgq5A3th3Zg==
++  dependencies:
++    "@react-native-community/cli-tools" "^9.2.1"
++    chalk "^4.1.2"
++    execa "^1.0.0"
++    fs-extra "^8.1.0"
++    glob "^7.1.3"
++    logkitty "^0.7.1"
++    slash "^3.0.0"
++
++"@react-native-community/cli-platform-android@^9.3.1":
+   version "9.3.1"
+   resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-9.3.1.tgz#378cd72249653cc74672094400657139f21bafb8"
+   integrity sha512-m0bQ6Twewl7OEZoVf79I2GZmsDqh+Gh0bxfxWgwxobsKDxLx8/RNItAo1lVtTCgzuCR75cX4EEO8idIF9jYhew==
+@@ -2410,10 +2449,10 @@
+     logkitty "^0.7.1"
+     slash "^3.0.0"
+ 
+-"@react-native-community/cli-platform-ios@9.3.0", "@react-native-community/cli-platform-ios@^9.3.0":
+-  version "9.3.0"
+-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-9.3.0.tgz#45abde2a395fddd7cf71e8b746c1dc1ee2260f9a"
+-  integrity sha512-nihTX53BhF2Q8p4B67oG3RGe1XwggoGBrMb6vXdcu2aN0WeXJOXdBLgR900DAA1O8g7oy1Sudu6we+JsVTKnjw==
++"@react-native-community/cli-platform-ios@9.2.1":
++  version "9.2.1"
++  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-9.2.1.tgz#d90740472216ffae5527dfc5f49063ede18a621f"
++  integrity sha512-dEgvkI6CFgPk3vs8IOR0toKVUjIFwe4AsXFvWWJL5qhrIzW9E5Owi0zPkSvzXsMlfYMbVX0COfVIK539ZxguSg==
+   dependencies:
+     "@react-native-community/cli-tools" "^9.2.1"
+     chalk "^4.1.2"
+@@ -2435,6 +2474,17 @@
+     ora "^5.4.1"
+     plist "^3.0.2"
+ 
++"@react-native-community/cli-platform-ios@^9.3.0":
++  version "9.3.0"
++  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-9.3.0.tgz#45abde2a395fddd7cf71e8b746c1dc1ee2260f9a"
++  integrity sha512-nihTX53BhF2Q8p4B67oG3RGe1XwggoGBrMb6vXdcu2aN0WeXJOXdBLgR900DAA1O8g7oy1Sudu6we+JsVTKnjw==
++  dependencies:
++    "@react-native-community/cli-tools" "^9.2.1"
++    chalk "^4.1.2"
++    execa "^1.0.0"
++    glob "^7.1.3"
++    ora "^5.4.1"
++
+ "@react-native-community/cli-plugin-metro@^9.2.1":
+   version "9.2.1"
+   resolved "https://registry.yarnpkg.com/@react-native-community/cli-plugin-metro/-/cli-plugin-metro-9.2.1.tgz#0ec207e78338e0cc0a3cbe1b43059c24afc66158"
+@@ -2504,16 +2554,16 @@
+   dependencies:
+     joi "^17.2.1"
+ 
+-"@react-native-community/cli@9.3.2":
+-  version "9.3.2"
+-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-9.3.2.tgz#81761880af00c1894d85380d8c9a358659865204"
+-  integrity sha512-IAW4X0vmX/xozNpp/JVZaX7MrC85KV0OP2DF4o7lNGOfpUhzJAEWqTfkxFYS+VsRjZHDve4wSTiGIuXwE7FG1w==
++"@react-native-community/cli@9.2.1":
++  version "9.2.1"
++  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-9.2.1.tgz#15cc32531fc323d4232d57b1f2d7c571816305ac"
++  integrity sha512-feMYS5WXXKF4TSWnCXozHxtWq36smyhGaENXlkiRESfYZ1mnCUlPfOanNCAvNvBqdyh9d4o0HxhYKX1g9l6DCQ==
+   dependencies:
+     "@react-native-community/cli-clean" "^9.2.1"
+     "@react-native-community/cli-config" "^9.2.1"
+     "@react-native-community/cli-debugger-ui" "^9.0.0"
+-    "@react-native-community/cli-doctor" "^9.3.0"
+-    "@react-native-community/cli-hermes" "^9.3.1"
++    "@react-native-community/cli-doctor" "^9.2.1"
++    "@react-native-community/cli-hermes" "^9.2.1"
+     "@react-native-community/cli-plugin-metro" "^9.2.1"
+     "@react-native-community/cli-server-api" "^9.2.1"
+     "@react-native-community/cli-tools" "^9.2.1"
+@@ -2720,6 +2770,11 @@
+   resolved "https://registry.yarnpkg.com/@sideway/pinpoint/-/pinpoint-2.0.0.tgz#cff8ffadc372ad29fd3f78277aeb29e632cc70df"
+   integrity sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==
+ 
++"@sinclair/typebox@^0.25.16":
++  version "0.25.24"
++  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.25.24.tgz#8c7688559979f7079aacaf31aa881c3aa410b718"
++  integrity sha512-XJfwUVUKDHF5ugKwIcxEgc9k8b7HbznCp6eUfWgu710hMPNIO4aw4/zB5RogDQz8nd6gyCDpU9O/m6qYEWY6yQ==
++
+ "@sindresorhus/is@^0.7.0":
+   version "0.7.0"
+   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
+@@ -2776,9 +2831,9 @@
+     "@babel/types" "^7.0.0"
+ 
+ "@types/babel__traverse@*", "@types/babel__traverse@^7.0.4", "@types/babel__traverse@^7.0.6":
+-  version "7.18.4"
+-  resolved "https://registry.yarnpkg.com/@types/babel__traverse/-/babel__traverse-7.18.4.tgz#0fa6be6c182288831be8c31c35dab6d6ccac47c5"
+-  integrity sha512-TLG7CsGZZmX9aDF78UuJxnNTfQyRUFU0OYIVyIblr0/wd/HvsIo8wmuB90CszeD2MtLLAE9Tt4cWvk+KVkyGIw==
++  version "7.18.3"
++  resolved "https://registry.yarnpkg.com/@types/babel__traverse/-/babel__traverse-7.18.3.tgz#dfc508a85781e5698d5b33443416b6268c4b3e8d"
++  integrity sha512-1kbcJ40lLB7MHsj39U4Sh1uTd2E7rLEa79kmDpI6cy+XiXsteB3POdQomoq4FxszMrO3ZYchkhYJw7A2862b3w==
+   dependencies:
+     "@babel/types" "^7.3.0"
+ 
+@@ -2820,11 +2875,6 @@
+   resolved "https://registry.yarnpkg.com/@types/i18n-js/-/i18n-js-3.8.2.tgz#957a3fa268124d09e3b3b34695f0184118f4bc4f"
+   integrity sha512-F+AuFCjllE1A0W/YUxJB13q2t7cWITMqXOTXQ/InfXxxT8nXrrqL7s/8Pv6XThGjFPemukElwk6QlMOKCEg7eQ==
+ 
+-"@types/invariant@^2.2.35":
+-  version "2.2.35"
+-  resolved "https://registry.yarnpkg.com/@types/invariant/-/invariant-2.2.35.tgz#cd3ebf581a6557452735688d8daba6cf0bd5a3be"
+-  integrity sha512-DxX1V9P8zdJPYQat1gHyY0xj3efl8gnMVjiM9iCY6y27lj+PoQWkgjt8jDqmovPqULkKVpKRg8J36iQiA+EtEg==
+-
+ "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
+   version "2.0.4"
+   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.4.tgz#8467d4b3c087805d63580480890791277ce35c44"
+@@ -2868,9 +2918,9 @@
+   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
+ 
+ "@types/node@*":
+-  version "18.16.1"
+-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.16.1.tgz#5db121e9c5352925bb1f1b892c4ae620e3526799"
+-  integrity sha512-DZxSZWXxFfOlx7k7Rv4LAyiMroaxa3Ly/7OOzZO8cBNho0YzAi4qlbrx8W27JGqG57IgR/6J7r+nOJWw6kcvZA==
++  version "18.16.0"
++  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.16.0.tgz#4668bc392bb6938637b47e98b1f2ed5426f33316"
++  integrity sha512-BsAaKhB+7X+H4GnSjGhJG9Qi8Tw+inU9nJDwmD5CgOmBLEI6ArdhikpLX7DjbjDRDTbqZzU2LSQNZg8WGPiSZQ==
+ 
+ "@types/node@16.9.1":
+   version "16.9.1"
+@@ -2903,9 +2953,9 @@
+   integrity sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==
+ 
+ "@types/react-dom@^18":
+-  version "18.2.1"
+-  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.2.1.tgz#663b2612feb5f6431a70207430d7c04881b87f29"
+-  integrity sha512-8QZEV9+Kwy7tXFmjJrp3XUKQSs9LTnE0KnoUb0YCguWBiNW0Yfb2iBMYZ08WPg35IR6P3Z0s00B15SwZnO26+w==
++  version "18.0.11"
++  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.0.11.tgz#321351c1459bc9ca3d216aefc8a167beec334e33"
++  integrity sha512-O38bPbI2CWtgw/OoQoY+BRelw7uysmXbWvw3nLWO21H1HSh+GOlqPuXshJfjmpNlKiiSDG9cc1JZAaMmVdcTlw==
+   dependencies:
+     "@types/react" "*"
+ 
+@@ -2916,16 +2966,7 @@
+   dependencies:
+     "@types/react" "*"
+ 
+-"@types/react@*", "@types/react@^18":
+-  version "18.2.0"
+-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.2.0.tgz#15cda145354accfc09a18d2f2305f9fc099ada21"
+-  integrity sha512-0FLj93y5USLHdnhIhABk83rm8XEGA7kH3cr+YUlvxoUGp1xNt/DINUMvqPxLyOQMzLmZe8i4RTHbvb8MC7NmrA==
+-  dependencies:
+-    "@types/prop-types" "*"
+-    "@types/scheduler" "*"
+-    csstype "^3.0.2"
+-
+-"@types/react@~18.0.24":
++"@types/react@*", "@types/react@^18", "@types/react@~18.0.24":
+   version "18.0.38"
+   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.38.tgz#02a23bef8848b360a0d1dceef4432c15c21c600c"
+   integrity sha512-ExsidLLSzYj4cvaQjGnQCk4HFfVT9+EZ9XZsQ8Hsrcn8QNgXtpZ3m9vSIC2MWtx7jHictK6wYhQgGh6ic58oOw==
+@@ -3001,6 +3042,13 @@
+   dependencies:
+     "@types/yargs-parser" "*"
+ 
++"@types/yargs@^17.0.8":
++  version "17.0.24"
++  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-17.0.24.tgz#b3ef8d50ad4aa6aecf6ddc97c580a00f5aa11902"
++  integrity sha512-6i0aC7jV6QzQB8ne1joVZ0eSFIstHsCrobmOtghM11yGlH0j43FKL2UhWdELkyps0zuf7qVTUVCCR+tgSlyLLw==
++  dependencies:
++    "@types/yargs-parser" "*"
++
+ "@typescript-eslint/eslint-plugin@5.28.0":
+   version "5.28.0"
+   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-5.28.0.tgz#6204ac33bdd05ab27c7f77960f1023951115d403"
+@@ -3090,12 +3138,12 @@
+     wonka "^4.0.14"
+ 
+ "@urql/core@>=2.3.1":
+-  version "4.0.7"
+-  resolved "https://registry.yarnpkg.com/@urql/core/-/core-4.0.7.tgz#8918a956f8e2ffbaeb3aae58190d728813de5841"
+-  integrity sha512-UtZ9oSbSFODXzFydgLCXpAQz26KGT1d6uEfcylKphiRWNXSWZi8k7vhJXNceNm/Dn0MiZ+kaaJHKcnGY1jvHRQ==
++  version "4.0.6"
++  resolved "https://registry.yarnpkg.com/@urql/core/-/core-4.0.6.tgz#1dedef5d3f40e5842e7febe8d9cf31e8c99a4bff"
++  integrity sha512-RxlX5nxWZsvS1lPCvOdgdYbIVVfih/DrjPzGZ0ThP1GuVycaxw5t0O7XEXXYHICeXNKj95HJBxW0o/37zg+z6Q==
+   dependencies:
+-    "@0no-co/graphql.web" "^1.0.1"
+-    wonka "^6.3.2"
++    "@0no-co/graphql.web" "^1.0.0"
++    wonka "^6.3.0"
+ 
+ "@urql/exchange-retry@0.3.0":
+   version "0.3.0"
+@@ -6080,9 +6128,9 @@ ee-first@1.1.1:
+   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
+ 
+ electron-to-chromium@^1.3.564, electron-to-chromium@^1.4.284:
+-  version "1.4.372"
+-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.372.tgz#7888ac92ccb9556627c3a37eba3b89ee5ac345f8"
+-  integrity sha512-MrlFq/j+TYHOjeWsWGYfzevc25HNeJdsF6qaLFrqBTRWZQtWkb1myq/Q2veLWezVaa5OcSZ99CFwTT4aF4Mung==
++  version "1.4.369"
++  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.369.tgz#a98d838cdd79be4471cd04e9b4dffe891d037874"
++  integrity sha512-LfxbHXdA/S+qyoTEA4EbhxGjrxx7WK2h6yb5K2v0UCOufUKX+VZaHbl3svlzZfv9sGseym/g3Ne4DpsgRULmqg==
+ 
+ elliptic@^6.5.3:
+   version "6.5.4"
+@@ -7313,9 +7361,9 @@ flatted@^3.1.0:
+   integrity sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==
+ 
+ flow-parser@0.*:
+-  version "0.204.1"
+-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.204.1.tgz#a894bc5e8ad520134c1d13383b8991d03cbf8b01"
+-  integrity sha512-PoeSF0VhSORn3hYzD/NxsQjXX1iLU0UZXzVwZXnRWjeVsedmvDo4epd7PtCQjxveGajmVlyVW35BOOOkqLqJpw==
++  version "0.204.0"
++  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.204.0.tgz#48515c3d289557d465b409c60ebdf4e783af491e"
++  integrity sha512-cQhNPLOk5NFyDXBC8WE8dy2Gls+YqKI3FNqQbJ7UrbFyd30IdEX3t27u3VsnoVK22I872+PWeb1KhHxDgu7kAg==
+ 
+ flow-parser@^0.121.0:
+   version "0.121.0"
+@@ -9637,9 +9685,9 @@ joi@14.0.4:
+     topo "3.x.x"
+ 
+ joi@^17.2.1:
+-  version "17.9.2"
+-  resolved "https://registry.yarnpkg.com/joi/-/joi-17.9.2.tgz#8b2e4724188369f55451aebd1d0b1d9482470690"
+-  integrity sha512-Itk/r+V4Dx0V3c7RLFdRh12IOjySm2/WGPMubBT92cQvRfYZhPM2W0hZlctjj72iES8jsRCwp7S/cRmWBnJ4nw==
++  version "17.9.1"
++  resolved "https://registry.yarnpkg.com/joi/-/joi-17.9.1.tgz#74899b9fa3646904afa984a11df648eca66c9018"
++  integrity sha512-FariIi9j6QODKATGBrEX7HZcja8Bsh3rfdGYy/Sb65sGlZWK/QWesU1ghk7aJWDj95knjXlQfSmzFSPPkLVsfw==
+   dependencies:
+     "@hapi/hoek" "^9.0.0"
+     "@hapi/topo" "^5.0.0"
+@@ -12799,7 +12847,7 @@ promise@^7.1.1:
+   dependencies:
+     asap "~2.0.3"
+ 
+-promise@^8.3.0:
++promise@^8.0.3:
+   version "8.3.0"
+   resolved "https://registry.yarnpkg.com/promise/-/promise-8.3.0.tgz#8cb333d1edeb61ef23869fbb8a4ea0279ab60e0a"
+   integrity sha512-rZPNPKTOYVNEEKFaq1HqTgOwZD+4/YHS5ukLzQCypkj+OkYx7iv0mA91lJlpPPZ8vMau3IIGj5Qlwrx+8iiSmg==
+@@ -13210,10 +13258,10 @@ react-native-flipper@^0.164.0:
+   resolved "https://registry.yarnpkg.com/react-native-flipper/-/react-native-flipper-0.164.0.tgz#64f6269a86a13a72e30f53ba9f5281d2073a7697"
+   integrity sha512-iJhIe3rqx6okuzBp4AJsTa2b8VRAOGzoLRFx/4HGbaGvu8AurZjz8TTQkhJsRma8dsHN2b6KKZPvGGW3wdWzvA==
+ 
+-react-native-gesture-handler@~2.8.0:
+-  version "2.8.0"
+-  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.8.0.tgz#ef9857871c10663c95a51546225b6e00cd4740cf"
+-  integrity sha512-poOSfz/w0IyD6Qwq7aaIRRfEaVTl1ecQFoyiIbpOpfNTjm2B1niY2FLrdVQIOtIOe+K9nH55Qal04nr4jGkHdQ==
++react-native-gesture-handler@~2.9.0:
++  version "2.9.0"
++  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.9.0.tgz#2f63812e523c646f25b9ad660fc6f75948e51241"
++  integrity sha512-a0BcH3Qb1tgVqUutc6d3VuWQkI1AM3+fJx8dkxzZs9t06qA27QgURYFoklpabuWpsUTzuKRpxleykp25E8m7tg==
+   dependencies:
+     "@egjs/hammerjs" "^2.0.17"
+     hoist-non-react-statics "^3.3.0"
+@@ -13226,14 +13274,14 @@ react-native-gradle-plugin@^0.70.3:
+   resolved "https://registry.yarnpkg.com/react-native-gradle-plugin/-/react-native-gradle-plugin-0.70.3.tgz#cbcf0619cbfbddaa9128701aa2d7b4145f9c4fc8"
+   integrity sha512-oOanj84fJEXUg9FoEAQomA8ISG+DVIrTZ3qF7m69VQUJyOGYyDZmPqKcjvRku4KXlEH6hWO9i4ACLzNBh8gC0A==
+ 
+-react-native-reanimated@~2.12.0:
+-  version "2.12.0"
+-  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-2.12.0.tgz#5821eecfb1769b1617a67a2d4dec12fdeedb2b6e"
+-  integrity sha512-nrlPyw+Hx9u4iJhZk9PoTvDo/QmVAd+bo7OK9Tv3hveNEF9++5oig/g3Uv9V93shy9avTYGsUprUvAEt/xdzeQ==
++react-native-reanimated@~2.14.0:
++  version "2.14.4"
++  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-2.14.4.tgz#3fa3da4e7b99f5dfb28f86bcf24d9d1024d38836"
++  integrity sha512-DquSbl7P8j4SAmc+kRdd75Ianm8G+IYQ9T4AQ6lrpLVeDkhZmjWI0wkutKWnp6L7c5XNVUrFDUf69dwETLCItQ==
+   dependencies:
+     "@babel/plugin-transform-object-assign" "^7.16.7"
+     "@babel/preset-typescript" "^7.16.7"
+-    "@types/invariant" "^2.2.35"
++    convert-source-map "^1.7.0"
+     invariant "^2.2.4"
+     lodash.isequal "^4.5.0"
+     setimmediate "^1.0.5"
+@@ -13265,15 +13313,15 @@ react-native-web@~0.18.7:
+     postcss-value-parser "^4.2.0"
+     styleq "^0.1.2"
+ 
+-react-native@0.70.8:
+-  version "0.70.8"
+-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.70.8.tgz#aa9aae8e6291589908db74fe69e0ec1d9a9c5490"
+-  integrity sha512-O3ONJed9W/VEEVWsbZcwyMDhnEvw7v9l9enqWqgbSGLzHfh6HeIGMCNmjz+kRsHnC7AiF47fupWfgYX7hNnhoQ==
++react-native@0.70.5:
++  version "0.70.5"
++  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.70.5.tgz#f60540b21d338891086e0a834e331c124dd1f55c"
++  integrity sha512-5NZM80LC3L+TIgQX/09yiyy48S73wMgpIgN5cCv3XTMR394+KpDI3rBZGH4aIgWWuwijz31YYVF5504+9n2Zfw==
+   dependencies:
+-    "@jest/create-cache-key-function" "^27.0.1"
+-    "@react-native-community/cli" "9.3.2"
+-    "@react-native-community/cli-platform-android" "9.3.1"
+-    "@react-native-community/cli-platform-ios" "9.3.0"
++    "@jest/create-cache-key-function" "^29.0.3"
++    "@react-native-community/cli" "9.2.1"
++    "@react-native-community/cli-platform-android" "9.2.1"
++    "@react-native-community/cli-platform-ios" "9.2.1"
+     "@react-native/assets" "1.0.0"
+     "@react-native/normalize-color" "2.0.0"
+     "@react-native/polyfills" "2.0.0"
+@@ -13290,7 +13338,7 @@ react-native@0.70.8:
+     mkdirp "^0.5.1"
+     nullthrows "^1.1.1"
+     pretty-format "^26.5.2"
+-    promise "^8.3.0"
++    promise "^8.0.3"
+     react-devtools-core "4.24.0"
+     react-native-codegen "^0.70.6"
+     react-native-gradle-plugin "^0.70.3"
+@@ -16325,10 +16373,10 @@ wonka@^4.0.14:
+   resolved "https://registry.yarnpkg.com/wonka/-/wonka-4.0.15.tgz#9aa42046efa424565ab8f8f451fcca955bf80b89"
+   integrity sha512-U0IUQHKXXn6PFo9nqsHphVCE5m3IntqZNB9Jjn7EB1lrR7YTDY3YWgFvEvwniTzXSvOH/XMzAZaIfJF/LvHYXg==
+ 
+-wonka@^6.3.2:
+-  version "6.3.2"
+-  resolved "https://registry.yarnpkg.com/wonka/-/wonka-6.3.2.tgz#6f32992b332251d7b696b038990f4dc284b3b33d"
+-  integrity sha512-2xXbQ1LnwNS7egVm1HPhW2FyKrekolzhpM3mCwXdQr55gO+tAiY76rhb32OL9kKsW8taj++iP7C6hxlVzbnvrw==
++wonka@^6.3.0:
++  version "6.3.1"
++  resolved "https://registry.yarnpkg.com/wonka/-/wonka-6.3.1.tgz#315b2a91e134c4032980836e6d97e13d0927634d"
++  integrity sha512-nJyGPcjuBiaLFn8QAlrHd+QjV9AlPO7snOWAhgx6aX0nQLMV6Wi0nqfrkmsXIH0efngbDOroOz2QyLnZMF16Hw==
+ 
+ word-wrap@^1.2.3, word-wrap@~1.2.3:
+   version "1.2.3"
