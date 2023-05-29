@@ -1,0 +1,834 @@
+diff --git a/IgniteDiffApp/app/components/Button.tsx b/IgniteDiffApp/app/components/Button.tsx
+index b217b36..ac95e7f 100644
+--- a/IgniteDiffApp/app/components/Button.tsx
++++ b/IgniteDiffApp/app/components/Button.tsx
+@@ -129,8 +129,8 @@ const $baseViewStyle: ViewStyle = {
+   justifyContent: "center",
+   alignItems: "center",
+   flexDirection: "row",
+-  paddingVertical: spacing.small,
+-  paddingHorizontal: spacing.small,
++  paddingVertical: spacing.sm,
++  paddingHorizontal: spacing.sm,
+   overflow: "hidden",
+ }
+ 
+@@ -144,8 +144,8 @@ const $baseTextStyle: TextStyle = {
+   zIndex: 2,
+ }
+ 
+-const $rightAccessoryStyle: ViewStyle = { marginStart: spacing.extraSmall, zIndex: 1 }
+-const $leftAccessoryStyle: ViewStyle = { marginEnd: spacing.extraSmall, zIndex: 1 }
++const $rightAccessoryStyle: ViewStyle = { marginStart: spacing.xs, zIndex: 1 }
++const $leftAccessoryStyle: ViewStyle = { marginEnd: spacing.xs, zIndex: 1 }
+ 
+ const $viewPresets = {
+   default: [
+diff --git a/IgniteDiffApp/app/components/Card.tsx b/IgniteDiffApp/app/components/Card.tsx
+index b118f73..1cdb69a 100644
+--- a/IgniteDiffApp/app/components/Card.tsx
++++ b/IgniteDiffApp/app/components/Card.tsx
+@@ -160,28 +160,28 @@ export function Card(props: CardProps) {
+   const $containerStyle = [$containerPresets[preset], $containerStyleOverride]
+   const $headingStyle = [
+     $headingPresets[preset],
+-    (isFooterPresent || isContentPresent) && { marginBottom: spacing.micro },
++    (isFooterPresent || isContentPresent) && { marginBottom: spacing.xxxs },
+     $headingStyleOverride,
+     HeadingTextProps?.style,
+   ]
+   const $contentStyle = [
+     $contentPresets[preset],
+-    isHeadingPresent && { marginTop: spacing.micro },
+-    isFooterPresent && { marginBottom: spacing.micro },
++    isHeadingPresent && { marginTop: spacing.xxxs },
++    isFooterPresent && { marginBottom: spacing.xxxs },
+     $contentStyleOverride,
+     ContentTextProps?.style,
+   ]
+   const $footerStyle = [
+     $footerPresets[preset],
+-    (isHeadingPresent || isContentPresent) && { marginTop: spacing.micro },
++    (isHeadingPresent || isContentPresent) && { marginTop: spacing.xxxs },
+     $footerStyleOverride,
+     FooterTextProps?.style,
+   ]
+   const $alignmentWrapperStyle = [
+     $alignmentWrapper,
+     { justifyContent: $alignmentWrapperFlexOptions[verticalAlignment] },
+-    LeftComponent && { marginStart: spacing.medium },
+-    RightComponent && { marginEnd: spacing.medium },
++    LeftComponent && { marginStart: spacing.md },
++    RightComponent && { marginEnd: spacing.md },
+   ]
+ 
+   return (
+@@ -240,8 +240,8 @@ export function Card(props: CardProps) {
+ }
+ 
+ const $containerBase: ViewStyle = {
+-  borderRadius: spacing.medium,
+-  padding: spacing.extraSmall,
++  borderRadius: spacing.md,
++  padding: spacing.xs,
+   borderWidth: 1,
+   shadowColor: colors.palette.neutral800,
+   shadowOffset: { width: 0, height: 12 },
+diff --git a/IgniteDiffApp/app/components/EmptyState.tsx b/IgniteDiffApp/app/components/EmptyState.tsx
+index 7aeec74..7ecef5d 100644
+--- a/IgniteDiffApp/app/components/EmptyState.tsx
++++ b/IgniteDiffApp/app/components/EmptyState.tsx
+@@ -150,26 +150,26 @@ export function EmptyState(props: EmptyStateProps) {
+   const $containerStyles = [$containerStyleOverride]
+   const $imageStyles = [
+     $image,
+-    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.micro },
++    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
+     $imageStyleOverride,
+     ImageProps?.style,
+   ]
+   const $headingStyles = [
+     $heading,
+-    isImagePresent && { marginTop: spacing.micro },
+-    (isContentPresent || isButtonPresent) && { marginBottom: spacing.micro },
++    isImagePresent && { marginTop: spacing.xxxs },
++    (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
+     $headingStyleOverride,
+     HeadingTextProps?.style,
+   ]
+   const $contentStyles = [
+     $content,
+-    (isImagePresent || isHeadingPresent) && { marginTop: spacing.micro },
+-    isButtonPresent && { marginBottom: spacing.micro },
++    (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxxs },
++    isButtonPresent && { marginBottom: spacing.xxxs },
+     $contentStyleOverride,
+     ContentTextProps?.style,
+   ]
+   const $buttonStyles = [
+-    (isImagePresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.extraLarge },
++    (isImagePresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.xl },
+     $buttonStyleOverride,
+     ButtonProps?.style,
+   ]
+@@ -215,5 +215,5 @@ export function EmptyState(props: EmptyStateProps) {
+ }
+ 
+ const $image: ImageStyle = { alignSelf: "center" }
+-const $heading: TextStyle = { textAlign: "center", paddingHorizontal: spacing.large }
+-const $content: TextStyle = { textAlign: "center", paddingHorizontal: spacing.large }
++const $heading: TextStyle = { textAlign: "center", paddingHorizontal: spacing.lg }
++const $content: TextStyle = { textAlign: "center", paddingHorizontal: spacing.lg }
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index ba8ee0f..273298e 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -277,7 +277,7 @@ const $actionTextContainer: ViewStyle = {
+   alignItems: "center",
+   justifyContent: "center",
+   height: "100%",
+-  paddingHorizontal: spacing.medium,
++  paddingHorizontal: spacing.md,
+   zIndex: 2,
+ }
+ 
+@@ -290,7 +290,7 @@ const $actionIconContainer: ViewStyle = {
+   alignItems: "center",
+   justifyContent: "center",
+   height: "100%",
+-  paddingHorizontal: spacing.medium,
++  paddingHorizontal: spacing.md,
+   zIndex: 2,
+ }
+ 
+@@ -304,7 +304,7 @@ const $titleWrapperCenter: ViewStyle = {
+   height: "100%",
+   width: "100%",
+   position: "absolute",
+-  paddingHorizontal: spacing.huge,
++  paddingHorizontal: spacing.xxl,
+   zIndex: 1,
+ }
+ 
+diff --git a/IgniteDiffApp/app/components/ListItem.tsx b/IgniteDiffApp/app/components/ListItem.tsx
+index 65d0897..e1d658f 100644
+--- a/IgniteDiffApp/app/components/ListItem.tsx
++++ b/IgniteDiffApp/app/components/ListItem.tsx
+@@ -197,7 +197,7 @@ const $separatorBottom: ViewStyle = {
+ }
+ 
+ const $textStyle: TextStyle = {
+-  paddingVertical: spacing.extraSmall,
++  paddingVertical: spacing.xs,
+   alignSelf: "center",
+   flexGrow: 1,
+   flexShrink: 1,
+@@ -214,9 +214,9 @@ const $iconContainer: ViewStyle = {
+   flexGrow: 0,
+ }
+ const $iconContainerLeft: ViewStyle = {
+-  marginEnd: spacing.medium,
++  marginEnd: spacing.md,
+ }
+ 
+ const $iconContainerRight: ViewStyle = {
+-  marginStart: spacing.medium,
++  marginStart: spacing.md,
+ }
+diff --git a/IgniteDiffApp/app/components/TextField.tsx b/IgniteDiffApp/app/components/TextField.tsx
+index e995930..6822a20 100644
+--- a/IgniteDiffApp/app/components/TextField.tsx
++++ b/IgniteDiffApp/app/components/TextField.tsx
+@@ -230,7 +230,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
+ })
+ 
+ const $labelStyle: TextStyle = {
+-  marginBottom: spacing.extraSmall,
++  marginBottom: spacing.xs,
+ }
+ 
+ const $inputWrapperStyle: ViewStyle = {
+@@ -253,22 +253,22 @@ const $inputStyle: TextStyle = {
+   // https://github.com/facebook/react-native/issues/21720#issuecomment-532642093
+   paddingVertical: 0,
+   paddingHorizontal: 0,
+-  marginVertical: spacing.extraSmall,
+-  marginHorizontal: spacing.small,
++  marginVertical: spacing.xs,
++  marginHorizontal: spacing.sm,
+ }
+ 
+ const $helperStyle: TextStyle = {
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ const $rightAccessoryStyle: ViewStyle = {
+-  marginEnd: spacing.extraSmall,
++  marginEnd: spacing.xs,
+   height: 40,
+   justifyContent: "center",
+   alignItems: "center",
+ }
+ const $leftAccessoryStyle: ViewStyle = {
+-  marginStart: spacing.extraSmall,
++  marginStart: spacing.xs,
+   height: 40,
+   justifyContent: "center",
+   alignItems: "center",
+diff --git a/IgniteDiffApp/app/components/Toggle.tsx b/IgniteDiffApp/app/components/Toggle.tsx
+index 3568905..7d5cbcc 100644
+--- a/IgniteDiffApp/app/components/Toggle.tsx
++++ b/IgniteDiffApp/app/components/Toggle.tsx
+@@ -615,7 +615,7 @@ const $switchDetail: SwitchToggleProps["inputDetailStyle"] = {
+ }
+ 
+ const $helper: TextStyle = {
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ const $label: TextStyle = {
+@@ -623,11 +623,11 @@ const $label: TextStyle = {
+ }
+ 
+ const $labelRight: TextStyle = {
+-  marginStart: spacing.medium,
++  marginStart: spacing.md,
+ }
+ 
+ const $labelLeft: TextStyle = {
+-  marginEnd: spacing.medium,
++  marginEnd: spacing.md,
+ }
+ 
+ const $switchAccessibility: TextStyle = {
+diff --git a/IgniteDiffApp/app/navigators/AppNavigator.tsx b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+index 9c538b9..1e94842 100644
+--- a/IgniteDiffApp/app/navigators/AppNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+@@ -19,6 +19,7 @@ import Config from "../config"
+ import { useStores } from "../models" // @demo remove-current-line
+ import { DemoNavigator, DemoTabParamList } from "./DemoNavigator" // @demo remove-current-line
+ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
++import { colors } from "app/theme"
+ 
+ /**
+  * This type allows TypeScript to know what routes are defined in this navigator
+@@ -64,7 +65,7 @@ const AppStack = observer(function AppStack() {
+   // @demo remove-block-end
+   return (
+     <Stack.Navigator
+-      screenOptions={{ headerShown: false }}
++      screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
+       initialRouteName={isAuthenticated ? "Welcome" : "Login"} // @demo remove-current-line
+     >
+       {/* @demo remove-block-start */}
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 168c045..529d2f7 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -98,7 +98,7 @@ const $tabBar: ViewStyle = {
+ }
+ 
+ const $tabBarItem: ViewStyle = {
+-  paddingTop: spacing.medium,
++  paddingTop: spacing.md,
+ }
+ 
+ const $tabBarLabel: TextStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+index 4add235..50df9ed 100644
+--- a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+@@ -101,28 +101,28 @@ export const DemoCommunityScreen: FC<DemoTabScreenProps<"DemoCommunity">> =
+   }
+ 
+ const $container: ViewStyle = {
+-  paddingTop: spacing.large + spacing.extraLarge,
+-  paddingHorizontal: spacing.large,
++  paddingTop: spacing.lg + spacing.xl,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $title: TextStyle = {
+-  marginBottom: spacing.small,
++  marginBottom: spacing.sm,
+ }
+ 
+ const $tagline: TextStyle = {
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $description: TextStyle = {
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+ }
+ 
+ const $sectionTitle: TextStyle = {
+-  marginTop: spacing.huge,
++  marginTop: spacing.xxl,
+ }
+ 
+ const $logoContainer: ViewStyle = {
+-  marginEnd: spacing.medium,
++  marginEnd: spacing.md,
+   flexDirection: "row",
+   flexWrap: "wrap",
+   alignContent: "center",
+diff --git a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+index 0294d75..052bf15 100644
+--- a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+@@ -99,42 +99,42 @@ export const DemoDebugScreen: FC<DemoTabScreenProps<"DemoDebug">> = function Dem
+ }
+ 
+ const $container: ViewStyle = {
+-  paddingTop: spacing.large + spacing.extraLarge,
+-  paddingBottom: spacing.huge,
+-  paddingHorizontal: spacing.large,
++  paddingTop: spacing.lg + spacing.xl,
++  paddingBottom: spacing.xxl,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $title: TextStyle = {
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $reportBugsLink: TextStyle = {
+   color: colors.tint,
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+   alignSelf: isRTL ? "flex-start" : "flex-end",
+ }
+ 
+ const $item: ViewStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $itemsContainer: ViewStyle = {
+-  marginBottom: spacing.extraLarge,
++  marginBottom: spacing.xl,
+ }
+ 
+ const $button: ViewStyle = {
+-  marginBottom: spacing.extraSmall,
++  marginBottom: spacing.xs,
+ }
+ 
+ const $buttonContainer: ViewStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $hint: TextStyle = {
+   color: colors.palette.neutral600,
+   fontSize: 12,
+   lineHeight: 15,
+-  paddingBottom: spacing.large,
++  paddingBottom: spacing.lg,
+ }
+ 
+ // @demo remove-file
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 0ce305a..d7c2aef 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -297,29 +297,29 @@ const $screenContentContainer: ViewStyle = {
+ }
+ 
+ const $flatListContentContainer: ViewStyle = {
+-  paddingHorizontal: spacing.large,
+-  paddingTop: spacing.large + spacing.extraLarge,
+-  paddingBottom: spacing.large,
++  paddingHorizontal: spacing.lg,
++  paddingTop: spacing.lg + spacing.xl,
++  paddingBottom: spacing.lg,
+ }
+ 
+ const $heading: ViewStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $item: ViewStyle = {
+-  padding: spacing.medium,
+-  marginTop: spacing.medium,
++  padding: spacing.md,
++  marginTop: spacing.md,
+   minHeight: 120,
+ }
+ 
+ const $itemThumbnail: ImageStyle = {
+-  marginTop: spacing.small,
++  marginTop: spacing.sm,
+   borderRadius: 50,
+   alignSelf: "flex-start",
+ }
+ 
+ const $toggle: ViewStyle = {
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+ }
+ 
+ const $labelStyle: TextStyle = {
+@@ -330,29 +330,29 @@ const $iconContainer: ViewStyle = {
+   height: ICON_SIZE,
+   width: ICON_SIZE,
+   flexDirection: "row",
+-  marginEnd: spacing.small,
++  marginEnd: spacing.sm,
+ }
+ 
+ const $metadata: TextStyle = {
+   color: colors.textDim,
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+   flexDirection: "row",
+ }
+ 
+ const $metadataText: TextStyle = {
+   color: colors.textDim,
+-  marginEnd: spacing.medium,
+-  marginBottom: spacing.extraSmall,
++  marginEnd: spacing.md,
++  marginBottom: spacing.xs,
+ }
+ 
+ const $favoriteButton: ViewStyle = {
+   borderRadius: 17,
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+   justifyContent: "flex-start",
+   backgroundColor: colors.palette.neutral300,
+   borderColor: colors.palette.neutral300,
+-  paddingHorizontal: spacing.medium,
+-  paddingTop: spacing.micro,
++  paddingHorizontal: spacing.md,
++  paddingTop: spacing.xxxs,
+   paddingBottom: 0,
+   minHeight: 32,
+   alignSelf: "flex-start",
+@@ -364,7 +364,7 @@ const $unFavoriteButton: ViewStyle = {
+ }
+ 
+ const $emptyState: ViewStyle = {
+-  marginTop: spacing.huge,
++  marginTop: spacing.xxl,
+ }
+ 
+ const $emptyStateImage: ImageStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index ec76002..3f81ef7 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -240,15 +240,15 @@ const $drawer: ViewStyle = {
+ }
+ 
+ const $flatListContentContainer: ViewStyle = {
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $sectionListContentContainer: ViewStyle = {
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $heading: ViewStyle = {
+-  marginBottom: spacing.massive,
++  marginBottom: spacing.xxxl,
+ }
+ 
+ const $logoImage: ImageStyle = {
+@@ -260,25 +260,25 @@ const $logoContainer: ViewStyle = {
+   alignSelf: "flex-start",
+   justifyContent: "center",
+   height: 56,
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $menuContainer: ViewStyle = {
+-  paddingBottom: spacing.extraSmall,
+-  paddingTop: spacing.large,
++  paddingBottom: spacing.xs,
++  paddingTop: spacing.lg,
+ }
+ 
+ const $demoItemName: TextStyle = {
+   fontSize: 24,
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $demoItemDescription: TextStyle = {
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $demoUseCasesSpacer: ViewStyle = {
+-  paddingBottom: spacing.huge,
++  paddingBottom: spacing.xxl,
+ }
+ 
+ // @demo remove-file
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+index e5b558e..d27801c 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+@@ -25,14 +25,14 @@ export function DemoUseCase(props: DemoUseCaseProps) {
+ }
+ 
+ const $description: TextStyle = {
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+ }
+ 
+ const $item: ViewStyle = {
+   backgroundColor: colors.palette.neutral100,
+   borderRadius: 8,
+-  padding: spacing.large,
+-  marginVertical: spacing.medium,
++  padding: spacing.lg,
++  marginVertical: spacing.md,
+ }
+ 
+ const $name: TextStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 289a035..8ac5dfa 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -100,7 +100,7 @@ const $topBar: ViewStyle = {
+ 
+ const $middleBar: ViewStyle = {
+   height: barHeight,
+-  marginTop: spacing.tiny,
++  marginTop: spacing.xxs,
+ }
+ 
+ const $bottomBar: ViewStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+index 9adbf08..f43ba81 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+@@ -14,7 +14,7 @@ const $imageContainer: ViewStyle = {
+ const $aspectRatioDescription: TextStyle = {
+   textAlign: "center",
+   width: "100%",
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ const $aspectRatioWidthExampleContainer: ViewStyle = {
+@@ -133,7 +133,7 @@ export const DemoAutoImage: Demo = {
+           />
+         </View>
+ 
+-        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginStart: spacing.small }]}>
++        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginStart: spacing.sm }]}>
+           <View style={[$aspectRatioBox, { height: 32 }]} />
+           <Image
+             source={{
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+index 9d02a85..193ab70 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+@@ -95,7 +95,7 @@ export const DemoCard: Demo = {
+         }
+         ContentComponent={
+           <Button
+-            style={{ marginVertical: spacing.small }}
++            style={{ marginVertical: spacing.sm }}
+             text="ContentComponent"
+             LeftAccessory={(props) => <Icon style={props.style} icon="ladybug" />}
+           />
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+index 646e920..6fad759 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+@@ -7,22 +7,22 @@ import { Demo } from "../DemoShowroomScreen"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const $demoIconContainer: ViewStyle = {
+-  padding: spacing.extraSmall,
++  padding: spacing.xs,
+ }
+ 
+ const $iconTile: ViewStyle = {
+   width: "33.333%",
+   alignItems: "center",
+-  paddingVertical: spacing.extraSmall,
++  paddingVertical: spacing.xs,
+ }
+ 
+ const $iconTileLabel: TextStyle = {
+-  marginTop: spacing.tiny,
++  marginTop: spacing.xxs,
+   color: colors.textDim,
+ }
+ 
+ const $customIconContainer: ViewStyle = {
+-  padding: spacing.medium,
++  padding: spacing.md,
+   backgroundColor: colors.palette.angry500,
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+index d9d8626..615b29a 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+@@ -37,7 +37,7 @@ const $customContainerStyle: ViewStyle = {
+ }
+ 
+ const $flatListStyle: ViewStyle = {
+-  paddingHorizontal: spacing.extraSmall,
++  paddingHorizontal: spacing.xs,
+   backgroundColor: colors.palette.neutral200,
+   flex: 1,
+   overflow: "scroll",
+@@ -101,7 +101,7 @@ export const DemoListItem: Demo = {
+       <ListItem
+         topSeparator
+         LeftComponent={
+-          <View style={[$customLeft, { marginEnd: spacing.medium }]}>
++          <View style={[$customLeft, { marginEnd: spacing.md }]}>
+             {Array.from({ length: 9 }, (x, i) => i).map((i) => (
+               <Icon key={i} icon="ladybug" color={colors.palette.neutral100} size={20} />
+             ))}
+@@ -115,7 +115,7 @@ export const DemoListItem: Demo = {
+         topSeparator
+         bottomSeparator
+         RightComponent={
+-          <View style={[$customLeft, { marginStart: spacing.medium }]}>
++          <View style={[$customLeft, { marginStart: spacing.md }]}>
+             {Array.from({ length: 9 }, (x, i) => i).map((i) => (
+               <Icon key={i} icon="ladybug" color={colors.palette.neutral100} size={20} />
+             ))}
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+index a831cf4..e1b6fd5 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+@@ -26,7 +26,7 @@ const $customLabelAndHelperStyle: TextStyle = {
+ }
+ 
+ const $customInputWithAbsoluteAccessoriesStyle: ViewStyle = {
+-  marginHorizontal: spacing.huge,
++  marginHorizontal: spacing.xxl,
+ }
+ 
+ const $customLeftAccessoryStyle: ViewStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+index 5a101d5..7f4d595 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+@@ -20,7 +20,7 @@ const $centeredOneThirdCol: ViewStyle = {
+ const $centeredText: TextStyle = {
+   textAlign: "center",
+   width: "100%",
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ export const DemoToggle: Demo = {
+diff --git a/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx b/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
+index d5ce4e9..2a9c616 100644
+--- a/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
++++ b/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
+@@ -43,8 +43,8 @@ export function ErrorDetails(props: ErrorDetailsProps) {
+ 
+ const $contentContainer: ViewStyle = {
+   alignItems: "center",
+-  paddingHorizontal: spacing.large,
+-  paddingTop: spacing.extraLarge,
++  paddingHorizontal: spacing.lg,
++  paddingTop: spacing.xl,
+   flex: 1,
+ }
+ 
+@@ -55,18 +55,18 @@ const $topSection: ViewStyle = {
+ 
+ const $heading: TextStyle = {
+   color: colors.error,
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $errorSection: ViewStyle = {
+   flex: 2,
+   backgroundColor: colors.separator,
+-  marginVertical: spacing.medium,
++  marginVertical: spacing.md,
+   borderRadius: 6,
+ }
+ 
+ const $errorSectionContentContainer: ViewStyle = {
+-  padding: spacing.medium,
++  padding: spacing.md,
+ }
+ 
+ const $errorContent: TextStyle = {
+@@ -74,11 +74,11 @@ const $errorContent: TextStyle = {
+ }
+ 
+ const $errorBacktrace: TextStyle = {
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+   color: colors.textDim,
+ }
+ 
+ const $resetButton: ViewStyle = {
+   backgroundColor: colors.error,
+-  paddingHorizontal: spacing.huge,
++  paddingHorizontal: spacing.xxl,
+ }
+diff --git a/IgniteDiffApp/app/screens/LoginScreen.tsx b/IgniteDiffApp/app/screens/LoginScreen.tsx
+index deb0e83..44992f8 100644
+--- a/IgniteDiffApp/app/screens/LoginScreen.tsx
++++ b/IgniteDiffApp/app/screens/LoginScreen.tsx
+@@ -119,29 +119,29 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
+ })
+ 
+ const $screenContentContainer: ViewStyle = {
+-  paddingVertical: spacing.huge,
+-  paddingHorizontal: spacing.large,
++  paddingVertical: spacing.xxl,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $signIn: TextStyle = {
+-  marginBottom: spacing.small,
++  marginBottom: spacing.sm,
+ }
+ 
+ const $enterDetails: TextStyle = {
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+ }
+ 
+ const $hint: TextStyle = {
+   color: colors.tint,
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $textField: ViewStyle = {
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+ }
+ 
+ const $tapButton: ViewStyle = {
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ // @demo remove-file
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index 31aa8b2..c1826a8 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -80,7 +80,7 @@ const $topContainer: ViewStyle = {
+   flexGrow: 1,
+   flexBasis: "57%",
+   justifyContent: "center",
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $bottomContainer: ViewStyle = {
+@@ -90,13 +90,13 @@ const $bottomContainer: ViewStyle = {
+   backgroundColor: colors.palette.neutral100,
+   borderTopLeftRadius: 16,
+   borderTopRightRadius: 16,
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+   justifyContent: "space-around",
+ }
+ const $welcomeLogo: ImageStyle = {
+   height: 88,
+   width: "100%",
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $welcomeFace: ImageStyle = {
+@@ -109,5 +109,5 @@ const $welcomeFace: ImageStyle = {
+ }
+ 
+ const $welcomeHeading: TextStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+diff --git a/IgniteDiffApp/app/theme/spacing.ts b/IgniteDiffApp/app/theme/spacing.ts
+index 9cd04b7..a21aa5b 100644
+--- a/IgniteDiffApp/app/theme/spacing.ts
++++ b/IgniteDiffApp/app/theme/spacing.ts
+@@ -2,15 +2,15 @@
+   Use these spacings for margins/paddings and other whitespace throughout your app.
+  */
+ export const spacing = {
+-  micro: 2,
+-  tiny: 4,
+-  extraSmall: 8,
+-  small: 12,
+-  medium: 16,
+-  large: 24,
+-  extraLarge: 32,
+-  huge: 48,
+-  massive: 64,
++  xxxs: 2,
++  xxs: 4,
++  xs: 8,
++  sm: 12,
++  md: 16,
++  lg: 24,
++  xl: 32,
++  xxl: 48,
++  xxxl: 64,
+ } as const
+ 
+ export type Spacing = keyof typeof spacing
