@@ -1,0 +1,1120 @@
+diff --git a/IgniteDiffApp/app/components/Button.tsx b/IgniteDiffApp/app/components/Button.tsx
+index b217b36..ac95e7f 100644
+--- a/IgniteDiffApp/app/components/Button.tsx
++++ b/IgniteDiffApp/app/components/Button.tsx
+@@ -129,8 +129,8 @@ const $baseViewStyle: ViewStyle = {
+   justifyContent: "center",
+   alignItems: "center",
+   flexDirection: "row",
+-  paddingVertical: spacing.small,
+-  paddingHorizontal: spacing.small,
++  paddingVertical: spacing.sm,
++  paddingHorizontal: spacing.sm,
+   overflow: "hidden",
+ }
+ 
+@@ -144,8 +144,8 @@ const $baseTextStyle: TextStyle = {
+   zIndex: 2,
+ }
+ 
+-const $rightAccessoryStyle: ViewStyle = { marginStart: spacing.extraSmall, zIndex: 1 }
+-const $leftAccessoryStyle: ViewStyle = { marginEnd: spacing.extraSmall, zIndex: 1 }
++const $rightAccessoryStyle: ViewStyle = { marginStart: spacing.xs, zIndex: 1 }
++const $leftAccessoryStyle: ViewStyle = { marginEnd: spacing.xs, zIndex: 1 }
+ 
+ const $viewPresets = {
+   default: [
+diff --git a/IgniteDiffApp/app/components/Card.tsx b/IgniteDiffApp/app/components/Card.tsx
+index b118f73..1cdb69a 100644
+--- a/IgniteDiffApp/app/components/Card.tsx
++++ b/IgniteDiffApp/app/components/Card.tsx
+@@ -160,28 +160,28 @@ export function Card(props: CardProps) {
+   const $containerStyle = [$containerPresets[preset], $containerStyleOverride]
+   const $headingStyle = [
+     $headingPresets[preset],
+-    (isFooterPresent || isContentPresent) && { marginBottom: spacing.micro },
++    (isFooterPresent || isContentPresent) && { marginBottom: spacing.xxxs },
+     $headingStyleOverride,
+     HeadingTextProps?.style,
+   ]
+   const $contentStyle = [
+     $contentPresets[preset],
+-    isHeadingPresent && { marginTop: spacing.micro },
+-    isFooterPresent && { marginBottom: spacing.micro },
++    isHeadingPresent && { marginTop: spacing.xxxs },
++    isFooterPresent && { marginBottom: spacing.xxxs },
+     $contentStyleOverride,
+     ContentTextProps?.style,
+   ]
+   const $footerStyle = [
+     $footerPresets[preset],
+-    (isHeadingPresent || isContentPresent) && { marginTop: spacing.micro },
++    (isHeadingPresent || isContentPresent) && { marginTop: spacing.xxxs },
+     $footerStyleOverride,
+     FooterTextProps?.style,
+   ]
+   const $alignmentWrapperStyle = [
+     $alignmentWrapper,
+     { justifyContent: $alignmentWrapperFlexOptions[verticalAlignment] },
+-    LeftComponent && { marginStart: spacing.medium },
+-    RightComponent && { marginEnd: spacing.medium },
++    LeftComponent && { marginStart: spacing.md },
++    RightComponent && { marginEnd: spacing.md },
+   ]
+ 
+   return (
+@@ -240,8 +240,8 @@ export function Card(props: CardProps) {
+ }
+ 
+ const $containerBase: ViewStyle = {
+-  borderRadius: spacing.medium,
+-  padding: spacing.extraSmall,
++  borderRadius: spacing.md,
++  padding: spacing.xs,
+   borderWidth: 1,
+   shadowColor: colors.palette.neutral800,
+   shadowOffset: { width: 0, height: 12 },
+diff --git a/IgniteDiffApp/app/components/EmptyState.tsx b/IgniteDiffApp/app/components/EmptyState.tsx
+index 7aeec74..7ecef5d 100644
+--- a/IgniteDiffApp/app/components/EmptyState.tsx
++++ b/IgniteDiffApp/app/components/EmptyState.tsx
+@@ -150,26 +150,26 @@ export function EmptyState(props: EmptyStateProps) {
+   const $containerStyles = [$containerStyleOverride]
+   const $imageStyles = [
+     $image,
+-    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.micro },
++    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
+     $imageStyleOverride,
+     ImageProps?.style,
+   ]
+   const $headingStyles = [
+     $heading,
+-    isImagePresent && { marginTop: spacing.micro },
+-    (isContentPresent || isButtonPresent) && { marginBottom: spacing.micro },
++    isImagePresent && { marginTop: spacing.xxxs },
++    (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
+     $headingStyleOverride,
+     HeadingTextProps?.style,
+   ]
+   const $contentStyles = [
+     $content,
+-    (isImagePresent || isHeadingPresent) && { marginTop: spacing.micro },
+-    isButtonPresent && { marginBottom: spacing.micro },
++    (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxxs },
++    isButtonPresent && { marginBottom: spacing.xxxs },
+     $contentStyleOverride,
+     ContentTextProps?.style,
+   ]
+   const $buttonStyles = [
+-    (isImagePresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.extraLarge },
++    (isImagePresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.xl },
+     $buttonStyleOverride,
+     ButtonProps?.style,
+   ]
+@@ -215,5 +215,5 @@ export function EmptyState(props: EmptyStateProps) {
+ }
+ 
+ const $image: ImageStyle = { alignSelf: "center" }
+-const $heading: TextStyle = { textAlign: "center", paddingHorizontal: spacing.large }
+-const $content: TextStyle = { textAlign: "center", paddingHorizontal: spacing.large }
++const $heading: TextStyle = { textAlign: "center", paddingHorizontal: spacing.lg }
++const $content: TextStyle = { textAlign: "center", paddingHorizontal: spacing.lg }
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index ba8ee0f..273298e 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -277,7 +277,7 @@ const $actionTextContainer: ViewStyle = {
+   alignItems: "center",
+   justifyContent: "center",
+   height: "100%",
+-  paddingHorizontal: spacing.medium,
++  paddingHorizontal: spacing.md,
+   zIndex: 2,
+ }
+ 
+@@ -290,7 +290,7 @@ const $actionIconContainer: ViewStyle = {
+   alignItems: "center",
+   justifyContent: "center",
+   height: "100%",
+-  paddingHorizontal: spacing.medium,
++  paddingHorizontal: spacing.md,
+   zIndex: 2,
+ }
+ 
+@@ -304,7 +304,7 @@ const $titleWrapperCenter: ViewStyle = {
+   height: "100%",
+   width: "100%",
+   position: "absolute",
+-  paddingHorizontal: spacing.huge,
++  paddingHorizontal: spacing.xxl,
+   zIndex: 1,
+ }
+ 
+diff --git a/IgniteDiffApp/app/components/ListItem.tsx b/IgniteDiffApp/app/components/ListItem.tsx
+index 65d0897..e1d658f 100644
+--- a/IgniteDiffApp/app/components/ListItem.tsx
++++ b/IgniteDiffApp/app/components/ListItem.tsx
+@@ -197,7 +197,7 @@ const $separatorBottom: ViewStyle = {
+ }
+ 
+ const $textStyle: TextStyle = {
+-  paddingVertical: spacing.extraSmall,
++  paddingVertical: spacing.xs,
+   alignSelf: "center",
+   flexGrow: 1,
+   flexShrink: 1,
+@@ -214,9 +214,9 @@ const $iconContainer: ViewStyle = {
+   flexGrow: 0,
+ }
+ const $iconContainerLeft: ViewStyle = {
+-  marginEnd: spacing.medium,
++  marginEnd: spacing.md,
+ }
+ 
+ const $iconContainerRight: ViewStyle = {
+-  marginStart: spacing.medium,
++  marginStart: spacing.md,
+ }
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index d9083bd..79265e2 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -73,13 +73,13 @@ export function Text(props: TextProps) {
+ }
+ 
+ const $sizeStyles = {
+-  xxl: { fontSize: 36, lineHeight: 44 } as TextStyle,
+-  xl: { fontSize: 24, lineHeight: 34 } as TextStyle,
+-  lg: { fontSize: 20, lineHeight: 32 } as TextStyle,
+-  md: { fontSize: 18, lineHeight: 26 } as TextStyle,
+-  sm: { fontSize: 16, lineHeight: 24 } as TextStyle,
+-  xs: { fontSize: 14, lineHeight: 21 } as TextStyle,
+-  xxs: { fontSize: 12, lineHeight: 18 } as TextStyle,
++  xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,
++  xl: { fontSize: 24, lineHeight: 34 } satisfies TextStyle,
++  lg: { fontSize: 20, lineHeight: 32 } satisfies TextStyle,
++  md: { fontSize: 18, lineHeight: 26 } satisfies TextStyle,
++  sm: { fontSize: 16, lineHeight: 24 } satisfies TextStyle,
++  xs: { fontSize: 14, lineHeight: 21 } satisfies TextStyle,
++  xxs: { fontSize: 12, lineHeight: 18 } satisfies TextStyle,
+ }
+ 
+ const $fontWeightStyles = Object.entries(typography.primary).reduce((acc, [weight, fontFamily]) => {
+diff --git a/IgniteDiffApp/app/components/TextField.tsx b/IgniteDiffApp/app/components/TextField.tsx
+index e995930..6822a20 100644
+--- a/IgniteDiffApp/app/components/TextField.tsx
++++ b/IgniteDiffApp/app/components/TextField.tsx
+@@ -230,7 +230,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
+ })
+ 
+ const $labelStyle: TextStyle = {
+-  marginBottom: spacing.extraSmall,
++  marginBottom: spacing.xs,
+ }
+ 
+ const $inputWrapperStyle: ViewStyle = {
+@@ -253,22 +253,22 @@ const $inputStyle: TextStyle = {
+   // https://github.com/facebook/react-native/issues/21720#issuecomment-532642093
+   paddingVertical: 0,
+   paddingHorizontal: 0,
+-  marginVertical: spacing.extraSmall,
+-  marginHorizontal: spacing.small,
++  marginVertical: spacing.xs,
++  marginHorizontal: spacing.sm,
+ }
+ 
+ const $helperStyle: TextStyle = {
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ const $rightAccessoryStyle: ViewStyle = {
+-  marginEnd: spacing.extraSmall,
++  marginEnd: spacing.xs,
+   height: 40,
+   justifyContent: "center",
+   alignItems: "center",
+ }
+ const $leftAccessoryStyle: ViewStyle = {
+-  marginStart: spacing.extraSmall,
++  marginStart: spacing.xs,
+   height: 40,
+   justifyContent: "center",
+   alignItems: "center",
+diff --git a/IgniteDiffApp/app/components/Toggle.tsx b/IgniteDiffApp/app/components/Toggle.tsx
+index 3568905..7d5cbcc 100644
+--- a/IgniteDiffApp/app/components/Toggle.tsx
++++ b/IgniteDiffApp/app/components/Toggle.tsx
+@@ -615,7 +615,7 @@ const $switchDetail: SwitchToggleProps["inputDetailStyle"] = {
+ }
+ 
+ const $helper: TextStyle = {
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ const $label: TextStyle = {
+@@ -623,11 +623,11 @@ const $label: TextStyle = {
+ }
+ 
+ const $labelRight: TextStyle = {
+-  marginStart: spacing.medium,
++  marginStart: spacing.md,
+ }
+ 
+ const $labelLeft: TextStyle = {
+-  marginEnd: spacing.medium,
++  marginEnd: spacing.md,
+ }
+ 
+ const $switchAccessibility: TextStyle = {
+diff --git a/IgniteDiffApp/app/navigators/AppNavigator.tsx b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+index 9c538b9..1e94842 100644
+--- a/IgniteDiffApp/app/navigators/AppNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+@@ -19,6 +19,7 @@ import Config from "../config"
+ import { useStores } from "../models" // @demo remove-current-line
+ import { DemoNavigator, DemoTabParamList } from "./DemoNavigator" // @demo remove-current-line
+ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
++import { colors } from "app/theme"
+ 
+ /**
+  * This type allows TypeScript to know what routes are defined in this navigator
+@@ -64,7 +65,7 @@ const AppStack = observer(function AppStack() {
+   // @demo remove-block-end
+   return (
+     <Stack.Navigator
+-      screenOptions={{ headerShown: false }}
++      screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
+       initialRouteName={isAuthenticated ? "Welcome" : "Login"} // @demo remove-current-line
+     >
+       {/* @demo remove-block-start */}
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 168c045..529d2f7 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -98,7 +98,7 @@ const $tabBar: ViewStyle = {
+ }
+ 
+ const $tabBarItem: ViewStyle = {
+-  paddingTop: spacing.medium,
++  paddingTop: spacing.md,
+ }
+ 
+ const $tabBarLabel: TextStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+index 4add235..50df9ed 100644
+--- a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+@@ -101,28 +101,28 @@ export const DemoCommunityScreen: FC<DemoTabScreenProps<"DemoCommunity">> =
+   }
+ 
+ const $container: ViewStyle = {
+-  paddingTop: spacing.large + spacing.extraLarge,
+-  paddingHorizontal: spacing.large,
++  paddingTop: spacing.lg + spacing.xl,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $title: TextStyle = {
+-  marginBottom: spacing.small,
++  marginBottom: spacing.sm,
+ }
+ 
+ const $tagline: TextStyle = {
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $description: TextStyle = {
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+ }
+ 
+ const $sectionTitle: TextStyle = {
+-  marginTop: spacing.huge,
++  marginTop: spacing.xxl,
+ }
+ 
+ const $logoContainer: ViewStyle = {
+-  marginEnd: spacing.medium,
++  marginEnd: spacing.md,
+   flexDirection: "row",
+   flexWrap: "wrap",
+   alignContent: "center",
+diff --git a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+index 0294d75..052bf15 100644
+--- a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+@@ -99,42 +99,42 @@ export const DemoDebugScreen: FC<DemoTabScreenProps<"DemoDebug">> = function Dem
+ }
+ 
+ const $container: ViewStyle = {
+-  paddingTop: spacing.large + spacing.extraLarge,
+-  paddingBottom: spacing.huge,
+-  paddingHorizontal: spacing.large,
++  paddingTop: spacing.lg + spacing.xl,
++  paddingBottom: spacing.xxl,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $title: TextStyle = {
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $reportBugsLink: TextStyle = {
+   color: colors.tint,
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+   alignSelf: isRTL ? "flex-start" : "flex-end",
+ }
+ 
+ const $item: ViewStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $itemsContainer: ViewStyle = {
+-  marginBottom: spacing.extraLarge,
++  marginBottom: spacing.xl,
+ }
+ 
+ const $button: ViewStyle = {
+-  marginBottom: spacing.extraSmall,
++  marginBottom: spacing.xs,
+ }
+ 
+ const $buttonContainer: ViewStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $hint: TextStyle = {
+   color: colors.palette.neutral600,
+   fontSize: 12,
+   lineHeight: 15,
+-  paddingBottom: spacing.large,
++  paddingBottom: spacing.lg,
+ }
+ 
+ // @demo remove-file
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 0ce305a..d7c2aef 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -297,29 +297,29 @@ const $screenContentContainer: ViewStyle = {
+ }
+ 
+ const $flatListContentContainer: ViewStyle = {
+-  paddingHorizontal: spacing.large,
+-  paddingTop: spacing.large + spacing.extraLarge,
+-  paddingBottom: spacing.large,
++  paddingHorizontal: spacing.lg,
++  paddingTop: spacing.lg + spacing.xl,
++  paddingBottom: spacing.lg,
+ }
+ 
+ const $heading: ViewStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $item: ViewStyle = {
+-  padding: spacing.medium,
+-  marginTop: spacing.medium,
++  padding: spacing.md,
++  marginTop: spacing.md,
+   minHeight: 120,
+ }
+ 
+ const $itemThumbnail: ImageStyle = {
+-  marginTop: spacing.small,
++  marginTop: spacing.sm,
+   borderRadius: 50,
+   alignSelf: "flex-start",
+ }
+ 
+ const $toggle: ViewStyle = {
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+ }
+ 
+ const $labelStyle: TextStyle = {
+@@ -330,29 +330,29 @@ const $iconContainer: ViewStyle = {
+   height: ICON_SIZE,
+   width: ICON_SIZE,
+   flexDirection: "row",
+-  marginEnd: spacing.small,
++  marginEnd: spacing.sm,
+ }
+ 
+ const $metadata: TextStyle = {
+   color: colors.textDim,
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+   flexDirection: "row",
+ }
+ 
+ const $metadataText: TextStyle = {
+   color: colors.textDim,
+-  marginEnd: spacing.medium,
+-  marginBottom: spacing.extraSmall,
++  marginEnd: spacing.md,
++  marginBottom: spacing.xs,
+ }
+ 
+ const $favoriteButton: ViewStyle = {
+   borderRadius: 17,
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+   justifyContent: "flex-start",
+   backgroundColor: colors.palette.neutral300,
+   borderColor: colors.palette.neutral300,
+-  paddingHorizontal: spacing.medium,
+-  paddingTop: spacing.micro,
++  paddingHorizontal: spacing.md,
++  paddingTop: spacing.xxxs,
+   paddingBottom: 0,
+   minHeight: 32,
+   alignSelf: "flex-start",
+@@ -364,7 +364,7 @@ const $unFavoriteButton: ViewStyle = {
+ }
+ 
+ const $emptyState: ViewStyle = {
+-  marginTop: spacing.huge,
++  marginTop: spacing.xxl,
+ }
+ 
+ const $emptyStateImage: ImageStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index ec76002..3f81ef7 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -240,15 +240,15 @@ const $drawer: ViewStyle = {
+ }
+ 
+ const $flatListContentContainer: ViewStyle = {
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $sectionListContentContainer: ViewStyle = {
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $heading: ViewStyle = {
+-  marginBottom: spacing.massive,
++  marginBottom: spacing.xxxl,
+ }
+ 
+ const $logoImage: ImageStyle = {
+@@ -260,25 +260,25 @@ const $logoContainer: ViewStyle = {
+   alignSelf: "flex-start",
+   justifyContent: "center",
+   height: 56,
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $menuContainer: ViewStyle = {
+-  paddingBottom: spacing.extraSmall,
+-  paddingTop: spacing.large,
++  paddingBottom: spacing.xs,
++  paddingTop: spacing.lg,
+ }
+ 
+ const $demoItemName: TextStyle = {
+   fontSize: 24,
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $demoItemDescription: TextStyle = {
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $demoUseCasesSpacer: ViewStyle = {
+-  paddingBottom: spacing.huge,
++  paddingBottom: spacing.xxl,
+ }
+ 
+ // @demo remove-file
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+index e5b558e..d27801c 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+@@ -25,14 +25,14 @@ export function DemoUseCase(props: DemoUseCaseProps) {
+ }
+ 
+ const $description: TextStyle = {
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+ }
+ 
+ const $item: ViewStyle = {
+   backgroundColor: colors.palette.neutral100,
+   borderRadius: 8,
+-  padding: spacing.large,
+-  marginVertical: spacing.medium,
++  padding: spacing.lg,
++  marginVertical: spacing.md,
+ }
+ 
+ const $name: TextStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 289a035..8ac5dfa 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -100,7 +100,7 @@ const $topBar: ViewStyle = {
+ 
+ const $middleBar: ViewStyle = {
+   height: barHeight,
+-  marginTop: spacing.tiny,
++  marginTop: spacing.xxs,
+ }
+ 
+ const $bottomBar: ViewStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+index 9adbf08..f43ba81 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+@@ -14,7 +14,7 @@ const $imageContainer: ViewStyle = {
+ const $aspectRatioDescription: TextStyle = {
+   textAlign: "center",
+   width: "100%",
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ const $aspectRatioWidthExampleContainer: ViewStyle = {
+@@ -133,7 +133,7 @@ export const DemoAutoImage: Demo = {
+           />
+         </View>
+ 
+-        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginStart: spacing.small }]}>
++        <View style={[$aspectRatioHeightExampleContainer, { flex: 1, marginStart: spacing.sm }]}>
+           <View style={[$aspectRatioBox, { height: 32 }]} />
+           <Image
+             source={{
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+index 9d02a85..193ab70 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+@@ -95,7 +95,7 @@ export const DemoCard: Demo = {
+         }
+         ContentComponent={
+           <Button
+-            style={{ marginVertical: spacing.small }}
++            style={{ marginVertical: spacing.sm }}
+             text="ContentComponent"
+             LeftAccessory={(props) => <Icon style={props.style} icon="ladybug" />}
+           />
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+index 646e920..6fad759 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+@@ -7,22 +7,22 @@ import { Demo } from "../DemoShowroomScreen"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const $demoIconContainer: ViewStyle = {
+-  padding: spacing.extraSmall,
++  padding: spacing.xs,
+ }
+ 
+ const $iconTile: ViewStyle = {
+   width: "33.333%",
+   alignItems: "center",
+-  paddingVertical: spacing.extraSmall,
++  paddingVertical: spacing.xs,
+ }
+ 
+ const $iconTileLabel: TextStyle = {
+-  marginTop: spacing.tiny,
++  marginTop: spacing.xxs,
+   color: colors.textDim,
+ }
+ 
+ const $customIconContainer: ViewStyle = {
+-  padding: spacing.medium,
++  padding: spacing.md,
+   backgroundColor: colors.palette.angry500,
+ }
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+index d9d8626..615b29a 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+@@ -37,7 +37,7 @@ const $customContainerStyle: ViewStyle = {
+ }
+ 
+ const $flatListStyle: ViewStyle = {
+-  paddingHorizontal: spacing.extraSmall,
++  paddingHorizontal: spacing.xs,
+   backgroundColor: colors.palette.neutral200,
+   flex: 1,
+   overflow: "scroll",
+@@ -101,7 +101,7 @@ export const DemoListItem: Demo = {
+       <ListItem
+         topSeparator
+         LeftComponent={
+-          <View style={[$customLeft, { marginEnd: spacing.medium }]}>
++          <View style={[$customLeft, { marginEnd: spacing.md }]}>
+             {Array.from({ length: 9 }, (x, i) => i).map((i) => (
+               <Icon key={i} icon="ladybug" color={colors.palette.neutral100} size={20} />
+             ))}
+@@ -115,7 +115,7 @@ export const DemoListItem: Demo = {
+         topSeparator
+         bottomSeparator
+         RightComponent={
+-          <View style={[$customLeft, { marginStart: spacing.medium }]}>
++          <View style={[$customLeft, { marginStart: spacing.md }]}>
+             {Array.from({ length: 9 }, (x, i) => i).map((i) => (
+               <Icon key={i} icon="ladybug" color={colors.palette.neutral100} size={20} />
+             ))}
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+index a831cf4..e1b6fd5 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+@@ -26,7 +26,7 @@ const $customLabelAndHelperStyle: TextStyle = {
+ }
+ 
+ const $customInputWithAbsoluteAccessoriesStyle: ViewStyle = {
+-  marginHorizontal: spacing.huge,
++  marginHorizontal: spacing.xxl,
+ }
+ 
+ const $customLeftAccessoryStyle: ViewStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+index 5a101d5..7f4d595 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+@@ -20,7 +20,7 @@ const $centeredOneThirdCol: ViewStyle = {
+ const $centeredText: TextStyle = {
+   textAlign: "center",
+   width: "100%",
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ export const DemoToggle: Demo = {
+diff --git a/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx b/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
+index d5ce4e9..2a9c616 100644
+--- a/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
++++ b/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
+@@ -43,8 +43,8 @@ export function ErrorDetails(props: ErrorDetailsProps) {
+ 
+ const $contentContainer: ViewStyle = {
+   alignItems: "center",
+-  paddingHorizontal: spacing.large,
+-  paddingTop: spacing.extraLarge,
++  paddingHorizontal: spacing.lg,
++  paddingTop: spacing.xl,
+   flex: 1,
+ }
+ 
+@@ -55,18 +55,18 @@ const $topSection: ViewStyle = {
+ 
+ const $heading: TextStyle = {
+   color: colors.error,
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $errorSection: ViewStyle = {
+   flex: 2,
+   backgroundColor: colors.separator,
+-  marginVertical: spacing.medium,
++  marginVertical: spacing.md,
+   borderRadius: 6,
+ }
+ 
+ const $errorSectionContentContainer: ViewStyle = {
+-  padding: spacing.medium,
++  padding: spacing.md,
+ }
+ 
+ const $errorContent: TextStyle = {
+@@ -74,11 +74,11 @@ const $errorContent: TextStyle = {
+ }
+ 
+ const $errorBacktrace: TextStyle = {
+-  marginTop: spacing.medium,
++  marginTop: spacing.md,
+   color: colors.textDim,
+ }
+ 
+ const $resetButton: ViewStyle = {
+   backgroundColor: colors.error,
+-  paddingHorizontal: spacing.huge,
++  paddingHorizontal: spacing.xxl,
+ }
+diff --git a/IgniteDiffApp/app/screens/LoginScreen.tsx b/IgniteDiffApp/app/screens/LoginScreen.tsx
+index deb0e83..44992f8 100644
+--- a/IgniteDiffApp/app/screens/LoginScreen.tsx
++++ b/IgniteDiffApp/app/screens/LoginScreen.tsx
+@@ -119,29 +119,29 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
+ })
+ 
+ const $screenContentContainer: ViewStyle = {
+-  paddingVertical: spacing.huge,
+-  paddingHorizontal: spacing.large,
++  paddingVertical: spacing.xxl,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $signIn: TextStyle = {
+-  marginBottom: spacing.small,
++  marginBottom: spacing.sm,
+ }
+ 
+ const $enterDetails: TextStyle = {
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+ }
+ 
+ const $hint: TextStyle = {
+   color: colors.tint,
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+ 
+ const $textField: ViewStyle = {
+-  marginBottom: spacing.large,
++  marginBottom: spacing.lg,
+ }
+ 
+ const $tapButton: ViewStyle = {
+-  marginTop: spacing.extraSmall,
++  marginTop: spacing.xs,
+ }
+ 
+ // @demo remove-file
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index 31aa8b2..c1826a8 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -80,7 +80,7 @@ const $topContainer: ViewStyle = {
+   flexGrow: 1,
+   flexBasis: "57%",
+   justifyContent: "center",
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+ }
+ 
+ const $bottomContainer: ViewStyle = {
+@@ -90,13 +90,13 @@ const $bottomContainer: ViewStyle = {
+   backgroundColor: colors.palette.neutral100,
+   borderTopLeftRadius: 16,
+   borderTopRightRadius: 16,
+-  paddingHorizontal: spacing.large,
++  paddingHorizontal: spacing.lg,
+   justifyContent: "space-around",
+ }
+ const $welcomeLogo: ImageStyle = {
+   height: 88,
+   width: "100%",
+-  marginBottom: spacing.huge,
++  marginBottom: spacing.xxl,
+ }
+ 
+ const $welcomeFace: ImageStyle = {
+@@ -109,5 +109,5 @@ const $welcomeFace: ImageStyle = {
+ }
+ 
+ const $welcomeHeading: TextStyle = {
+-  marginBottom: spacing.medium,
++  marginBottom: spacing.md,
+ }
+diff --git a/IgniteDiffApp/app/theme/spacing.ts b/IgniteDiffApp/app/theme/spacing.ts
+index 9cd04b7..a21aa5b 100644
+--- a/IgniteDiffApp/app/theme/spacing.ts
++++ b/IgniteDiffApp/app/theme/spacing.ts
+@@ -2,15 +2,15 @@
+   Use these spacings for margins/paddings and other whitespace throughout your app.
+  */
+ export const spacing = {
+-  micro: 2,
+-  tiny: 4,
+-  extraSmall: 8,
+-  small: 12,
+-  medium: 16,
+-  large: 24,
+-  extraLarge: 32,
+-  huge: 48,
+-  massive: 64,
++  xxxs: 2,
++  xxs: 4,
++  xs: 8,
++  sm: 12,
++  md: 16,
++  lg: 24,
++  xl: 32,
++  xxl: 48,
++  xxxl: 64,
+ } as const
+ 
+ export type Spacing = keyof typeof spacing
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 3c038dc..c87e9f8 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -77,8 +77,8 @@
+     "@types/jest": "^29.2.1",
+     "@types/react": "~18.0.27",
+     "@types/react-test-renderer": "^18.0.0",
+-    "@typescript-eslint/eslint-plugin": "5.28.0",
+-    "@typescript-eslint/parser": "5.28.0",
++    "@typescript-eslint/eslint-plugin": "^5.59.0",
++    "@typescript-eslint/parser": "^5.59.0",
+     "babel-jest": "^29.2.1",
+     "babel-loader": "8.2.5",
+     "babel-plugin-root-import": "^6.6.0",
+@@ -103,7 +103,7 @@
+     "mocha": "6",
+     "patch-package": "6.4.7",
+     "postinstall-prepare": "1.0.1",
+-    "prettier": "2.6.2",
++    "prettier": "2.8.8",
+     "query-string": "^7.0.1",
+     "react-devtools-core": "4.24.7",
+     "react-dom": "18.2.0",
+@@ -112,7 +112,7 @@
+     "reactotron-core-client": "^2.8.10",
+     "regenerator-runtime": "^0.13.4",
+     "ts-jest": "29",
+-    "typescript": "^4.8.4"
++    "typescript": "^5.0.4"
+   },
+   "resolutions": {
+     "@types/react": "^18",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index fd77af4..9007980 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -1212,6 +1212,18 @@
+   dependencies:
+     "@types/hammerjs" "^2.0.36"
+ 
++"@eslint-community/eslint-utils@^4.2.0":
++  version "4.4.0"
++  resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.4.0.tgz#a23514e8fb9af1269d5f7788aa556798d61c6b59"
++  integrity sha512-1/sA4dwrzBAyeUoQ6oxahHKmrZvsnLCg4RfxW3ZFGGmQkSNQPFNLV9CUEFQP1x9EYXHTo5p6xdhZM1Ne9p/AfA==
++  dependencies:
++    eslint-visitor-keys "^3.3.0"
++
++"@eslint-community/regexpp@^4.4.0":
++  version "4.5.1"
++  resolved "https://registry.yarnpkg.com/@eslint-community/regexpp/-/regexpp-4.5.1.tgz#cdd35dce4fa1a89a4fd42b1599eb35b3af408884"
++  integrity sha512-Z5ba73P98O1KUYCCJTUeVpja9RcGoMdncZ6T49FCUl2lN38JtCJ+3WgIDBv0AuY4WChU5PmtJmOCTlN6FZTFKQ==
++
+ "@eslint/eslintrc@^1.3.0":
+   version "1.4.1"
+   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-1.4.1.tgz#af58772019a2d271b7e2d4c23ff4ddcba3ccfb3e"
+@@ -2692,6 +2704,11 @@
+   resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.3.tgz#cef09e3ec9af1d63d2a6cc5b383a737e24e6dcf5"
+   integrity sha512-5cJ8CB4yAx7BH1oMvdU0Jh9lrEXyPkar6F9G/ERswkCuvP4KQZfZkSjcMbAICCpQTN4OuZn8tz0HiKv9TGZgrQ==
+ 
++"@types/semver@^7.3.12":
++  version "7.5.0"
++  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.0.tgz#591c1ce3a702c45ee15f47a42ade72c2fd78978a"
++  integrity sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==
++
+ "@types/send@*":
+   version "0.17.1"
+   resolved "https://registry.yarnpkg.com/@types/send/-/send-0.17.1.tgz#ed4932b8a2a805f1fe362a70f4e62d0ac994e301"
+@@ -2765,84 +2782,88 @@
+   dependencies:
+     "@types/yargs-parser" "*"
+ 
+-"@typescript-eslint/eslint-plugin@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-5.28.0.tgz#6204ac33bdd05ab27c7f77960f1023951115d403"
+-  integrity sha512-DXVU6Cg29H2M6EybqSg2A+x8DgO9TCUBRp4QEXQHJceLS7ogVDP0g3Lkg/SZCqcvkAP/RruuQqK0gdlkgmhSUA==
++"@typescript-eslint/eslint-plugin@^5.59.0":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-5.59.7.tgz#e470af414f05ecfdc05a23e9ce6ec8f91db56fe2"
++  integrity sha512-BL+jYxUFIbuYwy+4fF86k5vdT9lT0CNJ6HtwrIvGh0PhH8s0yy5rjaKH2fDCrz5ITHy07WCzVGNvAmjJh4IJFA==
+   dependencies:
+-    "@typescript-eslint/scope-manager" "5.28.0"
+-    "@typescript-eslint/type-utils" "5.28.0"
+-    "@typescript-eslint/utils" "5.28.0"
++    "@eslint-community/regexpp" "^4.4.0"
++    "@typescript-eslint/scope-manager" "5.59.7"
++    "@typescript-eslint/type-utils" "5.59.7"
++    "@typescript-eslint/utils" "5.59.7"
+     debug "^4.3.4"
+-    functional-red-black-tree "^1.0.1"
++    grapheme-splitter "^1.0.4"
+     ignore "^5.2.0"
+-    regexpp "^3.2.0"
++    natural-compare-lite "^1.4.0"
+     semver "^7.3.7"
+     tsutils "^3.21.0"
+ 
+-"@typescript-eslint/parser@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-5.28.0.tgz#639b101cad2bfb7ae16e69710ac95c42bd4eae33"
+-  integrity sha512-ekqoNRNK1lAcKhZESN/PdpVsWbP9jtiNqzFWkp/yAUdZvJalw2heCYuqRmM5eUJSIYEkgq5sGOjq+ZqsLMjtRA==
++"@typescript-eslint/parser@^5.59.0":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-5.59.7.tgz#02682554d7c1028b89aa44a48bf598db33048caa"
++  integrity sha512-VhpsIEuq/8i5SF+mPg9jSdIwgMBBp0z9XqjiEay+81PYLJuroN+ET1hM5IhkiYMJd9MkTz8iJLt7aaGAgzWUbQ==
+   dependencies:
+-    "@typescript-eslint/scope-manager" "5.28.0"
+-    "@typescript-eslint/types" "5.28.0"
+-    "@typescript-eslint/typescript-estree" "5.28.0"
++    "@typescript-eslint/scope-manager" "5.59.7"
++    "@typescript-eslint/types" "5.59.7"
++    "@typescript-eslint/typescript-estree" "5.59.7"
+     debug "^4.3.4"
+ 
+-"@typescript-eslint/scope-manager@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-5.28.0.tgz#ef9a5c68fecde72fd2ff8a84b9c120324826c1b9"
+-  integrity sha512-LeBLTqF/he1Z+boRhSqnso6YrzcKMTQ8bO/YKEe+6+O/JGof9M0g3IJlIsqfrK/6K03MlFIlycbf1uQR1IjE+w==
++"@typescript-eslint/scope-manager@5.59.7":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-5.59.7.tgz#0243f41f9066f3339d2f06d7f72d6c16a16769e2"
++  integrity sha512-FL6hkYWK9zBGdxT2wWEd2W8ocXMu3K94i3gvMrjXpx+koFYdYV7KprKfirpgY34vTGzEPPuKoERpP8kD5h7vZQ==
+   dependencies:
+-    "@typescript-eslint/types" "5.28.0"
+-    "@typescript-eslint/visitor-keys" "5.28.0"
++    "@typescript-eslint/types" "5.59.7"
++    "@typescript-eslint/visitor-keys" "5.59.7"
+ 
+-"@typescript-eslint/type-utils@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/type-utils/-/type-utils-5.28.0.tgz#53ccc78fdcf0205ef544d843b84104c0e9c7ca8e"
+-  integrity sha512-SyKjKh4CXPglueyC6ceAFytjYWMoPHMswPQae236zqe1YbhvCVQyIawesYywGiu98L9DwrxsBN69vGIVxJ4mQQ==
++"@typescript-eslint/type-utils@5.59.7":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/type-utils/-/type-utils-5.59.7.tgz#89c97291371b59eb18a68039857c829776f1426d"
++  integrity sha512-ozuz/GILuYG7osdY5O5yg0QxXUAEoI4Go3Do5xeu+ERH9PorHBPSdvD3Tjp2NN2bNLh1NJQSsQu2TPu/Ly+HaQ==
+   dependencies:
+-    "@typescript-eslint/utils" "5.28.0"
++    "@typescript-eslint/typescript-estree" "5.59.7"
++    "@typescript-eslint/utils" "5.59.7"
+     debug "^4.3.4"
+     tsutils "^3.21.0"
+ 
+-"@typescript-eslint/types@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.28.0.tgz#cffd9bcdce28db6daaa146e48a0be4387a6f4e9d"
+-  integrity sha512-2OOm8ZTOQxqkPbf+DAo8oc16sDlVR5owgJfKheBkxBKg1vAfw2JsSofH9+16VPlN9PWtv8Wzhklkqw3k/zCVxA==
++"@typescript-eslint/types@5.59.7":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.59.7.tgz#6f4857203fceee91d0034ccc30512d2939000742"
++  integrity sha512-UnVS2MRRg6p7xOSATscWkKjlf/NDKuqo5TdbWck6rIRZbmKpVNTLALzNvcjIfHBE7736kZOFc/4Z3VcZwuOM/A==
+ 
+-"@typescript-eslint/typescript-estree@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.28.0.tgz#3487d158d091ca2772b285e67412ff6d9797d863"
+-  integrity sha512-9GX+GfpV+F4hdTtYc6OV9ZkyYilGXPmQpm6AThInpBmKJEyRSIjORJd1G9+bknb7OTFYL+Vd4FBJAO6T78OVqA==
++"@typescript-eslint/typescript-estree@5.59.7":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.59.7.tgz#b887acbd4b58e654829c94860dbff4ac55c5cff8"
++  integrity sha512-4A1NtZ1I3wMN2UGDkU9HMBL+TIQfbrh4uS0WDMMpf3xMRursDbqEf1ahh6vAAe3mObt8k3ZATnezwG4pdtWuUQ==
+   dependencies:
+-    "@typescript-eslint/types" "5.28.0"
+-    "@typescript-eslint/visitor-keys" "5.28.0"
++    "@typescript-eslint/types" "5.59.7"
++    "@typescript-eslint/visitor-keys" "5.59.7"
+     debug "^4.3.4"
+     globby "^11.1.0"
+     is-glob "^4.0.3"
+     semver "^7.3.7"
+     tsutils "^3.21.0"
+ 
+-"@typescript-eslint/utils@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.28.0.tgz#b27a136eac300a48160b36d2aad0da44a1341b99"
+-  integrity sha512-E60N5L0fjv7iPJV3UGc4EC+A3Lcj4jle9zzR0gW7vXhflO7/J29kwiTGITA2RlrmPokKiZbBy2DgaclCaEUs6g==
++"@typescript-eslint/utils@5.59.7":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.59.7.tgz#7adf068b136deae54abd9a66ba5a8780d2d0f898"
++  integrity sha512-yCX9WpdQKaLufz5luG4aJbOpdXf/fjwGMcLFXZVPUz3QqLirG5QcwwnIHNf8cjLjxK4qtzTO8udUtMQSAToQnQ==
+   dependencies:
++    "@eslint-community/eslint-utils" "^4.2.0"
+     "@types/json-schema" "^7.0.9"
+-    "@typescript-eslint/scope-manager" "5.28.0"
+-    "@typescript-eslint/types" "5.28.0"
+-    "@typescript-eslint/typescript-estree" "5.28.0"
++    "@types/semver" "^7.3.12"
++    "@typescript-eslint/scope-manager" "5.59.7"
++    "@typescript-eslint/types" "5.59.7"
++    "@typescript-eslint/typescript-estree" "5.59.7"
+     eslint-scope "^5.1.1"
+-    eslint-utils "^3.0.0"
++    semver "^7.3.7"
+ 
+-"@typescript-eslint/visitor-keys@5.28.0":
+-  version "5.28.0"
+-  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-5.28.0.tgz#982bb226b763c48fc1859a60de33fbf939d40a0f"
+-  integrity sha512-BtfP1vCor8cWacovzzPFOoeW4kBQxzmhxGoOpt0v1SFvG+nJ0cWaVdJk7cky1ArTcFHHKNIxyo2LLr3oNkSuXA==
++"@typescript-eslint/visitor-keys@5.59.7":
++  version "5.59.7"
++  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-5.59.7.tgz#09c36eaf268086b4fbb5eb9dc5199391b6485fc5"
++  integrity sha512-tyN+X2jvMslUszIiYbF0ZleP+RqQsFVpGrKI6e0Eet1w8WmhsAtmzaqm8oM8WJQ1ysLwhnsK/4hYHJjOgJVfQQ==
+   dependencies:
+-    "@typescript-eslint/types" "5.28.0"
++    "@typescript-eslint/types" "5.59.7"
+     eslint-visitor-keys "^3.3.0"
+ 
+ "@urql/core@2.3.6":
+@@ -6359,6 +6380,11 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.3, graceful-fs@^4.1.6,
+   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.11.tgz#4183e4e8bf08bb6e05bbb2f7d2e0c8f712ca40e3"
+   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
+ 
++grapheme-splitter@^1.0.4:
++  version "1.0.4"
++  resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
++  integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
++
+ graphql-tag@^2.10.1:
+   version "2.12.6"
+   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.12.6.tgz#d441a569c1d2537ef10ca3d1633b48725329b5f1"
+@@ -9054,6 +9080,11 @@ napi-build-utils@^1.0.1:
+   resolved "https://registry.yarnpkg.com/napi-build-utils/-/napi-build-utils-1.0.2.tgz#b1fddc0b2c46e380a0b7a76f984dd47c41a13806"
+   integrity sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==
+ 
++natural-compare-lite@^1.4.0:
++  version "1.4.0"
++  resolved "https://registry.yarnpkg.com/natural-compare-lite/-/natural-compare-lite-1.4.0.tgz#17b09581988979fddafe0201e931ba933c96cbb4"
++  integrity sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==
++
+ natural-compare@^1.4.0:
+   version "1.4.0"
+   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
+@@ -10058,10 +10089,10 @@ prelude-ls@~1.1.2:
+   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
+   integrity sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==
+ 
+-prettier@2.6.2:
+-  version "2.6.2"
+-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.6.2.tgz#e26d71a18a74c3d0f0597f55f01fb6c06c206032"
+-  integrity sha512-PkUpF+qoXTqhOeWL9fu7As8LXsIUZ1WYaJiY/a7McAQzxjk82OF0tibkFXVCDImZtWxbvojFjerkiLb0/q8mew==
++prettier@2.8.8:
++  version "2.8.8"
++  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
++  integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
+ 
+ pretty-bytes@5.6.0:
+   version "5.6.0"
+@@ -12082,10 +12113,10 @@ typed-array-length@^1.0.4:
+     for-each "^0.3.3"
+     is-typed-array "^1.1.9"
+ 
+-typescript@^4.8.4:
+-  version "4.9.5"
+-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
+-  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
++typescript@^5.0.4:
++  version "5.0.4"
++  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.0.4.tgz#b217fd20119bd61a94d4011274e0ab369058da3b"
++  integrity sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
+ 
+ ua-parser-js@^0.7.30, ua-parser-js@^0.7.33:
+   version "0.7.35"
