@@ -1,0 +1,51 @@
+diff --git a/IgniteDiffApp/app/devtools/ReactotronConfig.ts b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+index 97538c8..1e1df97 100644
+--- a/IgniteDiffApp/app/devtools/ReactotronConfig.ts
++++ b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+@@ -155,6 +155,16 @@ console.warn = (...args: Parameters<typeof console.warn>) => {
+   Reactotron.warn(args[0])
+ }
+ 
++const ogConsoleError = console.error
++console.error = (...args: Parameters<typeof console.error>) => {
++  ogConsoleError(...args)
++  if (args[0] instanceof Error) {
++    Reactotron.error(args[0].message, args[0].stack)
++  } else {
++    Reactotron.error(args[0], args[1])
++  }
++}
++
+ const ogConsoleDebug = console.debug
+ console.debug = (...args: Parameters<typeof console.debug>) => {
+   ogConsoleDebug(...args)
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 4baa01f..6a6bc26 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -2550,9 +2550,9 @@
+   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
+ 
+ "@types/node@*":
+-  version "20.4.9"
+-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.9.tgz#c7164e0f8d3f12dfae336af0b1f7fdec8c6b204f"
+-  integrity sha512-8e2HYcg7ohnTUbHk8focoklEQYvemQmu9M/f43DZVx43kHn0tE3BY/6gSDxS7k0SprtS0NHvj+L80cGLnoOUcQ==
++  version "20.4.8"
++  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.8.tgz#b5dda19adaa473a9bf0ab5cbd8f30ec7d43f5c85"
++  integrity sha512-0mHckf6D2DiIAzh8fM8f3HQCvMKDpK94YQ0DSVkfWTG9BZleYIWudw9cJxX8oCk9bM+vAkDyujDV6dmKHbvQpg==
+ 
+ "@types/prop-types@*":
+   version "15.7.5"
+@@ -4930,9 +4930,9 @@ ee-first@1.1.1:
+   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
+ 
+ electron-to-chromium@^1.4.477:
+-  version "1.4.488"
+-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.488.tgz#442b1855f8c84fb1ed79f518985c65db94f64cc9"
+-  integrity sha512-Dv4sTjiW7t/UWGL+H8ZkgIjtUAVZDgb/PwGWvMsCT7jipzUV/u5skbLXPFKb6iV0tiddVi/bcS2/kUrczeWgIQ==
++  version "1.4.487"
++  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.487.tgz#e2ef8b15f2791bf68fa6f38f2656f1a551d360ae"
++  integrity sha512-XbCRs/34l31np/p33m+5tdBrdXu9jJkZxSbNxj5I0H1KtV2ZMSB+i/HYqDiRzHaFx2T5EdytjoBRe8QRJE2vQg==
+ 
+ emittery@^0.13.1:
+   version "0.13.1"
