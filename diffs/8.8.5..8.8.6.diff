@@ -1,0 +1,32 @@
+diff --git a/IgniteDiffApp/app/models/helpers/setupRootStore.ts b/IgniteDiffApp/app/models/helpers/setupRootStore.ts
+index 634a0ed..50f2ccf 100644
+--- a/IgniteDiffApp/app/models/helpers/setupRootStore.ts
++++ b/IgniteDiffApp/app/models/helpers/setupRootStore.ts
+@@ -27,7 +27,7 @@ export async function setupRootStore(rootStore: RootStore) {
+ 
+   try {
+     // load the last known state from AsyncStorage
+-    restoredState = (await storage.load(ROOT_STATE_STORAGE_KEY)) as RootStoreSnapshot | null
++    restoredState = ((await storage.load(ROOT_STATE_STORAGE_KEY)) ?? {}) as RootStoreSnapshot
+     applySnapshot(rootStore, restoredState)
+   } catch (e) {
+     // if there's any problems loading, then inform the dev what happened
+diff --git a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+index 73bca5f..daf8a51 100644
+--- a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+@@ -14,13 +14,12 @@ patches:
+ import React, { FC } from "react"
+ import { observer } from "mobx-react-lite"
+ import { ViewStyle } from "react-native"
+-import { NativeStackScreenProps } from "@react-navigation/native-stack"
+ import { AppStackScreenProps } from "app/navigators"
+ import { Screen, Text } from "app/components"
+ // import { useNavigation } from "@react-navigation/native"
+ // import { useStores } from "app/models"
+ 
+-interface <%= props.pascalCaseName %>ScreenProps extends NativeStackScreenProps<AppStackScreenProps<"<%= props.pascalCaseName %>">> {}
++interface <%= props.pascalCaseName %>ScreenProps extends AppStackScreenProps<"<%= props.pascalCaseName %>"> {}
+ 
+ export const <%= props.pascalCaseName %>Screen: FC<<%= props.pascalCaseName %>ScreenProps> = observer(function <%= props.pascalCaseName %>Screen() {
+   // Pull in one of our MST stores

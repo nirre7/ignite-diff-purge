@@ -1,0 +1,114 @@
+diff --git a/IgniteDiffApp/app/devtools/ReactotronConfig.ts b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+index 1e1df97..97538c8 100644
+--- a/IgniteDiffApp/app/devtools/ReactotronConfig.ts
++++ b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+@@ -155,16 +155,6 @@ console.warn = (...args: Parameters<typeof console.warn>) => {
+   Reactotron.warn(args[0])
+ }
+ 
+-const ogConsoleError = console.error
+-console.error = (...args: Parameters<typeof console.error>) => {
+-  ogConsoleError(...args)
+-  if (args[0] instanceof Error) {
+-    Reactotron.error(args[0].message, args[0].stack)
+-  } else {
+-    Reactotron.error(args[0], args[1])
+-  }
+-}
+-
+ const ogConsoleDebug = console.debug
+ console.debug = (...args: Parameters<typeof console.debug>) => {
+   ogConsoleDebug(...args)
+diff --git a/IgniteDiffApp/app/models/helpers/setupRootStore.ts b/IgniteDiffApp/app/models/helpers/setupRootStore.ts
+index 634a0ed..50f2ccf 100644
+--- a/IgniteDiffApp/app/models/helpers/setupRootStore.ts
++++ b/IgniteDiffApp/app/models/helpers/setupRootStore.ts
+@@ -27,7 +27,7 @@ export async function setupRootStore(rootStore: RootStore) {
+ 
+   try {
+     // load the last known state from AsyncStorage
+-    restoredState = (await storage.load(ROOT_STATE_STORAGE_KEY)) as RootStoreSnapshot | null
++    restoredState = ((await storage.load(ROOT_STATE_STORAGE_KEY)) ?? {}) as RootStoreSnapshot
+     applySnapshot(rootStore, restoredState)
+   } catch (e) {
+     // if there's any problems loading, then inform the dev what happened
+diff --git a/IgniteDiffApp/app/screens/LoginScreen.tsx b/IgniteDiffApp/app/screens/LoginScreen.tsx
+index 44992f8..0ced35b 100644
+--- a/IgniteDiffApp/app/screens/LoginScreen.tsx
++++ b/IgniteDiffApp/app/screens/LoginScreen.tsx
+@@ -24,6 +24,12 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
+     // and pre-fill the form fields.
+     setAuthEmail("ignite@infinite.red")
+     setAuthPassword("ign1teIsAwes0m3")
++
++    // Return a "cleanup" function that React will run when the component unmounts
++    return () => {
++      setAuthPassword("")
++      setAuthEmail("")
++    }
+   }, [])
+ 
+   const error = isSubmitted ? validationError : ""
+@@ -60,13 +66,6 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
+     [isAuthPasswordHidden],
+   )
+ 
+-  useEffect(() => {
+-    return () => {
+-      setAuthPassword("")
+-      setAuthEmail("")
+-    }
+-  }, [])
+-
+   return (
+     <Screen
+       preset="auto"
+diff --git a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+index 73bca5f..daf8a51 100644
+--- a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+@@ -14,13 +14,12 @@ patches:
+ import React, { FC } from "react"
+ import { observer } from "mobx-react-lite"
+ import { ViewStyle } from "react-native"
+-import { NativeStackScreenProps } from "@react-navigation/native-stack"
+ import { AppStackScreenProps } from "app/navigators"
+ import { Screen, Text } from "app/components"
+ // import { useNavigation } from "@react-navigation/native"
+ // import { useStores } from "app/models"
+ 
+-interface <%= props.pascalCaseName %>ScreenProps extends NativeStackScreenProps<AppStackScreenProps<"<%= props.pascalCaseName %>">> {}
++interface <%= props.pascalCaseName %>ScreenProps extends AppStackScreenProps<"<%= props.pascalCaseName %>"> {}
+ 
+ export const <%= props.pascalCaseName %>Screen: FC<<%= props.pascalCaseName %>ScreenProps> = observer(function <%= props.pascalCaseName %>Screen() {
+   // Pull in one of our MST stores
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 6a6bc26..4baa01f 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -2550,9 +2550,9 @@
+   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
+ 
+ "@types/node@*":
+-  version "20.4.8"
+-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.8.tgz#b5dda19adaa473a9bf0ab5cbd8f30ec7d43f5c85"
+-  integrity sha512-0mHckf6D2DiIAzh8fM8f3HQCvMKDpK94YQ0DSVkfWTG9BZleYIWudw9cJxX8oCk9bM+vAkDyujDV6dmKHbvQpg==
++  version "20.4.9"
++  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.9.tgz#c7164e0f8d3f12dfae336af0b1f7fdec8c6b204f"
++  integrity sha512-8e2HYcg7ohnTUbHk8focoklEQYvemQmu9M/f43DZVx43kHn0tE3BY/6gSDxS7k0SprtS0NHvj+L80cGLnoOUcQ==
+ 
+ "@types/prop-types@*":
+   version "15.7.5"
+@@ -4930,9 +4930,9 @@ ee-first@1.1.1:
+   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
+ 
+ electron-to-chromium@^1.4.477:
+-  version "1.4.487"
+-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.487.tgz#e2ef8b15f2791bf68fa6f38f2656f1a551d360ae"
+-  integrity sha512-XbCRs/34l31np/p33m+5tdBrdXu9jJkZxSbNxj5I0H1KtV2ZMSB+i/HYqDiRzHaFx2T5EdytjoBRe8QRJE2vQg==
++  version "1.4.488"
++  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.488.tgz#442b1855f8c84fb1ed79f518985c65db94f64cc9"
++  integrity sha512-Dv4sTjiW7t/UWGL+H8ZkgIjtUAVZDgb/PwGWvMsCT7jipzUV/u5skbLXPFKb6iV0tiddVi/bcS2/kUrczeWgIQ==
+ 
+ emittery@^0.13.1:
+   version "0.13.1"
