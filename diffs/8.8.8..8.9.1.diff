@@ -1,0 +1,264 @@
+diff --git a/IgniteDiffApp/README.md b/IgniteDiffApp/README.md
+index c8699b5..e33c2ea 100644
+--- a/IgniteDiffApp/README.md
++++ b/IgniteDiffApp/README.md
+@@ -30,11 +30,14 @@ ignite-project
+ │   ├── services
+ │   ├── theme
+ │   ├── utils
+-│   ├── app.tsx
++│   └── app.tsx
++├── assets
++│   ├── icons
++│   └── images
+ ├── test
+ │   ├── __snapshots__
+ │   ├── mockFile.ts
+-│   ├── setup.ts
++│   └── setup.ts
+ ├── README.md
+ ├── android
+ │   ├── app
+@@ -81,7 +84,7 @@ app
+ ├── services
+ ├── theme
+ ├── utils
+-├── app.tsx
++└── app.tsx
+ ```
+ 
+ **components**
+@@ -110,6 +113,38 @@ This is a great place to put miscellaneous helpers and utilities. Things like da
+ 
+ **app.tsx** This is the entry point to your app. This is where you will find the main App component which renders the rest of the application.
+ 
++### ./assets directory
++
++This directory is designed to organize and store various assets, making it easy for you to manage and use them in your application. The assets are further categorized into subdirectories, including `icons` and `images`:
++
++```
++assets
++├── icons
++└── images
++```
++
++**icons**
++This is where your icon assets will live. These icons can be used for buttons, navigation elements, or any other UI components. The recommended format for icons is PNG, but other formats can be used as well.
++
++Ignite comes with a built-in `Icon` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/Components-Icon.md).
++
++**images**
++This is where your images will live, such as background images, logos, or any other graphics. You can use various formats such as PNG, JPEG, or GIF for your images.
++
++Another valuable built-in component within Ignite is the `AutoImage` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/Components-AutoImage.md).
++
++How to use your `icon` or `image` assets:
++
++```
++import { Image } from 'react-native';
++
++const MyComponent = () => {
++  return (
++    <Image source={require('../assets/images/my_image.png')} />
++  );
++};
++```
++
+ ### ./ignite directory
+ 
+ The `ignite` directory stores all things Ignite, including CLI and boilerplate items. Here you will find templates you can customize to help you get started with React Native.
+@@ -126,5 +161,4 @@ Follow our [Maestro Setup](https://ignitecookbook.com/docs/recipes/MaestroSetup)
+ 
+ - [2018 aka Bowser](https://github.com/infinitered/ignite-bowser)
+ - [2017 aka Andross](https://github.com/infinitered/ignite-andross)
+-- [2016 aka Ignite 1.0](https://github.com/infinitered/ignite-ir-boilerplate-2016)
+-
++- [2016 aka Ignite 1.0](https://github.com/infinitered/ignite-ir-boilerplate-2016)
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/i18n/fr.ts b/IgniteDiffApp/app/i18n/fr.ts
+new file mode 100644
+index 0000000..6a7fdc4
+--- /dev/null
++++ b/IgniteDiffApp/app/i18n/fr.ts
+@@ -0,0 +1,129 @@
++import { Translations } from "./en"
++
++const fr: Translations = {
++  common: {
++    ok: "OK !",
++    cancel: "Annuler",
++    back: "Retour",
++    logOut: "Déconnexion", // @demo remove-current-line
++  },
++  welcomeScreen: {
++    postscript:
++      "psst  — Ce n'est probablement pas à quoi ressemble votre application. (À moins que votre designer ne vous ait donné ces écrans, dans ce cas, mettez la en prod !)",
++    readyForLaunch: "Votre application, presque prête pour le lancement !",
++    exciting: "(ohh, c'est excitant !)",
++    letsGo: "Allons-y !", // @demo remove-current-line
++  },
++  errorScreen: {
++    title: "Quelque chose s'est mal passé !",
++    friendlySubtitle:
++      "C'est l'écran que vos utilisateurs verront en production lorsqu'une erreur sera lancée. Vous voudrez personnaliser ce message (situé dans `app/i18n/fr.ts`) et probablement aussi la mise en page (`app/screens/ErrorScreen`). Si vous voulez le supprimer complètement, vérifiez `app/app.tsx` pour le composant <ErrorBoundary>.",
++    reset: "RÉINITIALISER L'APPLICATION",
++    traceTitle: "Erreur depuis %{name}", // @demo remove-current-line
++  },
++  emptyStateComponent: {
++    generic: {
++      heading: "Si vide... si triste",
++      content:
++        "Aucune donnée trouvée pour le moment. Essayez de cliquer sur le bouton pour rafraîchir ou recharger l'application.",
++      button: "Essayons à nouveau",
++    },
++  },
++  // @demo remove-block-start
++  errors: {
++    invalidEmail: "Adresse e-mail invalide.",
++  },
++  loginScreen: {
++    signIn: "Se connecter",
++    enterDetails:
++      "Entrez vos informations ci-dessous pour débloquer des informations top secrètes. Vous ne devinerez jamais ce que nous avons en attente. Ou peut-être que vous le ferez ; ce n'est pas de la science spatiale ici.",
++    emailFieldLabel: "E-mail",
++    passwordFieldLabel: "Mot de passe",
++    emailFieldPlaceholder: "Entrez votre adresse e-mail",
++    passwordFieldPlaceholder: "Mot de passe super secret ici",
++    tapToSignIn: "Appuyez pour vous connecter !",
++    hint: "Astuce : vous pouvez utiliser n'importe quelle adresse e-mail et votre mot de passe préféré :)",
++  },
++  demoNavigator: {
++    componentsTab: "Composants",
++    debugTab: "Débogage",
++    communityTab: "Communauté",
++    podcastListTab: "Podcasts",
++  },
++  demoCommunityScreen: {
++    title: "Connectez-vous avec la communauté",
++    tagLine:
++      "Rejoignez la communauté d'ingénieurs React Native d'Infinite Red et améliorez votre développement d'applications avec nous !",
++    joinUsOnSlackTitle: "Rejoignez-nous sur Slack",
++    joinUsOnSlack:
++      "Vous souhaitez vous connecter avec des ingénieurs React Native du monde entier ? Rejoignez la conversation dans la communauté Slack d'Infinite Red ! Notre communauté en pleine croissance est un espace sûr pour poser des questions, apprendre des autres et développer votre réseau.",
++    joinSlackLink: "Rejoindre la communauté Slack",
++    makeIgniteEvenBetterTitle: "Rendre Ignite encore meilleur",
++    makeIgniteEvenBetter:
++      "Vous avez une idée pour rendre Ignite encore meilleur ? Nous sommes heureux de l'entendre ! Nous cherchons toujours des personnes qui veulent nous aider à construire les meilleurs outils React Native. Rejoignez-nous sur GitHub pour nous aider à construire l'avenir d'Ignite.",
++    contributeToIgniteLink: "Contribuer à Ignite",
++    theLatestInReactNativeTitle: "Les dernières nouvelles de React Native",
++    theLatestInReactNative:
++      "Nous sommes là pour vous tenir au courant de tout ce que React Native a à offrir.",
++    reactNativeRadioLink: "React Native Radio",
++    reactNativeNewsletterLink: "React Native Newsletter",
++    reactNativeLiveLink: "React Native Live",
++    chainReactConferenceLink: "Conférence Chain React",
++    hireUsTitle: "Engagez Infinite Red pour votre prochain projet",
++    hireUs:
++      "Que ce soit pour gérer un projet complet ou pour former des équipes à notre formation pratique, Infinite Red peut vous aider pour presque tous les projets React Native.",
++    hireUsLink: "Envoyez-nous un message",
++  },
++  demoShowroomScreen: {
++    jumpStart: "Composants pour démarrer votre projet !",
++    lorem2Sentences:
++      "Nulla cupidatat deserunt amet quis aliquip nostrud do adipisicing. Adipisicing excepteur elit laborum Lorem adipisicing do duis.",
++    demoHeaderTxExample: "Yay",
++    demoViaTxProp: "Via la propriété `tx`",
++    demoViaSpecifiedTxProp: "Via la propriété `{{prop}}Tx` spécifiée",
++  },
++  demoDebugScreen: {
++    howTo: "COMMENT FAIRE",
++    title: "Débugage",
++    tagLine:
++      "Félicitations, vous avez un modèle d'application React Native très avancé ici. Profitez de cette base de code !",
++    reactotron: "Envoyer à Reactotron",
++    reportBugs: "Signaler des bugs",
++    demoList: "Liste de démonstration",
++    demoPodcastList: "Liste de podcasts de démonstration",
++    androidReactotronHint:
++      "Si cela ne fonctionne pas, assurez-vous que l'application de bureau Reactotron est en cours d'exécution, exécutez adb reverse tcp:9090 tcp:9090 à partir de votre terminal, puis rechargez l'application.",
++    iosReactotronHint:
++      "Si cela ne fonctionne pas, assurez-vous que l'application de bureau Reactotron est en cours d'exécution, puis rechargez l'application.",
++    macosReactotronHint:
++      "Si cela ne fonctionne pas, assurez-vous que l'application de bureau Reactotron est en cours d'exécution, puis rechargez l'application.",
++    webReactotronHint:
++      "Si cela ne fonctionne pas, assurez-vous que l'application de bureau Reactotron est en cours d'exécution, puis rechargez l'application.",
++    windowsReactotronHint:
++      "Si cela ne fonctionne pas, assurez-vous que l'application de bureau Reactotron est en cours d'exécution, puis rechargez l'application.",
++  },
++  demoPodcastListScreen: {
++    title: "Épisodes de Radio React Native",
++    onlyFavorites: "Afficher uniquement les favoris",
++    favoriteButton: "Favori",
++    unfavoriteButton: "Non favori",
++    accessibility: {
++      cardHint:
++        "Double-cliquez pour écouter l'épisode. Double-cliquez et maintenez pour {{action}} cet épisode.",
++      switch: "Activez pour afficher uniquement les favoris",
++      favoriteAction: "Basculer en favori",
++      favoriteIcon: "Épisode non favori",
++      unfavoriteIcon: "Épisode favori",
++      publishLabel: "Publié le {{date}}",
++      durationLabel: "Durée : {{hours}} heures {{minutes}} minutes {{seconds}} secondes",
++    },
++    noFavoritesEmptyState: {
++      heading: "C'est un peu vide ici",
++      content:
++        "Aucun favori n'a été ajouté pour le moment. Appuyez sur le cœur d'un épisode pour l'ajouter à vos favoris !",
++    },
++  },
++  // @demo remove-block-end
++}
++
++export default fr
+diff --git a/IgniteDiffApp/app/i18n/i18n.ts b/IgniteDiffApp/app/i18n/i18n.ts
+index 7a871a6..34b9c13 100644
+--- a/IgniteDiffApp/app/i18n/i18n.ts
++++ b/IgniteDiffApp/app/i18n/i18n.ts
+@@ -6,6 +6,7 @@ import { I18nManager } from "react-native"
+ import en, { Translations } from "./en"
+ import ar from "./ar"
+ import ko from "./ko"
++import fr from "./fr"
+ 
+ i18n.fallbacks = true
+ /**
+@@ -13,7 +14,7 @@ i18n.fallbacks = true
+  * the language code is the suffixed with "-US". i.e. if a device is set to English ("en"),
+  * if you change to another language and then return to English language code is now "en-US".
+  */
+-i18n.translations = { ar, en, "en-US": en, ko }
++i18n.translations = { ar, en, "en-US": en, ko, fr }
+ 
+ i18n.locale = Localization.locale
+ 
+diff --git a/IgniteDiffApp/app/utils/formatDate.ts b/IgniteDiffApp/app/utils/formatDate.ts
+index dcc9ce9..d1f4a48 100644
+--- a/IgniteDiffApp/app/utils/formatDate.ts
++++ b/IgniteDiffApp/app/utils/formatDate.ts
+@@ -1,6 +1,12 @@
+-import { Locale, format, parseISO } from "date-fns"
+ import I18n from "i18n-js"
+ 
++// Note the syntax of these imports from the date-fns library.
++// If you import with the syntax: import { format } from "date-fns" the ENTIRE library
++// will be included in your production bundle (even if you only use one function).
++// This is because react-native does not support tree-shaking.
++import type Locale from "date-fns/locale"
++import format from "date-fns/format"
++import parseISO from "date-fns/parseISO"
+ import ar from "date-fns/locale/ar-SA"
+ import ko from "date-fns/locale/ko"
+ import en from "date-fns/locale/en-US"
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 20243f4..494ca57 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -18,6 +18,8 @@
+     "postinstall": "node ./bin/postInstall",
+     "bundle:ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
+     "bundle:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
++    "bundle:visualize": "npx react-native-bundle-visualizer",
++    "bundle:visualize:dev": "npx react-native-bundle-visualizer --dev",
+     "release:ios": "echo 'Not implemented yet: release:ios. Use Xcode. More info: https://reactnative.dev/docs/next/publishing-to-app-store'",
+     "release:android": "cd android && rm -rf app/src/main/res/drawable-* && ./gradlew assembleRelease && cd - && echo 'APK generated in ./android/app/build/outputs/apk/release/app-release.apk'",
+     "clean": "npx react-native-clean-project",
