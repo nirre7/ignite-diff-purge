@@ -1,0 +1,25 @@
+diff --git a/IgniteDiffApp/app/i18n/i18n.ts b/IgniteDiffApp/app/i18n/i18n.ts
+index 06b9cf4..34b9c13 100644
+--- a/IgniteDiffApp/app/i18n/i18n.ts
++++ b/IgniteDiffApp/app/i18n/i18n.ts
+@@ -16,18 +16,10 @@ i18n.fallbacks = true
+  */
+ i18n.translations = { ar, en, "en-US": en, ko, fr }
+ 
+-const locales = Localization.getLocales() // This method is guaranteed to return at least one array item.
+-// The preferred language is the first element in the array, however, we fallback to en-US, especially for tests.
+-const preferredLanguage:
+-  | Localization.Locale
+-  | { languageTag: string; textDirection: "ltr" | "rtl" } = locales[0] || {
+-  languageTag: "en-US",
+-  textDirection: "ltr",
+-}
+-i18n.locale = preferredLanguage.languageTag
++i18n.locale = Localization.locale
+ 
+ // handle RTL languages
+-export const isRTL = preferredLanguage.textDirection === "rtl"
++export const isRTL = Localization.isRTL
+ I18nManager.allowRTL(isRTL)
+ I18nManager.forceRTL(isRTL)
+ 
