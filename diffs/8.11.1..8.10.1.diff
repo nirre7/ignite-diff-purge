@@ -1,0 +1,13 @@
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index 643ef9b..abeaf1b 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -97,7 +97,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+ 
+     // handle Web links
+     React.useEffect(() => {
+-      if (params !== undefined && Object.keys(params).length > 0) {
++      if (Object.keys(params).length > 0) {
+         const demoValues = Object.values(Demos)
+         const findSectionIndex = demoValues.findIndex(
+           (x) => x.name.toLowerCase() === params.queryIndex,
