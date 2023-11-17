@@ -1,0 +1,81 @@
+diff --git a/IgniteDiffApp/app/devtools/ReactotronConfig.ts b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+index 97538c8..d23ab06 100644
+--- a/IgniteDiffApp/app/devtools/ReactotronConfig.ts
++++ b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+@@ -3,7 +3,7 @@
+  * free desktop app for inspecting and debugging your React Native app.
+  * @see https://github.com/infinitered/reactotron
+  */
+-import { Platform } from "react-native"
++import { Platform, NativeModules } from "react-native"
+ 
+ import AsyncStorage from "@react-native-async-storage/async-storage"
+ import { ArgType } from "reactotron-core-client"
+@@ -46,6 +46,17 @@ if (Platform.OS !== "web") {
+  * NOTE: If you edit this file while running the app, you will need to do a full refresh
+  * or else your custom commands won't be registered correctly.
+  */
++
++Reactotron.onCustomCommand({
++  title: "Show Dev Menu",
++  description: "Opens the React Native dev menu",
++  command: "showDevMenu",
++  handler: () => {
++    Reactotron.log("Showing React Native dev menu")
++    NativeModules.DevMenu.show()
++  },
++})
++
+ Reactotron.onCustomCommand({
+   title: "Reset Root Store",
+   description: "Resets the MST store",
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index 3f81ef7..643ef9b 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -97,7 +97,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+ 
+     // handle Web links
+     React.useEffect(() => {
+-      if (route.params) {
++      if (params !== undefined && Object.keys(params).length > 0) {
+         const demoValues = Object.values(Demos)
+         const findSectionIndex = demoValues.findIndex(
+           (x) => x.name.toLowerCase() === params.queryIndex,
+@@ -115,7 +115,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+         }
+         handleScroll(findSectionIndex, findItemIndex)
+       }
+-    }, [route])
++    }, [params])
+ 
+     const toggleDrawer = () => {
+       if (!open) {
+diff --git a/IgniteDiffApp/ios/Podfile b/IgniteDiffApp/ios/Podfile
+index 230db5d..1c3e194 100644
+--- a/IgniteDiffApp/ios/Podfile
++++ b/IgniteDiffApp/ios/Podfile
+@@ -1,8 +1,6 @@
+-pod_folder = Pathname.new(__FILE__).dirname.realpath
+-
+-require File.join(File.dirname(`cd #{pod_folder} && node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
+-require File.join(File.dirname(`cd #{pod_folder} && node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+-require File.join(File.dirname(`cd #{pod_folder} && node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
++require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
++require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
++require File.join(File.dirname(`node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
+ 
+ require 'json'
+ podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
+diff --git a/IgniteDiffApp/ios/Podfile.lock b/IgniteDiffApp/ios/Podfile.lock
+index f32f16c..f8170f7 100644
+--- a/IgniteDiffApp/ios/Podfile.lock
++++ b/IgniteDiffApp/ios/Podfile.lock
+@@ -747,6 +747,6 @@ SPEC CHECKSUMS:
+   Yoga: d56980c8914db0b51692f55533409e844b66133c
+   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+ 
+-PODFILE CHECKSUM: 49017f7e01b3378f7b74a9e4851601303e9d3756
++PODFILE CHECKSUM: 7747706fe3f8656bb40e73e453226926152ebf98
+ 
+ COCOAPODS: 1.14.2
