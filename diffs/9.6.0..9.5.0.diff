@@ -1,0 +1,13 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 4bd85cfe..783b5d6b 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -74,6 +74,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.6.0"
++    "version": "9.5.0"
+   }
+ }
+\ No newline at end of file
