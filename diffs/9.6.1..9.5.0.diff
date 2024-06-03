@@ -1,0 +1,129 @@
+diff --git a/IgniteDiffApp/App.tsx b/IgniteDiffApp/App.tsx
+index 2a7609b6..1fd79cc5 100644
+--- a/IgniteDiffApp/App.tsx
++++ b/IgniteDiffApp/App.tsx
+@@ -1,7 +1,6 @@
+-import "@expo/metro-runtime"
++import App from "./app/app"
+ import React from "react"
+ import * as SplashScreen from "expo-splash-screen"
+-import App from "./app/app"
+ 
+ SplashScreen.preventAutoHideAsync()
+ 
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index db117df3..783b5d6b 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -74,6 +74,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.6.1"
++    "version": "9.5.0"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Toggle.tsx b/IgniteDiffApp/app/components/Toggle.tsx
+index 93bc3d72..7fb1b47a 100644
+--- a/IgniteDiffApp/app/components/Toggle.tsx
++++ b/IgniteDiffApp/app/components/Toggle.tsx
+@@ -3,7 +3,6 @@ import {
+   GestureResponderEvent,
+   Image,
+   ImageStyle,
+-  Platform,
+   StyleProp,
+   SwitchProps,
+   TextInputProps,
+@@ -14,16 +13,10 @@ import {
+   ViewProps,
+   ViewStyle,
+ } from "react-native"
+-import Animated, {
+-  Extrapolation,
+-  interpolate,
+-  useAnimatedStyle,
+-  withTiming,
+-} from "react-native-reanimated"
++import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
+ import { colors, spacing } from "../theme"
+ import { iconRegistry, IconTypes } from "./Icon"
+ import { Text, TextProps } from "./Text"
+-import { isRTL } from "app/i18n"
+ 
+ type Variants = "checkbox" | "switch" | "radio"
+ 
+@@ -457,19 +450,10 @@ function Switch(props: ToggleInputProps) {
+       $switchInner?.paddingRight ||
+       0) as number
+ 
+-    // For RTL support:
+-    // - web flip input range to [1,0]
+-    // - outputRange doesn't want rtlAdjustment
+-    const rtlAdjustment = isRTL ? -1 : 1
+-    const inputRange = Platform.OS === "web" ? (isRTL ? [1, 0] : [0, 1]) : [0, 1]
+-    const outputRange =
+-      Platform.OS === "web"
+-        ? [offsetLeft, +(knobWidth || 0) + offsetRight]
+-        : [rtlAdjustment * offsetLeft, rtlAdjustment * (+(knobWidth || 0) + offsetRight)]
++    const start = withTiming(on ? "100%" : "0%")
++    const marginStart = withTiming(on ? -(knobWidth || 0) - offsetRight : 0 + offsetLeft)
+ 
+-    const translateX = interpolate(on ? 1 : 0, inputRange, outputRange, Extrapolation.CLAMP)
+-
+-    return { transform: [{ translateX: withTiming(translateX) }] }
++    return { start, marginStart }
+   }, [on, knobWidth])
+ 
+   return (
+diff --git a/IgniteDiffApp/jest.config.js b/IgniteDiffApp/jest.config.js
+index 426d6adc..49c06bde 100644
+--- a/IgniteDiffApp/jest.config.js
++++ b/IgniteDiffApp/jest.config.js
+@@ -25,6 +25,7 @@ module.exports = {
+     "jest-runner",
+   ],
+   testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/.maestro/", "@react-native"],
++  testEnvironment: "jsdom",
+   setupFiles: ["<rootDir>/test/setup.ts"],
+   transform:{
+     '^.+\\.test.tsx?$': ['ts-jest', {
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index e331c0b6..666a3161 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -27,11 +27,12 @@
+     "web": "npx expo start --web",
+     "bundle:web": "npx expo export --platform web",
+     "serve:web": "npx server dist",
+-    "prebuild:clean": "npx expo prebuild --clean"
++    "prebuild:clean": "npx expo prebuild --clean",
++    "prebuild": "npx expo prebuild"
+   },
+   "dependencies": {
+     "@expo-google-fonts/space-grotesk": "^0.2.2",
+-    "@expo/metro-runtime": "~3.1.3",
++    "@expo/metro-runtime": "^3.1.1",
+     "@react-native-async-storage/async-storage": "^1.21.0",
+     "@react-navigation/bottom-tabs": "^6.3.2",
+     "@react-navigation/native": "^6.0.2",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 3d9d4a9e..dd6252d7 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -1508,10 +1508,10 @@
+     resolve-from "^5.0.0"
+     sucrase "3.34.0"
+ 
+-"@expo/metro-runtime@~3.1.3":
+-  version "3.1.3"
+-  resolved "https://registry.yarnpkg.com/@expo/metro-runtime/-/metro-runtime-3.1.3.tgz#e29503808bd8ffeb706ef9a17b644230a379f298"
+-  integrity sha512-u1CaQJJlSgvxBB5NJ6YMVvSDTTRzjT71dHpEBnKPZhpFv5ebVry52FZ2sEeEEA6mHG5zGxWXmHImW3hNKHh8EA==
++"@expo/metro-runtime@^3.1.1":
++  version "3.2.1"
++  resolved "https://registry.yarnpkg.com/@expo/metro-runtime/-/metro-runtime-3.2.1.tgz#bbab2ca9d0c8d256172eb4688123af6be67c7674"
++  integrity sha512-L7xNo5SmK+rcuXDm/+VBBImpA7FZsVB+m/rNr3fNl5or+1+yrZe99ViF7LZ8DOoVqAqcb4aCAXvGrP2JNYo1/Q==
+ 
+ "@expo/osascript@^2.0.31":
+   version "2.1.3"
