@@ -1,0 +1,279 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 700495a..c47bf2d 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -72,6 +72,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.0.5"
++    "version": "9.0.2"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Screen.tsx b/IgniteDiffApp/app/components/Screen.tsx
+index 8c1f22a..32ce840 100644
+--- a/IgniteDiffApp/app/components/Screen.tsx
++++ b/IgniteDiffApp/app/components/Screen.tsx
+@@ -204,7 +204,7 @@ export function Screen(props: ScreenProps) {
+       <StatusBar style={statusBarStyle} {...StatusBarProps} />
+ 
+       <KeyboardAvoidingView
+-        behavior={isIos ? "padding" : "height"}
++        behavior={isIos ? "padding" : undefined}
+         keyboardVerticalOffset={keyboardOffset}
+         {...KeyboardAvoidingViewProps}
+         style={[$keyboardAvoidingViewStyle, KeyboardAvoidingViewProps?.style]}
+diff --git a/IgniteDiffApp/app/devtools/ReactotronConfig.ts b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+index 17efb15..09a99ee 100644
+--- a/IgniteDiffApp/app/devtools/ReactotronConfig.ts
++++ b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+@@ -16,6 +16,7 @@ import { Reactotron } from "./ReactotronClient"
+ 
+ const reactotron = Reactotron.configure({
+   name: require("../../package.json").name,
++  host: "localhost",
+   onConnect: () => {
+     /** since this file gets hot reloaded, let's clear the past logs every time we connect */
+     Reactotron.clear()
+@@ -109,12 +110,7 @@ reactotron.onCustomCommand({
+  *
+  * ```
+  * if (__DEV__) {
+- *  console.tron.display({
+- *    name: 'JOKE',
+- *    preview: 'What's the best thing about Switzerland?',
+- *    value: 'I don't know, but the flag is a big plus!',
+- *    important: true
+- *  })
++ *  console.tron.log('here')
+  * }
+  * ```
+  *
+@@ -136,6 +132,8 @@ declare global {
+      *
+      * @example
+      * if (__DEV__) {
++     *  console.tron.log("here")
++     *
+      *  console.tron.display({
+      *    name: 'JOKE',
+      *    preview: 'What's the best thing about Switzerland?',
+@@ -149,6 +147,37 @@ declare global {
+   }
+ }
+ 
++/**
++ * For our last trick, we are going to monkey patching console to also output to Reactotron.
++ */
++const ogConsoleLog = console.log
++console.log = (...args: Parameters<typeof console.log>) => {
++  ogConsoleLog(...args)
++  reactotron.log(...args)
++}
++
++const ogConsoleWarn = console.warn
++console.warn = (...args: Parameters<typeof console.warn>) => {
++  ogConsoleWarn(...args)
++  reactotron.warn(args[0])
++}
++
++const ogConsoleError = console.error
++console.error = (...args: Parameters<typeof console.error>) => {
++  ogConsoleError(...args)
++  if (args[0] instanceof Error) {
++    reactotron.error(args[0].message, args[0].stack)
++  } else {
++    reactotron.error(args[0], args[1])
++  }
++}
++
++const ogConsoleDebug = console.debug
++console.debug = (...args: Parameters<typeof console.debug>) => {
++  ogConsoleDebug(...args)
++  reactotron.debug(args[0])
++}
++
+ /**
+  * Now that we've setup all our Reactotron configuration, let's connect!
+  */
+diff --git a/IgniteDiffApp/app/models/EpisodeStore.ts b/IgniteDiffApp/app/models/EpisodeStore.ts
+index af4fd3f..0319ca3 100644
+--- a/IgniteDiffApp/app/models/EpisodeStore.ts
++++ b/IgniteDiffApp/app/models/EpisodeStore.ts
+@@ -17,7 +17,7 @@ export const EpisodeStoreModel = types
+       if (response.kind === "ok") {
+         store.setProp("episodes", response.episodes)
+       } else {
+-        console.error(`Error fetching episodes: ${JSON.stringify(response)}`)
++        console.tron.error?.(`Error fetching episodes: ${JSON.stringify(response)}`, [])
+       }
+     },
+     addFavorite(episode: Episode) {
+diff --git a/IgniteDiffApp/app/models/helpers/setupRootStore.ts b/IgniteDiffApp/app/models/helpers/setupRootStore.ts
+index aea5d36..039bd86 100644
+--- a/IgniteDiffApp/app/models/helpers/setupRootStore.ts
++++ b/IgniteDiffApp/app/models/helpers/setupRootStore.ts
+@@ -32,7 +32,7 @@ export async function setupRootStore(rootStore: RootStore) {
+   } catch (e) {
+     // if there's any problems loading, then inform the dev what happened
+     if (__DEV__) {
+-      if (e instanceof Error) console.error(e.message)
++      if (e instanceof Error) console.tron.error?.(e.message, null)
+     }
+   }
+ 
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 414158e..1e2302c 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -105,4 +105,5 @@ const $tabBarLabel: TextStyle = {
+   fontSize: 12,
+   fontFamily: typography.primary.medium,
+   lineHeight: 16,
++  flex: 1,
+ }
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index 4fe25d6..a8a8623 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -123,7 +123,7 @@ export function useNavigationPersistence(storage: Storage, persistenceKey: strin
+       if (previousRouteName !== currentRouteName) {
+         // track screens.
+         if (__DEV__) {
+-          console.log(currentRouteName)
++          console.tron.log?.(currentRouteName)
+         }
+       }
+ 
+diff --git a/IgniteDiffApp/app/services/api/api.ts b/IgniteDiffApp/app/services/api/api.ts
+index fc8d859..695b079 100644
+--- a/IgniteDiffApp/app/services/api/api.ts
++++ b/IgniteDiffApp/app/services/api/api.ts
+@@ -69,7 +69,7 @@ export class Api {
+       return { kind: "ok", episodes }
+     } catch (e) {
+       if (__DEV__ && e instanceof Error) {
+-        console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
++        console.tron.error?.(`Bad data: ${e.message}\n${response.data}`, e.stack)
+       }
+       return { kind: "bad-data" }
+     }
+diff --git a/IgniteDiffApp/app/utils/crashReporting.ts b/IgniteDiffApp/app/utils/crashReporting.ts
+index 7c79483..bb79efc 100644
+--- a/IgniteDiffApp/app/utils/crashReporting.ts
++++ b/IgniteDiffApp/app/utils/crashReporting.ts
+@@ -55,6 +55,7 @@ export const reportCrash = (error: Error, type: ErrorType = ErrorType.FATAL) =>
+     const message = error.message || "Unknown"
+     console.error(error)
+     console.log(message, type)
++    console.tron.log(error)
+   } else {
+     // In production, utilize crash reporting service of choice below:
+     // RN
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index eb16a8c..4f0e9f3 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -39,7 +39,7 @@
+     "@shopify/flash-list": "1.4.3",
+     "apisauce": "3.0.1",
+     "date-fns": "^2.30.0",
+-    "expo": "^49.0.21",
++    "expo": "^49.0.18",
+     "expo-application": "~5.3.0",
+     "expo-build-properties": "~0.8.3",
+     "expo-font": "~11.4.0",
+@@ -93,10 +93,10 @@
+     "postinstall-prepare": "1.0.1",
+     "prettier": "2.8.8",
+     "react-test-renderer": "18.2.0",
+-    "reactotron-core-client": "2.8.11-beta.17",
+-    "reactotron-mst": "3.1.5-beta.17",
+-    "reactotron-react-js": "3.3.9-beta.17",
+-    "reactotron-react-native": "5.0.4-beta.19",
++    "reactotron-core-client": "2.8.11-beta.15",
++    "reactotron-mst": "3.1.5-beta.15",
++    "reactotron-react-js": "3.3.9-beta.15",
++    "reactotron-react-native": "5.0.4-beta.16",
+     "regenerator-runtime": "^0.13.4",
+     "ts-jest": "^29.1.1",
+     "ts-node": "^10.9.1",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index bb2938c..0c21c8e 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -4588,7 +4588,7 @@ expo-status-bar@~1.6.0:
+   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-1.6.0.tgz#e79ffdb9a84d2e0ec9a0dc7392d9ab364fefa9cf"
+   integrity sha512-e//Oi2WPdomMlMDD3skE4+1ZarKCJ/suvcB4Jo/nO427niKug5oppcPNYO+csR6y3ZglGuypS+3pp/hJ+Xp6fQ==
+ 
+-expo@^49.0.21:
++expo@^49.0.18:
+   version "49.0.23"
+   resolved "https://registry.yarnpkg.com/expo/-/expo-49.0.23.tgz#b8dc4daecdc2e912607a4bc63dede5506017976d"
+   integrity sha512-mFdBpWisPXBuocRGywC14nDai5vSUmvEyQpwvKH/xUo+m5/TUvfqV6YIewFpW22zn5WFGFiuJPhzNrqhBBinIw==
+@@ -8038,41 +8038,41 @@ react@18.2.0:
+   dependencies:
+     loose-envify "^1.1.0"
+ 
+-reactotron-core-client@2.8.11-beta.17:
+-  version "2.8.11-beta.17"
+-  resolved "https://registry.yarnpkg.com/reactotron-core-client/-/reactotron-core-client-2.8.11-beta.17.tgz#2b1c9de16557912aed1de428fa39a023b1f9e13d"
+-  integrity sha512-ZRQT8VI0sM9fs4Kq28WJX2QdVNyUxKZZXbHQtgikEqx4PATtZlkcgIWsVQWepxvX0rCHl+JGlhyZP9RifFp68g==
++reactotron-core-client@2.8.11-beta.15:
++  version "2.8.11-beta.15"
++  resolved "https://registry.yarnpkg.com/reactotron-core-client/-/reactotron-core-client-2.8.11-beta.15.tgz#29705fafd718f2059fef15eb11494208cf187f49"
++  integrity sha512-L+RAaIIli0Z28KfDmoj3QCq8fHyYmQTkmSlEOr1ZBGNkzJ+K9juG2ZG5gcky2n/MIXlrfixQw5GRnI4Oj9fOUw==
+   dependencies:
+-    reactotron-core-contract "0.1.0"
++    reactotron-core-contract "0.0.5"
+ 
+-reactotron-core-contract@0.1.0:
+-  version "0.1.0"
+-  resolved "https://registry.yarnpkg.com/reactotron-core-contract/-/reactotron-core-contract-0.1.0.tgz#11cdfbbdb8d013ccec7ff256c75057ae32e7462e"
+-  integrity sha512-M/J5djtbSrvFzeepPt3eKwUZik61Yi9AprzAJWvVcBVDQW1EB/iCGV3fD88twfx3WAulkOkKofsqY55UsWrBZg==
++reactotron-core-contract@0.0.5:
++  version "0.0.5"
++  resolved "https://registry.yarnpkg.com/reactotron-core-contract/-/reactotron-core-contract-0.0.5.tgz#44f8ed6568bd1a76e8cbc120e8263a08d666c4f4"
++  integrity sha512-HixNOxJwLV951WinuvMYJE2+qw4b2NIQdAVH8NU1KbznDuZdf73v+s4GWxDlCN3OGsIXvBxGEulMSh7TSP3o9w==
+ 
+-reactotron-mst@3.1.5-beta.17:
+-  version "3.1.5-beta.17"
+-  resolved "https://registry.yarnpkg.com/reactotron-mst/-/reactotron-mst-3.1.5-beta.17.tgz#e2b99d5ceb87e411fc1482444be468aaac520f22"
+-  integrity sha512-Hm9CuovCtj6aSUMk8VmAGipioxWFpfza6iQNsqbJrTuvvEtDno6BX581DCIcU1JWCVfaoX2bvu91EeqLE35cyg==
++reactotron-mst@3.1.5-beta.15:
++  version "3.1.5-beta.15"
++  resolved "https://registry.yarnpkg.com/reactotron-mst/-/reactotron-mst-3.1.5-beta.15.tgz#e0b01cecb18df96e2e8a9159ac0a7d51f8a7fd8d"
++  integrity sha512-zIUCUWKzH+8rHyQcNBC1s5uoaO7cKW9BNBt2jvw/PahTQZ9CxrSMsFpnScz+RdPN5SpvZWg2X1sF0Fbr8FgiLw==
+   dependencies:
+     ramda "^0.25.0"
+ 
+-reactotron-react-js@3.3.9-beta.17:
+-  version "3.3.9-beta.17"
+-  resolved "https://registry.yarnpkg.com/reactotron-react-js/-/reactotron-react-js-3.3.9-beta.17.tgz#851a0c75ab6aeeef619a9f04444194ed5351302b"
+-  integrity sha512-Zk+NYS3+RKrxDpJhub5z0PrtyaWhC7+hmwLZEJ4YqCrtxciIsnx+3rz6b2emibCQdbnLWj18ZtMemRcm8FHfHA==
++reactotron-react-js@3.3.9-beta.15:
++  version "3.3.9-beta.15"
++  resolved "https://registry.yarnpkg.com/reactotron-react-js/-/reactotron-react-js-3.3.9-beta.15.tgz#079338a96d66229732a4273030a2b54e17439466"
++  integrity sha512-OnD9cyYvS/2drKwp/+3bNOOKTtkROLzMxOvPzFX2Z5qf6hosk4JrW4ErgfbG3DzakEdS5vmXrcaQWbX9VYomCg==
+   dependencies:
+-    reactotron-core-client "2.8.11-beta.17"
++    reactotron-core-client "2.8.11-beta.15"
+     stacktrace-js "2.0.1"
+ 
+-reactotron-react-native@5.0.4-beta.19:
+-  version "5.0.4-beta.19"
+-  resolved "https://registry.yarnpkg.com/reactotron-react-native/-/reactotron-react-native-5.0.4-beta.19.tgz#ac29a0d46dd65e92684bb1e60df1de4294c1b7ca"
+-  integrity sha512-InBhz+/6xih8+ihQ2EOLgBCRSIIvteVdXNh5vkAntHVgpLiv5liUfz2FL/CWGG51tAJin83IkD5aR7Ea31QF3g==
++reactotron-react-native@5.0.4-beta.16:
++  version "5.0.4-beta.16"
++  resolved "https://registry.yarnpkg.com/reactotron-react-native/-/reactotron-react-native-5.0.4-beta.16.tgz#368c853b045901790b4718fdfd9fd7b3eb4cd21b"
++  integrity sha512-Vzpl1EPYTJde2EWtywl8cdrQgU88dCAVCFWakQZypUIlr5IVS6lnmfZ0kWHksW2HUQQKavCxgZWB+1JI7GWLJw==
+   dependencies:
+     mitt "^3.0.1"
+     query-string "6.14.1"
+-    reactotron-core-client "2.8.11-beta.17"
++    reactotron-core-client "2.8.11-beta.15"
+   optionalDependencies:
+     react-native-flipper "^0.164.0"
+ 
