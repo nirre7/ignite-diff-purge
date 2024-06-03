@@ -1,0 +1,74 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 903987e..c47bf2d 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -72,6 +72,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.0.4"
++    "version": "9.0.2"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Screen.tsx b/IgniteDiffApp/app/components/Screen.tsx
+index 8c1f22a..32ce840 100644
+--- a/IgniteDiffApp/app/components/Screen.tsx
++++ b/IgniteDiffApp/app/components/Screen.tsx
+@@ -204,7 +204,7 @@ export function Screen(props: ScreenProps) {
+       <StatusBar style={statusBarStyle} {...StatusBarProps} />
+ 
+       <KeyboardAvoidingView
+-        behavior={isIos ? "padding" : "height"}
++        behavior={isIos ? "padding" : undefined}
+         keyboardVerticalOffset={keyboardOffset}
+         {...KeyboardAvoidingViewProps}
+         style={[$keyboardAvoidingViewStyle, KeyboardAvoidingViewProps?.style]}
+diff --git a/IgniteDiffApp/app/devtools/ReactotronConfig.ts b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+index cc8349a..09a99ee 100644
+--- a/IgniteDiffApp/app/devtools/ReactotronConfig.ts
++++ b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+@@ -16,6 +16,7 @@ import { Reactotron } from "./ReactotronClient"
+ 
+ const reactotron = Reactotron.configure({
+   name: require("../../package.json").name,
++  host: "localhost",
+   onConnect: () => {
+     /** since this file gets hot reloaded, let's clear the past logs every time we connect */
+     Reactotron.clear()
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 414158e..1e2302c 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -105,4 +105,5 @@ const $tabBarLabel: TextStyle = {
+   fontSize: 12,
+   fontFamily: typography.primary.medium,
+   lineHeight: 16,
++  flex: 1,
+ }
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index f424472..4f0e9f3 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -39,7 +39,7 @@
+     "@shopify/flash-list": "1.4.3",
+     "apisauce": "3.0.1",
+     "date-fns": "^2.30.0",
+-    "expo": "^49.0.21",
++    "expo": "^49.0.18",
+     "expo-application": "~5.3.0",
+     "expo-build-properties": "~0.8.3",
+     "expo-font": "~11.4.0",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 82b6e4b..0c21c8e 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -4588,7 +4588,7 @@ expo-status-bar@~1.6.0:
+   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-1.6.0.tgz#e79ffdb9a84d2e0ec9a0dc7392d9ab364fefa9cf"
+   integrity sha512-e//Oi2WPdomMlMDD3skE4+1ZarKCJ/suvcB4Jo/nO427niKug5oppcPNYO+csR6y3ZglGuypS+3pp/hJ+Xp6fQ==
+ 
+-expo@^49.0.21:
++expo@^49.0.18:
+   version "49.0.23"
+   resolved "https://registry.yarnpkg.com/expo/-/expo-49.0.23.tgz#b8dc4daecdc2e912607a4bc63dede5506017976d"
+   integrity sha512-mFdBpWisPXBuocRGywC14nDai5vSUmvEyQpwvKH/xUo+m5/TUvfqV6YIewFpW22zn5WFGFiuJPhzNrqhBBinIw==
