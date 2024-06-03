@@ -1,0 +1,25 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 8e93241..700495a 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -72,6 +72,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.1.0"
++    "version": "9.0.5"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/theme/colors.ts b/IgniteDiffApp/app/theme/colors.ts
+index ae26aa9..a8daa80 100644
+--- a/IgniteDiffApp/app/theme/colors.ts
++++ b/IgniteDiffApp/app/theme/colors.ts
+@@ -1,6 +1,6 @@
+ // TODO: write documentation for colors and palette in own markdown file and add links from here
+ 
+-const palette = {
++const palette: Record<string, string> = {
+   neutral100: "#FFFFFF",
+   neutral200: "#F4F2F1",
+   neutral300: "#D7CEC9",
