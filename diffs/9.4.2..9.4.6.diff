@@ -1,0 +1,898 @@
+diff --git a/IgniteDiffApp/.maestro/FavoritePodcast.yaml b/IgniteDiffApp/.maestro/FavoritePodcast.yaml
+index 0fe5b19..6b3231b 100644
+--- a/IgniteDiffApp/.maestro/FavoritePodcast.yaml
++++ b/IgniteDiffApp/.maestro/FavoritePodcast.yaml
+@@ -2,7 +2,6 @@
+ 
+ appId: com.ignitediffapp
+ env:
+-  TITLE: "RNR 257 - META RESPONDS! How can we improve React Native, part 2"
+   FAVORITES_TEXT: "Switch on to only show favorites"
+ 
+ ---
+@@ -16,14 +15,14 @@ env:
+     text: ${FAVORITES_TEXT}
+     # https://maestro.mobile.dev/troubleshooting/known-issues#android-accidental-double-tap
+     retryTapIfNoChange: false
+-- scrollUntilVisible:
+-    element:
+-      text: ${TITLE}
+-    direction: DOWN
+-    timeout: 50000
+-    speed: 40
+-    visibilityPercentage: 100
+-- longPressOn: ${TITLE}
++- repeat:
++    times: 2
++    commands:
++      - scroll
++- copyTextFrom:
++    text: "^RNR.*" # assumes all podcast titles start with RNR
++    index: 1 # grab the second one, the first one might not be fully visible
++- longPressOn: ${maestro.copiedText}
+ - scrollUntilVisible:
+     element:
+       text: ${FAVORITES_TEXT}
+@@ -33,5 +32,5 @@ env:
+     visibilityPercentage: 100
+ - tapOn:
+     text: ${FAVORITES_TEXT}
+-- assertVisible: ${TITLE}
++- assertVisible: ${maestro.copiedText}
+ 
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index cbbfe9f..c8c0e82 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -72,6 +72,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.4.2"
++    "version": "9.4.6"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index c968524..f83f1d5 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -60,6 +60,8 @@ interface AppProps {
+ 
+ /**
+  * This is the root component of our app.
++ * @param {AppProps} props - The props for the `App` component.
++ * @returns {JSX.Element} The rendered `App` component.
+  */
+ function App(props: AppProps) {
+   const { hideSplashScreen } = props
+diff --git a/IgniteDiffApp/app/components/AutoImage.tsx b/IgniteDiffApp/app/components/AutoImage.tsx
+index bf2f7c8..1c159b4 100644
+--- a/IgniteDiffApp/app/components/AutoImage.tsx
++++ b/IgniteDiffApp/app/components/AutoImage.tsx
+@@ -1,7 +1,6 @@
+ import React, { useLayoutEffect, useState } from "react"
+ import { Image, ImageProps, ImageURISource, Platform } from "react-native"
+ 
+-// TODO: document new props
+ export interface AutoImageProps extends ImageProps {
+   /**
+    * How wide should the image be?
+@@ -21,7 +20,9 @@ export interface AutoImageProps extends ImageProps {
+  * How is this different from `resizeMode: 'contain'`? Firstly, you can
+  * specify only one side's size (not both). Secondly, the image will scale to fit
+  * the desired dimensions instead of just being contained within its image-container.
+- *
++ * @param {number} remoteUri - The URI of the remote image.
++ * @param {number} dimensions - The desired dimensions of the image. If not provided, the original dimensions will be returned.
++ * @returns {[number, number]} - The scaled dimensions of the image.
+  */
+ export function useAutoImage(
+   remoteUri: string,
+@@ -53,8 +54,9 @@ export function useAutoImage(
+ 
+ /**
+  * An Image component that automatically sizes a remote or data-uri image.
+- *
+- * - [Documentation and Examples](https://docs.infinite.red/ignite-cli/boilerplate/components/AutoImage/)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/AutoImage/}
++ * @param {AutoImageProps} props - The props for the `AutoImage` component.
++ * @returns {JSX.Element} The rendered `AutoImage` component.
+  */
+ export function AutoImage(props: AutoImageProps) {
+   const { maxWidth, maxHeight, ...ImageProps } = props
+diff --git a/IgniteDiffApp/app/components/Button.tsx b/IgniteDiffApp/app/components/Button.tsx
+index 6e43c54..33c6f29 100644
+--- a/IgniteDiffApp/app/components/Button.tsx
++++ b/IgniteDiffApp/app/components/Button.tsx
+@@ -84,8 +84,16 @@ export interface ButtonProps extends PressableProps {
+ /**
+  * A component that allows users to take actions and make choices.
+  * Wraps the Text component with a Pressable component.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Button.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Button/}
++ * @param {ButtonProps} props - The props for the `Button` component.
++ * @returns {JSX.Element} The rendered `Button` component.
++ * @example
++ * <Button
++ *   tx="common.ok"
++ *   style={styles.button}
++ *   textStyle={styles.buttonText}
++ *   onPress={handleButtonPress}
++ * />
+  */
+ export function Button(props: ButtonProps) {
+   const {
+@@ -106,7 +114,12 @@ export function Button(props: ButtonProps) {
+   } = props
+ 
+   const preset: Presets = props.preset ?? "default"
+-  function $viewStyle({ pressed }: PressableStateCallbackType) {
++  /**
++   * @param {PressableStateCallbackType} root0 - The root object containing the pressed state.
++   * @param {boolean} root0.pressed - The pressed state.
++   * @returns {StyleProp<ViewStyle>} The view style based on the pressed state.
++   */
++  function $viewStyle({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> {
+     return [
+       $viewPresets[preset],
+       $viewStyleOverride,
+@@ -114,7 +127,12 @@ export function Button(props: ButtonProps) {
+       !!disabled && $disabledViewStyleOverride,
+     ]
+   }
+-  function $textStyle({ pressed }: PressableStateCallbackType) {
++  /**
++   * @param {PressableStateCallbackType} root0 - The root object containing the pressed state.
++   * @param {boolean} root0.pressed - The pressed state.
++   * @returns {StyleProp<TextStyle>} The text style based on the pressed state.
++   */
++  function $textStyle({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> {
+     return [
+       $textPresets[preset],
+       $textStyleOverride,
+diff --git a/IgniteDiffApp/app/components/Card.tsx b/IgniteDiffApp/app/components/Card.tsx
+index 66323f1..08a1202 100644
+--- a/IgniteDiffApp/app/components/Card.tsx
++++ b/IgniteDiffApp/app/components/Card.tsx
+@@ -119,8 +119,9 @@ interface CardProps extends TouchableOpacityProps {
+ /**
+  * Cards are useful for displaying related information in a contained way.
+  * If a ListItem displays content horizontally, a Card can be used to display content vertically.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Card.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Card/}
++ * @param {CardProps} props - The props for the `Card` component.
++ * @returns {JSX.Element} The rendered `Card` component.
+  */
+ export function Card(props: CardProps) {
+   const {
+diff --git a/IgniteDiffApp/app/components/EmptyState.tsx b/IgniteDiffApp/app/components/EmptyState.tsx
+index 5f78ed1..5e77cc0 100644
+--- a/IgniteDiffApp/app/components/EmptyState.tsx
++++ b/IgniteDiffApp/app/components/EmptyState.tsx
+@@ -119,8 +119,9 @@ const EmptyStatePresets = {
+ 
+ /**
+  * A component to use when there is no data to display. It can be utilized to direct the user what to do next.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-EmptyState.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/EmptyState/}
++ * @param {EmptyStateProps} props - The props for the `EmptyState` component.
++ * @returns {JSX.Element} The rendered `EmptyState` component.
+  */
+ export function EmptyState(props: EmptyStateProps) {
+   const preset = EmptyStatePresets[props.preset ?? "generic"]
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index 273298e..1d81324 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -139,8 +139,9 @@ interface HeaderActionProps {
+ /**
+  * Header that appears on many screens. Will hold navigation buttons and screen title.
+  * The Header is meant to be used with the `screenOptions.header` option on navigators, routes, or screen components via `navigation.setOptions({ header })`.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Header.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Header/}
++ * @param {HeaderProps} props - The props for the `Header` component.
++ * @returns {JSX.Element} The rendered `Header` component.
+  */
+ export function Header(props: HeaderProps) {
+   const {
+@@ -221,6 +222,10 @@ export function Header(props: HeaderProps) {
+   )
+ }
+ 
++/**
++ * @param {HeaderActionProps} props - The props for the `HeaderAction` component.
++ * @returns {JSX.Element} The rendered `HeaderAction` component.
++ */
+ function HeaderAction(props: HeaderActionProps) {
+   const { backgroundColor, icon, text, tx, txOptions, onPress, ActionComponent, iconColor } = props
+ 
+diff --git a/IgniteDiffApp/app/components/Icon.tsx b/IgniteDiffApp/app/components/Icon.tsx
+index 08def01..dae37ec 100644
+--- a/IgniteDiffApp/app/components/Icon.tsx
++++ b/IgniteDiffApp/app/components/Icon.tsx
+@@ -48,8 +48,9 @@ interface IconProps extends TouchableOpacityProps {
+ /**
+  * A component to render a registered icon.
+  * It is wrapped in a <TouchableOpacity /> if `onPress` is provided, otherwise a <View />.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Icon.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Icon/}
++ * @param {IconProps} props - The props for the `Icon` component.
++ * @returns {JSX.Element} The rendered `Icon` component.
+  */
+ export function Icon(props: IconProps) {
+   const {
+diff --git a/IgniteDiffApp/app/components/ListItem.tsx b/IgniteDiffApp/app/components/ListItem.tsx
+index 4863790..4ab9607 100644
+--- a/IgniteDiffApp/app/components/ListItem.tsx
++++ b/IgniteDiffApp/app/components/ListItem.tsx
+@@ -98,8 +98,9 @@ interface ListItemActionProps {
+ 
+ /**
+  * A styled row component that can be used in FlatList, SectionList, or by itself.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-ListItem.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/ListItem/}
++ * @param {ListItemProps} props - The props for the `ListItem` component.
++ * @returns {JSX.Element} The rendered `ListItem` component.
+  */
+ export function ListItem(props: ListItemProps) {
+   const {
+@@ -160,6 +161,10 @@ export function ListItem(props: ListItemProps) {
+   )
+ }
+ 
++/**
++ * @param {ListItemActionProps} props - The props for the `ListItemAction` component.
++ * @returns {JSX.Element | null} The rendered `ListItemAction` component.
++ */
+ function ListItemAction(props: ListItemActionProps) {
+   const { icon, Component, iconColor, size, side } = props
+ 
+diff --git a/IgniteDiffApp/app/components/ListView.tsx b/IgniteDiffApp/app/components/ListView.tsx
+index 3b12bc2..ef3406a 100644
+--- a/IgniteDiffApp/app/components/ListView.tsx
++++ b/IgniteDiffApp/app/components/ListView.tsx
+@@ -18,15 +18,12 @@ export type ListViewProps<T> = PropsWithoutRef<FlashListProps<T>>
+  *
+  * This is a temporary workaround until the FlashList component supports RTL at
+  * which point this component can be removed and we will default to using FlashList everywhere.
+- *
+  * @see {@link https://github.com/Shopify/flash-list/issues/544|RTL Bug Android}
+  * @see {@link https://github.com/Shopify/flash-list/issues/840|Flashlist Not Support RTL}
+- *
+- * @param props - FlashListProps | FlatListProps
+- * @param forwardRef - React.Ref<ListProps<T>>
+- * @returns JSX.Element
++ * @param {FlashListProps | FlatListProps} props - The props for the `ListView` component.
++ * @param {React.RefObject<ListViewRef>} forwardRef - An optional forwarded ref.
++ * @returns {JSX.Element} The rendered `ListView` component.
+  */
+-
+ const ListViewComponent = forwardRef(
+   <T,>(props: ListViewProps<T>, ref: React.ForwardedRef<ListViewRef<T>>) => {
+     const ListComponentWrapper = isRTL ? FlatList : FlashList
+diff --git a/IgniteDiffApp/app/components/Screen.tsx b/IgniteDiffApp/app/components/Screen.tsx
+index 8c1f22a..eddae55 100644
+--- a/IgniteDiffApp/app/components/Screen.tsx
++++ b/IgniteDiffApp/app/components/Screen.tsx
+@@ -83,11 +83,26 @@ export type ScreenProps = ScrollScreenProps | FixedScreenProps | AutoScreenProps
+ 
+ const isIos = Platform.OS === "ios"
+ 
+-function isNonScrolling(preset?: ScreenProps["preset"]) {
++type ScreenPreset = "fixed" | "scroll" | "auto"
++
++/**
++ * @param {ScreenPreset?} preset - The preset to check.
++ * @returns {boolean} - Whether the preset is non-scrolling.
++ */
++function isNonScrolling(preset?: ScreenPreset) {
+   return !preset || preset === "fixed"
+ }
+ 
+-function useAutoPreset(props: AutoScreenProps) {
++/**
++ * Custom hook that handles the automatic enabling/disabling of scroll ability based on the content size and screen size.
++ * @param {UseAutoPresetProps} props - The props for the `useAutoPreset` hook.
++ * @returns {{boolean, Function, Function}} - The scroll state, and the `onContentSizeChange` and `onLayout` functions.
++ */
++function useAutoPreset(props: AutoScreenProps): {
++  scrollEnabled: boolean
++  onContentSizeChange: (w: number, h: number) => void
++  onLayout: (e: LayoutChangeEvent) => void
++} {
+   const { preset, scrollEnabledToggleThreshold } = props
+   const { percent = 0.92, point = 0 } = scrollEnabledToggleThreshold || {}
+ 
+@@ -114,12 +129,19 @@ function useAutoPreset(props: AutoScreenProps) {
+     if (!scrollEnabled && !contentFitsScreen) setScrollEnabled(true)
+   }
+ 
++  /**
++   * @param {number} w - The width of the content.
++   * @param {number} h - The height of the content.
++   */
+   function onContentSizeChange(w: number, h: number) {
+     // update scroll-view content height
+     scrollViewContentHeight.current = h
+     updateScrollState()
+   }
+ 
++  /**
++   * @param {LayoutChangeEvent} e = The layout change event.
++   */
+   function onLayout(e: LayoutChangeEvent) {
+     const { height } = e.nativeEvent.layout
+     // update scroll-view  height
+@@ -137,6 +159,10 @@ function useAutoPreset(props: AutoScreenProps) {
+   }
+ }
+ 
++/**
++ * @param {ScreenProps} props - The props for the `ScreenWithoutScrolling` component.
++ * @returns {JSX.Element} - The rendered `ScreenWithoutScrolling` component.
++ */
+ function ScreenWithoutScrolling(props: ScreenProps) {
+   const { style, contentContainerStyle, children } = props
+   return (
+@@ -146,6 +172,10 @@ function ScreenWithoutScrolling(props: ScreenProps) {
+   )
+ }
+ 
++/**
++ * @param {ScreenProps} props - The props for the `ScreenWithScrolling` component.
++ * @returns {JSX.Element} - The rendered `ScreenWithScrolling` component.
++ */
+ function ScreenWithScrolling(props: ScreenProps) {
+   const {
+     children,
+@@ -187,6 +217,14 @@ function ScreenWithScrolling(props: ScreenProps) {
+   )
+ }
+ 
++/**
++ * Represents a screen component that provides a consistent layout and behavior for different screen presets.
++ * The `Screen` component can be used with different presets such as "fixed", "scroll", or "auto".
++ * It handles safe area insets, status bar settings, keyboard avoiding behavior, and scrollability based on the preset.
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Screen/}
++ * @param {ScreenProps} props - The props for the `Screen` component.
++ * @returns {JSX.Element} The rendered `Screen` component.
++ */
+ export function Screen(props: ScreenProps) {
+   const {
+     backgroundColor = colors.background,
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index 595ad43..88ab965 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -47,8 +47,9 @@ export interface TextProps extends RNTextProps {
+ /**
+  * For your text displaying needs.
+  * This component is a HOC over the built-in React Native one.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Text.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Text/}
++ * @param {TextProps} props - The props for the `Text` component.
++ * @returns {JSX.Element} The rendered `Text` component.
+  */
+ export function Text(props: TextProps) {
+   const { weight, size, tx, txOptions, text, children, style: $styleOverride, ...rest } = props
+diff --git a/IgniteDiffApp/app/components/TextField.tsx b/IgniteDiffApp/app/components/TextField.tsx
+index 1b42f8a..26a1ca6 100644
+--- a/IgniteDiffApp/app/components/TextField.tsx
++++ b/IgniteDiffApp/app/components/TextField.tsx
+@@ -99,8 +99,9 @@ export interface TextFieldProps extends Omit<TextInputProps, "ref"> {
+ 
+ /**
+  * A component that allows for the entering and editing of text.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-TextField.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/TextField/}
++ * @param {TextFieldProps} props - The props for the `TextField` component.
++ * @returns {JSX.Element} The rendered `TextField` component.
+  */
+ export const TextField = forwardRef(function TextField(props: TextFieldProps, ref: Ref<TextInput>) {
+   const {
+@@ -158,6 +159,9 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
+     HelperTextProps?.style,
+   ]
+ 
++  /**
++   *
++   */
+   function focusInput() {
+     if (disabled) return
+ 
+diff --git a/IgniteDiffApp/app/components/Toggle.tsx b/IgniteDiffApp/app/components/Toggle.tsx
+index 47e96d1..7fb1b47 100644
+--- a/IgniteDiffApp/app/components/Toggle.tsx
++++ b/IgniteDiffApp/app/components/Toggle.tsx
+@@ -155,8 +155,9 @@ interface ToggleInputProps {
+ /**
+  * Renders a boolean input.
+  * This is a controlled component that requires an onValueChange callback that updates the value prop in order for the component to reflect user actions. If the value prop is not updated, the component will continue to render the supplied value prop instead of the expected result of any user actions.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Toggle.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Toggle/}
++ * @param {ToggleProps} props - The props for the `Toggle` component.
++ * @returns {JSX.Element} The rendered `Toggle` component.
+  */
+ export function Toggle(props: ToggleProps) {
+   const {
+@@ -195,6 +196,9 @@ export function Toggle(props: ToggleProps) {
+     HelperTextProps?.style,
+   ]
+ 
++  /**
++   * @param {GestureResponderEvent} e - The event object.
++   */
+   function handlePress(e: GestureResponderEvent) {
+     if (disabled) return
+     onValueChange?.(!value)
+@@ -247,6 +251,10 @@ const ToggleInputs: Record<Variants, FC<ToggleInputProps>> = {
+   radio: Radio,
+ }
+ 
++/**
++ * @param {ToggleInputProps} props - The props for the `Checkbox` component.
++ * @returns {JSX.Element} The rendered `Checkbox` component.
++ */
+ function Checkbox(props: ToggleInputProps) {
+   const {
+     on,
+@@ -312,6 +320,10 @@ function Checkbox(props: ToggleInputProps) {
+   )
+ }
+ 
++/**
++ * @param {ToggleInputProps} props - The props for the `Radio` component.
++ * @returns {JSX.Element} The rendered `Radio` component.
++ */
+ function Radio(props: ToggleInputProps) {
+   const {
+     on,
+@@ -371,6 +383,10 @@ function Radio(props: ToggleInputProps) {
+   )
+ }
+ 
++/**
++ * @param {ToggleInputProps} props - The props for the `Switch` component.
++ * @returns {JSX.Element} The rendered `Switch` component.
++ */
+ function Switch(props: ToggleInputProps) {
+   const {
+     on,
+@@ -473,6 +489,10 @@ function Switch(props: ToggleInputProps) {
+   )
+ }
+ 
++/**
++ * @param {ToggleInputProps & { role: "on" | "off" }} props - The props for the `SwitchAccessibilityLabel` component.
++ * @returns {JSX.Element} The rendered `SwitchAccessibilityLabel` component.
++ */
+ function SwitchAccessibilityLabel(props: ToggleInputProps & { role: "on" | "off" }) {
+   const { on, disabled, status, switchAccessibilityMode, role, innerStyle, detailStyle } = props
+ 
+@@ -516,6 +536,10 @@ function SwitchAccessibilityLabel(props: ToggleInputProps & { role: "on" | "off"
+   )
+ }
+ 
++/**
++ * @param {BaseToggleProps} props - The props for the `FieldLabel` component.
++ * @returns {JSX.Element} The rendered `FieldLabel` component.
++ */
+ function FieldLabel(props: BaseToggleProps) {
+   const {
+     status,
+diff --git a/IgniteDiffApp/app/devtools/ReactotronConfig.ts b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+index 17efb15..436a407 100644
+--- a/IgniteDiffApp/app/devtools/ReactotronConfig.ts
++++ b/IgniteDiffApp/app/devtools/ReactotronConfig.ts
+@@ -22,7 +22,7 @@ const reactotron = Reactotron.configure({
+   },
+ }).use(
+   mst({
+-    /** ignore some chatty `mobx-state-tree` actions  */
++    /* ignore some chatty `mobx-state-tree` actions */
+     filter: (event) => /postProcessSnapshot|@APPLY_SNAPSHOT/.test(event.name) === false,
+   }),
+ )
+@@ -133,7 +133,6 @@ declare global {
+     /**
+      * Reactotron client for logging, displaying, measuring performance, and more.
+      * @see https://github.com/infinitered/reactotron
+-     *
+      * @example
+      * if (__DEV__) {
+      *  console.tron.display({
+@@ -143,7 +142,6 @@ declare global {
+      *    important: true
+      *  })
+      * }
+-     *
+      */
+     tron: typeof reactotron
+   }
+diff --git a/IgniteDiffApp/app/i18n/i18n.ts b/IgniteDiffApp/app/i18n/i18n.ts
+index 8ad301f..680c990 100644
+--- a/IgniteDiffApp/app/i18n/i18n.ts
++++ b/IgniteDiffApp/app/i18n/i18n.ts
+@@ -11,11 +11,11 @@ import fr from "./fr"
+ i18n.fallbacks = true
+ 
+ // to use regional locales use { "en-US": enUS } etc
+-i18n.translations = { ar, "en-US": en, ko, fr }
++i18n.translations = { ar, en, "en-US": en, ko, fr }
+ 
+-const fallbackLocale = "en"
++const fallbackLocale = "en-US"
+ const systemLocale = Localization.getLocales()[0]
+-const systemLocaleTag = systemLocale.languageTag
++const systemLocaleTag = systemLocale?.languageTag ?? "en-US"
+ 
+ if (Object.prototype.hasOwnProperty.call(i18n.translations, systemLocaleTag)) {
+   // if specific locales like en-FI or en-US is available, set it
+@@ -31,7 +31,7 @@ if (Object.prototype.hasOwnProperty.call(i18n.translations, systemLocaleTag)) {
+ }
+ 
+ // handle RTL languages
+-export const isRTL = systemLocale.textDirection === "rtl"
++export const isRTL = systemLocale?.textDirection === "rtl"
+ I18nManager.allowRTL(isRTL)
+ I18nManager.forceRTL(isRTL)
+ 
+diff --git a/IgniteDiffApp/app/i18n/translate.ts b/IgniteDiffApp/app/i18n/translate.ts
+index 72669a6..084fdcd 100644
+--- a/IgniteDiffApp/app/i18n/translate.ts
++++ b/IgniteDiffApp/app/i18n/translate.ts
+@@ -3,11 +3,9 @@ import { TxKeyPath } from "./i18n"
+ 
+ /**
+  * Translates text.
+- *
+- * @param key The i18n key.
+- * @param options The i18n options.
+- * @returns The translated text.
+- *
++ * @param {TxKeyPath} key - The i18n key.
++ * @param {i18n.TranslateOptions} options - The i18n options.
++ * @returns {string} - The translated text.
+  * @example
+  * Translations:
+  *
+@@ -25,6 +23,6 @@ import { TxKeyPath } from "./i18n"
+  * // => "Hello world!"
+  * ```
+  */
+-export function translate(key: TxKeyPath, options?: i18n.TranslateOptions) {
++export function translate(key: TxKeyPath, options?: i18n.TranslateOptions): string {
+   return i18n.t(key, options)
+ }
+diff --git a/IgniteDiffApp/app/models/helpers/getRootStore.ts b/IgniteDiffApp/app/models/helpers/getRootStore.ts
+index 5ff5056..f1ca60f 100644
+--- a/IgniteDiffApp/app/models/helpers/getRootStore.ts
++++ b/IgniteDiffApp/app/models/helpers/getRootStore.ts
+@@ -4,6 +4,8 @@ import { RootStore, RootStoreModel } from "../RootStore"
+ /**
+  * Returns a RootStore object in strongly typed way
+  * for stores to access other stores.
++ * @param {IStateTreeNode} self - The store instance.
++ * @returns {RootStore} - The RootStore instance.
+  */
+ export const getRootStore = (self: IStateTreeNode): RootStore => {
+   return getRoot<typeof RootStoreModel>(self)
+diff --git a/IgniteDiffApp/app/models/helpers/useStores.ts b/IgniteDiffApp/app/models/helpers/useStores.ts
+index ede2860..575c90b 100644
+--- a/IgniteDiffApp/app/models/helpers/useStores.ts
++++ b/IgniteDiffApp/app/models/helpers/useStores.ts
+@@ -46,6 +46,8 @@ export const useStores = () => useContext(RootStoreContext)
+  * Used only in the app.tsx file, this hook sets up the RootStore
+  * and then rehydrates it. It connects everything with Reactotron
+  * and then lets the app know that everything is ready to go.
++ * @param {() => void | Promise<void>} callback - an optional callback that's invoked once the store is ready
++ * @returns {object} - the RootStore and rehydrated state
+  */
+ export const useInitialRootStore = (callback?: () => void | Promise<void>) => {
+   const rootStore = useStores()
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 414158e..1ae617f 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -29,6 +29,13 @@ export type DemoTabScreenProps<T extends keyof DemoTabParamList> = CompositeScre
+ 
+ const Tab = createBottomTabNavigator<DemoTabParamList>()
+ 
++/**
++ * This is the main navigator for the demo screens with a bottom tab bar.
++ * Each tab is a stack navigator with its own set of screens.
++ *
++ * More info: https://reactnavigation.org/docs/bottom-tab-navigator/
++ * @returns {JSX.Element} The rendered `DemoNavigator`.
++ */
+ export function DemoNavigator() {
+   const { bottom } = useSafeAreaInsets()
+ 
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index 9b8885e..77b098c 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -19,7 +19,7 @@ type Storage = typeof storage
+  *
+  * If needed, you can use this to access the navigation object outside of a
+  * `NavigationContainer` context. However, it's recommended to use the `useNavigation` hook whenever possible.
+- * @see https://reactnavigation.org/docs/navigating-without-navigation-prop/
++ * @see [Navigating Without Navigation Prop]{@link https://reactnavigation.org/docs/navigating-without-navigation-prop/}
+  *
+  * The types on this reference will only let you reference top level navigators. If you have
+  * nested navigators, you'll need to use the `useNavigation` with the stack navigator's ParamList type.
+@@ -28,6 +28,8 @@ export const navigationRef = createNavigationContainerRef<AppStackParamList>()
+ 
+ /**
+  * Gets the current screen from any navigation state.
++ * @param {NavigationState | PartialState<NavigationState>} state - The navigation state to traverse.
++ * @returns {string} - The name of the current screen.
+  */
+ export function getActiveRouteName(state: NavigationState | PartialState<NavigationState>): string {
+   const route = state.routes[state.index ?? 0]
+@@ -42,6 +44,9 @@ export function getActiveRouteName(state: NavigationState | PartialState<Navigat
+ /**
+  * Hook that handles Android back button presses and forwards those on to
+  * the navigation or allows exiting the app.
++ * @see [BackHandler]{@link https://reactnative.dev/docs/backhandler}
++ * @param {(routeName: string) => boolean} canExit - Function that returns whether we can exit the app.
++ * @returns {void}
+  */
+ export function useBackButtonHandler(canExit: (routeName: string) => boolean) {
+   // ignore unless android... no back button!
+@@ -92,6 +97,8 @@ export function useBackButtonHandler(canExit: (routeName: string) => boolean) {
+ /**
+  * This helper function will determine whether we should enable navigation persistence
+  * based on a config setting and the __DEV__ environment (dev or prod).
++ * @param {PersistNavigationConfig} persistNavigation - The config setting for navigation persistence.
++ * @returns {boolean} - Whether to restore navigation state by default.
+  */
+ function navigationRestoredDefaultState(persistNavigation: PersistNavigationConfig) {
+   if (persistNavigation === "always") return false
+@@ -104,6 +111,9 @@ function navigationRestoredDefaultState(persistNavigation: PersistNavigationConf
+ 
+ /**
+  * Custom hook for persisting navigation state.
++ * @param {Storage} storage - The storage utility to use.
++ * @param {string} persistenceKey - The key to use for storing the navigation state.
++ * @returns {object} - The navigation state and persistence functions.
+  */
+ export function useNavigationPersistence(storage: Storage, persistenceKey: string) {
+   const [initialNavigationState, setInitialNavigationState] =
+@@ -154,7 +164,9 @@ export function useNavigationPersistence(storage: Storage, persistenceKey: strin
+ /**
+  * use this to navigate without the navigation
+  * prop. If you have access to the navigation prop, do not use this.
+- * @see https://reactnavigation.org/docs/navigating-without-navigation-prop/
++ * @see {@link https://reactnavigation.org/docs/navigating-without-navigation-prop/}
++ * @param {unknown} name - The name of the route to navigate to.
++ * @param {unknown} params - The params to pass to the route.
+  */
+ export function navigate(name: unknown, params?: unknown) {
+   if (navigationRef.isReady()) {
+@@ -177,6 +189,8 @@ export function goBack() {
+ 
+ /**
+  * resetRoot will reset the root navigation state to the given params.
++ * @param {Parameters<typeof navigationRef.resetRoot>[0]} state - The state to reset the root to.
++ * @returns {void}
+  */
+ export function resetRoot(
+   state: Parameters<typeof navigationRef.resetRoot>[0] = { index: 0, routes: [] },
+diff --git a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+index 60758a1..1914380 100644
+--- a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+@@ -7,6 +7,10 @@ import { colors, spacing } from "../theme"
+ import { isRTL } from "../i18n"
+ import { useStores } from "../models"
+ 
++/**
++ * @param {string} url - The URL to open in the browser.
++ * @returns {void} - No return value.
++ */
+ function openLinkInBrowser(url: string) {
+   Linking.canOpenURL(url).then((canOpen) => canOpen && Linking.openURL(url))
+ }
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+index 62993ef..3110cbb 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoDivider.tsx
+@@ -10,6 +10,10 @@ interface DemoDividerProps {
+   line?: boolean
+ }
+ 
++/**
++ * @param {DemoDividerProps} props - The props for the `DemoDivider` component.
++ * @returns {JSX.Element} The rendered `DemoDivider` component.
++ */
+ export function DemoDivider(props: DemoDividerProps) {
+   const { type = "horizontal", size = 10, line = false, style: $styleOverride } = props
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+index 19e7770..402c906 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+@@ -10,6 +10,10 @@ interface DemoUseCaseProps {
+   children: ReactNode
+ }
+ 
++/**
++ * @param {DemoUseCaseProps} props - The props for the `DemoUseCase` component.
++ * @returns {JSX.Element} The rendered `DemoUseCase` component.
++ */
+ export function DemoUseCase(props: DemoUseCaseProps) {
+   const { name, description, children, layout = "column" } = props
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 7c36956..53c461e 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -9,6 +9,10 @@ interface DrawerIconButtonProps extends PressableProps {}
+ 
+ const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+ 
++/**
++ * @param {DrawerIconButtonProps} props - The props for the `DrawerIconButton` component.
++ * @returns {JSX.Element} The rendered `DrawerIconButton` component.
++ */
+ export function DrawerIconButton(props: DrawerIconButtonProps) {
+   const { ...PressableProps } = props
+   const progress = useDrawerProgress()
+diff --git a/IgniteDiffApp/app/screens/ErrorScreen/ErrorBoundary.tsx b/IgniteDiffApp/app/screens/ErrorScreen/ErrorBoundary.tsx
+index ca8025f..7df04d9 100644
+--- a/IgniteDiffApp/app/screens/ErrorScreen/ErrorBoundary.tsx
++++ b/IgniteDiffApp/app/screens/ErrorScreen/ErrorBoundary.tsx
+@@ -16,9 +16,10 @@ interface State {
+  * app. It follows the "error boundary" pattern in React. We're using a
+  * class component because according to the documentation, only class
+  * components can be error boundaries.
+- *
+- * - [Documentation and Examples](https://docs.infinite.red/ignite-cli/concept/Error-Boundary/)
+- * - [React Error Boundaries](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/concept/Error-Boundary/}
++ * @see [React Error Boundaries]{@link https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary}
++ * @param {Props} props - The props for the `ErrorBoundary` component.
++ * @returns {JSX.Element} The rendered `ErrorBoundary` component.
+  */
+ export class ErrorBoundary extends Component<Props, State> {
+   state = { error: null, errorInfo: null }
+diff --git a/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx b/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
+index 120a367..5b7322c 100644
+--- a/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
++++ b/IgniteDiffApp/app/screens/ErrorScreen/ErrorDetails.tsx
+@@ -9,6 +9,11 @@ export interface ErrorDetailsProps {
+   onReset(): void
+ }
+ 
++/**
++ * Renders the error details screen.
++ * @param {ErrorDetailsProps} props - The props for the `ErrorDetails` component.
++ * @returns {JSX.Element} The rendered `ErrorDetails` component.
++ */
+ export function ErrorDetails(props: ErrorDetailsProps) {
+   return (
+     <Screen
+diff --git a/IgniteDiffApp/app/services/api/api.ts b/IgniteDiffApp/app/services/api/api.ts
+index fc8d859..f8f25ee 100644
+--- a/IgniteDiffApp/app/services/api/api.ts
++++ b/IgniteDiffApp/app/services/api/api.ts
+@@ -2,7 +2,7 @@
+  * This Api class lets you define an API endpoint and methods to request
+  * data and process it.
+  *
+- * See the [Backend API Integration](https://github.com/infinitered/ignite/blob/master/docs/Backend-API-Integration.md)
++ * See the [Backend API Integration](https://docs.infinite.red/ignite-cli/boilerplate/app/services/Services.md)
+  * documentation for more details.
+  */
+ import { ApiResponse, ApisauceInstance, create } from "apisauce"
+diff --git a/IgniteDiffApp/app/utils/useHeader.tsx b/IgniteDiffApp/app/utils/useHeader.tsx
+index f48d3f1..a3b191a 100644
+--- a/IgniteDiffApp/app/utils/useHeader.tsx
++++ b/IgniteDiffApp/app/utils/useHeader.tsx
+@@ -4,8 +4,9 @@ import { Header, HeaderProps } from "../components"
+ 
+ /**
+  * A hook that can be used to easily set the Header of a react-navigation screen from within the screen's component.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Utils-useHeader.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/utility/useHeader/}
++ * @param {HeaderProps} headerProps - The props for the `Header` component.
++ * @param {any[]} deps - The dependencies to watch for changes to update the header.
+  */
+ export function useHeader(
+   headerProps: HeaderProps,
+diff --git a/IgniteDiffApp/app/utils/useIsMounted.ts b/IgniteDiffApp/app/utils/useIsMounted.ts
+index 32f4356..168627e 100644
+--- a/IgniteDiffApp/app/utils/useIsMounted.ts
++++ b/IgniteDiffApp/app/utils/useIsMounted.ts
+@@ -1,5 +1,9 @@
+ import { useEffect, useCallback, useRef } from "react"
+ 
++/**
++ * A common react custom hook to check if the component is mounted.
++ * @returns {() => boolean} - A function that returns true if the component is mounted.
++ */
+ export function useIsMounted() {
+   const isMounted = useRef(false)
+ 
+diff --git a/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts b/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts
+index 6d11b31..fb85a76 100644
+--- a/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts
++++ b/IgniteDiffApp/app/utils/useSafeAreaInsetsStyle.ts
+@@ -1,4 +1,3 @@
+-import { FlexStyle } from "react-native"
+ import { Edge, useSafeAreaInsets } from "react-native-safe-area-context"
+ 
+ export type ExtendedEdge = Edge | "start" | "end"
+@@ -17,29 +16,31 @@ const edgeInsetMap: Record<string, Edge> = {
+   end: "right",
+ }
+ 
++export type SafeAreaInsetsStyle<
++  Property extends "padding" | "margin" = "padding",
++  Edges extends Array<ExtendedEdge> = Array<ExtendedEdge>,
++> = {
++  [K in Edges[number] as `${Property}${Capitalize<K>}`]: number
++}
++
+ /**
+  * A hook that can be used to create a safe-area-aware style object that can be passed directly to a View.
+- *
+- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/boilerplate/utility/useSafeAreaInsetsStyle.md)
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/utility/useSafeAreaInsetsStyle/}
++ * @param {ExtendedEdge[]} safeAreaEdges - The edges to apply the safe area insets to.
++ * @param {"padding" | "margin"} property - The property to apply the safe area insets to.
++ * @returns {SafeAreaInsetsStyle<Property, Edges>} - The style object with the safe area insets applied.
+  */
+-export function useSafeAreaInsetsStyle(
+-  safeAreaEdges: ExtendedEdge[] = [],
+-  property: "padding" | "margin" = "padding",
+-): Pick<
+-  FlexStyle,
+-  | "marginBottom"
+-  | "marginEnd"
+-  | "marginStart"
+-  | "marginTop"
+-  | "paddingBottom"
+-  | "paddingEnd"
+-  | "paddingStart"
+-  | "paddingTop"
+-> {
++export function useSafeAreaInsetsStyle<
++  Property extends "padding" | "margin" = "padding",
++  Edges extends Array<ExtendedEdge> = [],
++>(
++  safeAreaEdges: Edges = [] as unknown as Edges,
++  property: Property = "padding" as Property,
++): SafeAreaInsetsStyle<Property, Edges> {
+   const insets = useSafeAreaInsets()
+ 
+   return safeAreaEdges.reduce((acc, e) => {
+     const value = edgeInsetMap[e] ?? e
+     return { ...acc, [`${property}${propertySuffixMap[e]}`]: insets[value] }
+-  }, {})
++  }, {}) as SafeAreaInsetsStyle<Property, Edges>
+ }
+diff --git a/IgniteDiffApp/test/setup.ts b/IgniteDiffApp/test/setup.ts
+index 2fce6c0..1c67101 100644
+--- a/IgniteDiffApp/test/setup.ts
++++ b/IgniteDiffApp/test/setup.ts
+@@ -41,7 +41,6 @@ jest.mock("expo-localization", () => ({
+ 
+ declare const tron // eslint-disable-line @typescript-eslint/no-unused-vars
+ 
+-jest.useFakeTimers()
+ declare global {
+   let __TEST__: boolean
+ }
