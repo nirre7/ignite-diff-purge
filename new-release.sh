@@ -56,7 +56,8 @@ function generateNewReleaseBranch () {
         --install-deps \
         --target-path=$SCRIPT_DIR/wt-app/$AppName \
         --remove-demo=false \
-        --workflow=cng \
+        --workflow=CNG \
+        --state=mst \
         --no-timeout=false
 
     # remove the .git folder in created ignite app
