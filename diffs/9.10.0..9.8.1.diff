@@ -1,0 +1,4805 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index c493c0bd..3b6f6fd5 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -73,6 +73,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.10.0"
++    "version": "9.8.1"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Button.tsx b/IgniteDiffApp/app/components/Button.tsx
+index ed7ef069..33c6f29f 100644
+--- a/IgniteDiffApp/app/components/Button.tsx
++++ b/IgniteDiffApp/app/components/Button.tsx
+@@ -84,7 +84,7 @@ export interface ButtonProps extends PressableProps {
+ /**
+  * A component that allows users to take actions and make choices.
+  * Wraps the Text component with a Pressable component.
+- * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Button/}
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Button/}
+  * @param {ButtonProps} props - The props for the `Button` component.
+  * @returns {JSX.Element} The rendered `Button` component.
+  * @example
+diff --git a/IgniteDiffApp/app/components/ListView.tsx b/IgniteDiffApp/app/components/ListView.tsx
+index 5840b28f..ef3406a0 100644
+--- a/IgniteDiffApp/app/components/ListView.tsx
++++ b/IgniteDiffApp/app/components/ListView.tsx
+@@ -10,7 +10,7 @@ export type ListViewProps<T> = PropsWithoutRef<FlashListProps<T>>
+ /**
+  * This is a Higher Order Component meant to ease the pain of using @shopify/flash-list
+  * when there is a chance that a user would have their device language set to an
+- * RTL language like Arabic or Persian. This component will use react-native's
++ * RTL language like Arabic or Punjabi. This component will use react-native's
+  * FlatList if the user's language is RTL or FlashList if the user's language is LTR.
+  *
+  * Because FlashList's props are a superset of FlatList's, you must pass estimatedItemSize
+diff --git a/IgniteDiffApp/app/i18n/ar.ts b/IgniteDiffApp/app/i18n/ar.ts
+index 89f1124a..8100769f 100644
+--- a/IgniteDiffApp/app/i18n/ar.ts
++++ b/IgniteDiffApp/app/i18n/ar.ts
+@@ -1,4 +1,3 @@
+-import demoAr from "./demo-ar"
+ import { Translations } from "./en"
+ 
+ const ar: Translations = {
+@@ -118,8 +117,6 @@ const ar: Translations = {
+         "لم تتم اضافة اي مفضلات حتى الان. اضغط على القلب في إحدى الحلقات لإضافته الى المفضلة.",
+     },
+   },
+-
+-  ...demoAr,
+ }
+ 
+ export default ar
+diff --git a/IgniteDiffApp/app/i18n/demo-ar.ts b/IgniteDiffApp/app/i18n/demo-ar.ts
+deleted file mode 100644
+index b3610096..00000000
+--- a/IgniteDiffApp/app/i18n/demo-ar.ts
++++ /dev/null
+@@ -1,462 +0,0 @@
+-import { DemoTranslations } from "./demo-en"
+-
+-export const demoAr: DemoTranslations = {
+-  demoIcon: {
+-    description:
+-      "مكون لعرض أيقونة مسجلة.يتم تغليفه في <TouchableOpacity> يتم توفير 'OnPress'، وإلا يتم توفير <View",
+-    useCase: {
+-      icons: {
+-        name: "Icons",
+-        description: "قائمة الرموز المسجلة داخل المكون.",
+-      },
+-      size: {
+-        name: "Size",
+-        description: "هناك حجم الدعامة.",
+-      },
+-      color: {
+-        name: "لون",
+-        description: "هناك لون الدعامة.",
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة.",
+-      },
+-    },
+-  },
+-  demoTextField: {
+-    description: "TextField يسمح المكون بإدخال النص وتحريره.",
+-    useCase: {
+-      statuses: {
+-        name: "الحالات",
+-        description:
+-          "هناك حالة مماثلة ل 'preset' في المكونات الأخرى، ولكنها تؤثر على وظيفة المكون ايضاً.",
+-        noStatus: {
+-          label: "لا يوجد حالات",
+-          helper: "هذه هي الحالة الافتراضية",
+-          placeholder: "النص يذهب هنا",
+-        },
+-        error: {
+-          label: "حالة الخطأ",
+-          helper: "الحالة التي يجب استخدامها عند وجود خطأ",
+-          placeholder: "النص يذهب هنا",
+-        },
+-        disabled: {
+-          label: "حالة الإعاقة",
+-          helper: "يعطل إمكانية التحرير ويكتم النص",
+-          placeholder: "النص يذهب هنا",
+-        },
+-      },
+-      passingContent: {
+-        name: "محتوى عابر",
+-        description: "هناك عدة طرق مختلفة لتمرير المحتوى",
+-        viaLabel: {
+-          labelTx: "عبر 'label' الدعامة",
+-          helper: "عبر 'helper' الدعامة",
+-          placeholder: "عبر 'placeholder' الدعامة",
+-        },
+-        rightAccessory: {
+-          label: "RightAccessory",
+-          helper: "هذه الدعامة تأخذ دالة تقوم بإرجاع عنصر React",
+-        },
+-        leftAccessory: {
+-          label: "LeftAccessory",
+-          helper: "هذه الدعامة تأخذ دالة تقوم بإرجاع عنصر React",
+-        },
+-        supportsMultiline: {
+-          label: "يدعم Multiline",
+-          helper: "يتيح إدخالا اطول للنص متعدد الأسطر.",
+-        },
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة",
+-        styleInput: {
+-          label: "أسلوب الإدخال",
+-          helper: "عبر دعامة 'Style'",
+-        },
+-        styleInputWrapper: {
+-          label: "غلاف ادخال النمط",
+-          helper: "عبر دعامة 'InputWrapperStyle'",
+-        },
+-        styleContainer: {
+-          label: "حاوية النمط",
+-          helper: "عبر دعامة 'containerstyle'",
+-        },
+-        styleLabel: {
+-          label: "تسمية النمط والمساعد",
+-          helper: "عبر أسلوب الدعامة 'LabelTextProps' & 'HelperTextProps'",
+-        },
+-        styleAccessories: {
+-          label: "اكسسورات الاناقة",
+-          helper: "عبر أسلوب الدعامة 'RightAccessory' & 'LeftAccessory'",
+-        },
+-      },
+-    },
+-  },
+-  demoToggle: {
+-    description:
+-      "يقوم بعرض ادخال منطقي.هذا مكون خاضع للتحكم ويتطلب استدعاء OnValueChanger الذي يقوم بتحديث خاصية القيمة حتى يعكس المكون إجراءات المستخدم. إذا لم يتم تحديث خاصية القيمة، فسيستمر المكون في عرض خاصية القيمة المقدمة بدلا من النتيجة المتوقعة لأي إجراءات مستخدم.",
+-    useCase: {
+-      variants: {
+-        name: "المتغيرات",
+-        description:
+-          "تدعم المكونات عددا قليلا من المتغيرات المختلفة. اذا كانت هناك حاجة إلى تخصيص كبير لمتغير معين، فيمكن إعادة صياغته بسهولة. الافتراضي هو 'checkbox'",
+-        checkbox: {
+-          label: "'checkbox' متغير",
+-          helper: "يمكن استخدامه كمدخل تشغيل \\ إيقاف واحد",
+-        },
+-        radio: {
+-          label: "'radio' متغير",
+-          helper: "استخدام هذا عندما يكون لديك خيارات متعددة",
+-        },
+-        switch: {
+-          label: "'switch' متغير",
+-          helper: "مدخل تشغيل/إيقاف أكثر بروزا. يتمتع بدعم إمكانية الوصول بشكل أفضل.",
+-        },
+-      },
+-      statuses: {
+-        name: "الحالات",
+-        description:
+-          "هناك دعامة حالة مشابهة ل 'preset' في المكونات الأخرى، لكنها تؤثر على وظائف المكونات ايضاً",
+-        noStatus: "لا توجد حالات- هذا هو الوضع الافتراضي",
+-        errorStatus: "حالة الخطأ - استخدمها عندما يكون هناك خطأ",
+-        disabledStatus: "حالة معطلة- تعطيل إمكانية التحرير وكتم صوت الإدخال",
+-      },
+-      passingContent: {
+-        name: "محتوى عابر",
+-        description: "هناك عدة طرق مختلفة لتمرير المحتوى",
+-        useCase: {
+-          checkBox: {
+-            label: "عبر دعامة 'labelTx'",
+-            helper: "عبر دعامة 'helpertx'",
+-          },
+-          checkBoxMultiLine: {
+-            helper: "يدعم خطوط متعددة-Nulla provident consectetur labore sunt ea labore ",
+-          },
+-          radioChangeSides: {
+-            helper: "يمكنك تغيير الجانبين - Laborum labore adipisicing in eu ipsum deserunt.",
+-          },
+-          customCheckBox: {
+-            label: "مرر أيقونة مربع الاختيار المخصص",
+-          },
+-          switch: {
+-            label: "يمكن قراءة المفاتيح كنص",
+-            helper:
+-              "بشكل افتراضي، لا يستخدم هذا الخيار \"text' نظرا لأنه اعتمادا على الخط، قد تبدو الأحرف التي يتم تشغيلها/ايقافها غريبة. قم بالتخصيص حسب الحاجة",
+-          },
+-          switchAid: {
+-            label: "او بمساعدة أيقونة",
+-          },
+-        },
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة",
+-        outerWrapper: "١- تصميم الغلاف الخارجي للإدخال",
+-        innerWrapper: "٢- تصميم الغلاف الداخلي للإدخال",
+-        inputDetail: "٣- تصميم تفاصيل الإدخال",
+-        labelTx: "يمكنك ايضاً تصميم الملصق labelTx",
+-        styleContainer: "او، قم بتصميم الحاوية بأكملها",
+-      },
+-    },
+-  },
+-  demoButton: {
+-    description:
+-      "مكون يسمح للمستخدمين بإتخاذ الإجراءات والاختيارات. يلف مكون النص بمكون قابل للضغط",
+-    useCase: {
+-      presets: {
+-        name: "الإعدادات المسبقة",
+-        description: "هناك عدد قليل من الإعدادات المسبقة التي تم تكوينها مسبقاً",
+-      },
+-      passingContent: {
+-        name: "محتوى عابر",
+-        description: "هناك عدة طرق مختلفة لتمرير المحتوى",
+-        viaTextProps: "عبر الدعامة 'text'- Billum In",
+-        children: "أولاد- Irure Reprehenderit",
+-        rightAccessory: "RightAccessory - Duis Quis",
+-        leftAccessory: "LeftAccessory - Duis Proident",
+-        nestedChildren: "الأطفال المتداخلون-\tprovident genial",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren3: "Occaecat aliqua irure proident veniam.",
+-        multiLine:
+-          "Multiline - consequat veniam veniam reprehenderit. Fugiat id nisi quis duis sunt proident mollit dolor mollit adipisicing proident deserunt.",
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة",
+-        styleContainer: "حاوية الأسلوب- الإثارة",
+-        styleText: "نص النمط- ِEa Anim",
+-        styleAccessories: "اكسسوارات الاناقة - enim ea id fugiat anim ad.",
+-        pressedState: "نمط الحالة المضغوطة - fugiat anim",
+-      },
+-      disabling: {
+-        name: "تعطيل",
+-        description: "يمكن تعطيل المكون، وتصميمه بناء على ذلك. سيتم تعطيل سلوك الضغط",
+-        standard: "إبطال - معيار",
+-        filled: "إبطال - مملوء",
+-        reversed: "إبطال- معكوس",
+-        accessory: "نمط الملحق المعطل",
+-        textStyle: "نمط النص المعطل",
+-      },
+-    },
+-  },
+-  demoListItem: {
+-    description: "مكون صف مصمم يمكن استخدامه في FlatList او SectionList او بمفرده",
+-    useCase: {
+-      height: {
+-        name: "علو",
+-        description: "يمكن ان يكون الصف بارتفاعات مختلفة",
+-        defaultHeight: "الارتفاع الافتراضي (56px)",
+-        customHeight: "ارتفاع مخصص عبر دعامة 'height'",
+-        textHeight:
+-          "الارتفاع يتم تحديده من خلال محتوى النص - Reprehenderit incididunt deserunt do do ea labore.",
+-        longText: "تحديد النص إلى سطر واحد - Reprehenderit incididunt deserunt do do ea labore.",
+-      },
+-      separators: {
+-        name: "الفواصل",
+-        description: "الفاصل/ المقسم مهيّأ مسبقاً وهو اختياري",
+-        topSeparator: "فقط فاصل علوي",
+-        topAndBottomSeparator: "الفواصل العلوية والسفلية",
+-        bottomSeparator: "فقط فاصل سفلي",
+-      },
+-      icons: {
+-        name: "الأيقونات",
+-        description: "يمكنك تخصيص الرموز على اليسار أو اليمين",
+-        leftIcon: "أيقونة اليسار",
+-        rightIcon: "أيقونة اليمين",
+-        leftRightIcons: "أيقونة اليمين واليسار",
+-      },
+-      customLeftRight: {
+-        name: "مكونات مخصصة لليسار /اليمين",
+-        description: "اذا كنت بحاجة إلى مخصص لليسار/اليمين فيمكنك تمريره",
+-        customLeft: "مكون يسار مخصص",
+-        customRight: "مكون يمين مخصص",
+-      },
+-      passingContent: {
+-        name: "محتوى عابر",
+-        description: "هناك عدة طرق مختلفة لتمرير المحتوى",
+-        text: "عبر دعامة 'text' - reprehenderit sint",
+-        children: "أولاد- mostrud mollit",
+-        nestedChildren1: "الأولاد المتداخلون - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-      },
+-      listIntegration: {
+-        name: "دمج مع/ FlatList & FlashList",
+-        description: "يمكن دمج المكون بسهولة مع واجهة القائمة المفضلة لديك",
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة.",
+-        styledText: "نص مصمم",
+-        styledContainer: "حاوية مصممة (فواصل)",
+-        tintedIcons: "أيقونات ملونة",
+-      },
+-    },
+-  },
+-  demoCard: {
+-    description:
+-      "البطاقات مفيدة لعرض المعلومات ذات الصلة بطريقة محددة. اذا كان ListItem يعرض المحتوى أفقياً، فيمكن استخدام البطاقة لعرض المحتوى رأسياً.",
+-    useCase: {
+-      presets: {
+-        name: "الإعدادات المسبقة",
+-        description: "هناك عدد قليل من الإعدادات المسبقة التي تم تكوينها مسبقاً",
+-        default: {
+-          heading: "الأعداد المسبق الافتراضي ( تقصير)",
+-          content: "Incididunt magna ut aliquip consectetur mollit dolor.",
+-          footer: "Consectetur nulla non aliquip velit.",
+-        },
+-        reversed: {
+-          heading: "الأعداد المسبق المعكوس",
+-          content: "Reprehenderit occaecat proident amet id laboris.",
+-          footer: "Consectetur tempor ea non labore anim .",
+-        },
+-      },
+-      verticalAlignment: {
+-        name: "انحياز عمودي",
+-        description:
+-          "اعتمادا على ما هو مطلوب، تأتي البطاقة مهيأة مسبقاً باستراتيجيات محاذاة مختلفة",
+-        top: {
+-          heading: "قمة (تقصير)",
+-          content: "يتم محاذاة كل محتوى تلقائياً إلى الأعلى",
+-          footer: "حتى التذييل",
+-        },
+-        center: {
+-          heading: "مركز",
+-          content: "يتم تركيز المحتوى بالنسبة لارتفاع البطاقة",
+-          footer: "أنا ايضاً!",
+-        },
+-        spaceBetween: {
+-          heading: "مسافة بين الكلمات",
+-          content: "يتم توزيع جميع المحتويات بالتساوي",
+-          footer: "أنا حيث أريد ان أكون",
+-        },
+-        reversed: {
+-          heading: "Force Footer Bottom",
+-          content: "يؤدي هذا إلى دفع التذييل إلى المكان الذي ينتمي اليه.",
+-          footer: "أنا وحد جداًهنا",
+-        },
+-      },
+-      passingContent: {
+-        name: "محتوى عابر",
+-        description: "هناك عدة طرق مختلفة لتمرير المحتوى.",
+-        heading: "عبر دعم 'heading'",
+-        content: "عبر دعم 'content'",
+-        footer: "أنا وحيد هنا.",
+-      },
+-      customComponent: {
+-        name: "مكونات مخصصة",
+-        description:
+-          "يمكن استبدال اي من المكونات المعدة مسبقاً بمكوناتك الخاصة. يمكنك ايضاً اضافة مكونات إضافية.",
+-        rightComponent: "RightComponent",
+-        leftComponent: "LeftComponent",
+-      },
+-      style: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة.",
+-        heading: "صمم العنوان",
+-        content: "صمم المحتوى",
+-        footer: "صمم التذييل",
+-      },
+-    },
+-  },
+-  demoAutoImage: {
+-    description: "مكون صورة يحدد حجم الصورة البعيدة او صورة data-uri",
+-    useCase: {
+-      remoteUri: {
+-        name: "عن بعد URI",
+-      },
+-      base64Uri: {
+-        name: "Base64 URI",
+-      },
+-      scaledToFitDimensions: {
+-        name: "تم قياسها لتناسب الأبعاد",
+-        description:
+-          " توفيرعرض  'maxWidth' و\\او 'maxHeight' ، سيتم عرض الصورة بنسبة عرض الى ارتفاع. كيف يختلف هذا عن 'resizeMode': 'contain'? اولاً،يمكنك تحديد حجم جانب واحد فقط. (ليس كلاهما). ثانياً، سيتم تغيير الصورة لتناسب الأبعاد المطلوبة بدلاً من مجرد احتوائها داخل حاوية الصورة الخاصة بها.",
+-        heightAuto: " عرض : ٦٠ / طول:  auto",
+-        widthAuto: "عرض: auto / طول: ٣٢",
+-        bothManual: "عرض :٦٠ / طول : ٦٠",
+-      },
+-    },
+-  },
+-  demoText: {
+-    description:
+-      "لتلبية احتياجاتك في عرض النصوص. هذا المكون عبارة عن HOC فوق المكون المدمج Native React.",
+-    useCase: {
+-      presets: {
+-        name: "الإعدادات المسبقة",
+-        description: "هناك عدد قليل من الإعدادات المسبقة التي تم تكوينها مسبقاً.",
+-        default:
+-          "الأعداد المسبق الافتراضي - Cillum eu laboris in labore. Excepteur mollit tempor reprehenderit fugiat elit et eu consequat laborum.",
+-        bold: "bold preset - Tempor et ullamco cupidatat in officia. Nulla ea duis elit id sunt ipsum cillum duis deserunt nostrud ut nostrud id.",
+-        subheading: "subheading preset - In Cupidatat Cillum.",
+-        heading: "heading preset - Voluptate Adipis.",
+-      },
+-      sizes: {
+-        name: "قياسات",
+-        description: "هناك حجم الدعامة",
+-        xs: "xs - Ea ipsum est ea ex sunt.",
+-        sm: "sm - Lorem sunt adipisicin.",
+-        md: "md - Consequat id do lorem.",
+-        lg: "lg - Nostrud ipsum ea.",
+-        xl: "xl - Eiusmod ex excepteur.",
+-        xxl: "xxl - Cillum eu laboris.",
+-      },
+-      weights: {
+-        name: "أوزان",
+-        description: "هناك وزن الدعامة",
+-        light:
+-          "light - Nulla magna incididunt excepteur est occaecat duis culpa dolore cupidatat enim et.",
+-        normal:
+-          "normal - Magna incididunt dolor ut veniam veniam laboris aliqua velit ea incididunt.",
+-        medium: "medium - Non duis laborum quis laboris occaecat culpa cillum.",
+-        semibold: "semiBold - Exercitation magna nostrud pariatur laborum occaecat aliqua.",
+-        bold: "bold - Eiusmod ullamco magna exercitation est excepteur.",
+-      },
+-      passingContent: {
+-        name: "محتوى عابر",
+-        description: "هناك عدة طرق مختلفة لتمرير المحتوى.",
+-        viaText:
+-          "via `text` prop - Billum in aute fugiat proident nisi pariatur est. Cupidatat anim cillum eiusmod ad. Officia eu magna aliquip labore dolore consequat.",
+-        viaTx: "عبر دعامة 'tx'",
+-        children: "childrenreprehenderit eu qui amet veniam consectetur.",
+-        nestedChildren: "الأطفال المتداخلون",
+-        nestedChildren2: "Occaecat aliqua irure proident veniam.",
+-        nestedChildren3: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren4: "Occaecat aliqua irure proident veniam.",
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة.",
+-        text: "Consequat ullamco veniam velit mollit proident excepteur aliquip id culpa ipsum velit sint nostrud.",
+-        text2:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-        text3:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-      },
+-    },
+-  },
+-  demoHeader: {
+-    description: "المكون الذي يظهر على العديد من الشاشات، سيحمل ازرار التنقل وعنوان الشاشة.",
+-    useCase: {
+-      actionIcons: {
+-        name: "أيقونة الإجرائات ",
+-        description: "يمكنك بسهولة تمرير الرموزالى مكونات الاجراء اليسرى او اليمنى.",
+-        leftIconTitle: "الرمز الأيسر",
+-        rightIconTitle: "الرمز الأيمن ",
+-        bothIconsTitle: "كلا الرمزين",
+-      },
+-      actionText: {
+-        name: "نص العمل",
+-        description: "يمكنك بسهولة تمرير النص الى مكونات الاجراء اليسرى او اليمنى.",
+-        leftTxTitle: "عبر 'leftTx' ",
+-        rightTextTitle: "عبر `rightText`",
+-      },
+-      customActionComponents: {
+-        name: "مكونات الاجراء المخصص",
+-        description:
+-          "اذا لم تكن خيارات الرمز او النسكافية، فيمكنك تمرير مكون الاجراء المخصص الخاص بك.",
+-        customLeftActionTitle: "عمل يسار مخصص ",
+-      },
+-      titleModes: {
+-        name: "اوضاع العنوان",
+-        description:
+-          "يمكن اجبار العنوان على البقاء غي المنتصف ولكن قد يتم قطعه اذا كان طويلاً للغاية. يمكنك بشكل اختياري تعديله وفقاً لأزرار الإجراء.",
+-        centeredTitle: "عنوان مركزي",
+-        flexTitle: "عنوان مرن",
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة",
+-        styledTitle: "عنوان مصمم",
+-        styledWrapperTitle: "غلاف مصمم",
+-        tintedIconsTitle: "أيقونات ملونة",
+-      },
+-    },
+-  },
+-  demoEmptyState: {
+-    description:
+-      "مكون يتم استخدامه عندما لا يكون هناك بيانات لعرضها. ويمكن استخدامه لتوجيه المستخدم الى ما يجب فعله بعد ذلك.",
+-    useCase: {
+-      presets: {
+-        name: "الإعدادات المسبقة",
+-        description:
+-          "يمكن إنشاء نص/صورة مختلفة مجموعات. واحد محدد مسبقاً يسمى 'generic'. لاحظ انه لا يوجد اي خيار افتراضي في حال رغبتك في الحصول على كامل  EmptyState مخصصة.",
+-      },
+-      passingContent: {
+-        name: "محتوى عابر",
+-        description: "هناك عدة طرق مختلفة لتمرير المحتوى.",
+-        customizeImageHeading: "تخصيص الصورة",
+-        customizeImageContent: "يمكنك تمرير اي مصدر للصورة",
+-        viaHeadingProp: "عبر دعامة 'heading'",
+-        viaContentProp: "عبر دعامة 'content'",
+-        viaButtonProp: "عبر دعامة 'button'",
+-      },
+-      styling: {
+-        name: "التصميم",
+-        description: "يمكن تصميم المكون بسهولة.",
+-      },
+-    },
+-  },
+-}
+-
+-export default demoAr
+diff --git a/IgniteDiffApp/app/i18n/demo-en.ts b/IgniteDiffApp/app/i18n/demo-en.ts
+deleted file mode 100644
+index ab93885e..00000000
+--- a/IgniteDiffApp/app/i18n/demo-en.ts
++++ /dev/null
+@@ -1,460 +0,0 @@
+-export const demoEn = {
+-  demoIcon: {
+-    description:
+-      "A component to render a registered icon. It is wrapped in a <TouchableOpacity /> if `onPress` is provided, otherwise a <View />.",
+-    useCase: {
+-      icons: {
+-        name: "Icons",
+-        description: "List of icons registered inside the component.",
+-      },
+-      size: {
+-        name: "Size",
+-        description: "There's a size prop.",
+-      },
+-      color: {
+-        name: "Color",
+-        description: "There's a color prop.",
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-      },
+-    },
+-  },
+-  demoTextField: {
+-    description: "TextField component allows for the entering and editing of text.",
+-    useCase: {
+-      statuses: {
+-        name: "Statuses",
+-        description:
+-          "There is a status prop - similar to `preset` in other components, but affects component functionality as well.",
+-        noStatus: {
+-          label: "No Status",
+-          helper: "This is the default status",
+-          placeholder: "Text goes here",
+-        },
+-        error: {
+-          label: "Error Status",
+-          helper: "Status to use when there is an error",
+-          placeholder: "Text goes here",
+-        },
+-        disabled: {
+-          label: "Disabled Status",
+-          helper: "Disables the editability and mutes text",
+-          placeholder: "Text goes here",
+-        },
+-      },
+-      passingContent: {
+-        name: "Passing Content",
+-        description: "There are a few different ways to pass content.",
+-        viaLabel: {
+-          labelTx: "Via `label` prop",
+-          helper: "Via `helper` prop",
+-          placeholder: "Via `placeholder` prop",
+-        },
+-        rightAccessory: {
+-          label: "RightAccessory",
+-          helper: "This prop takes a function that returns a React element.",
+-        },
+-        leftAccessory: {
+-          label: "LeftAccessory",
+-          helper: "This prop takes a function that returns a React element.",
+-        },
+-        supportsMultiline: {
+-          label: "Supports Multiline",
+-          helper: "Enables a taller input for multiline text.",
+-        },
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-        styleInput: {
+-          label: "Style Input",
+-          helper: "Via `style` prop",
+-        },
+-        styleInputWrapper: {
+-          label: "Style Input Wrapper",
+-          helper: "Via `inputWrapperStyle` prop",
+-        },
+-        styleContainer: {
+-          label: "Style Container",
+-          helper: "Via `containerStyle` prop",
+-        },
+-        styleLabel: {
+-          label: "Style Label & Helper",
+-          helper: "Via `LabelTextProps` & `HelperTextProps` style prop",
+-        },
+-        styleAccessories: {
+-          label: "Style Accessories",
+-          helper: "Via `RightAccessory` & `LeftAccessory` style prop",
+-        },
+-      },
+-    },
+-  },
+-  demoToggle: {
+-    description:
+-      "Renders a boolean input. This is a controlled component that requires an onValueChange callback that updates the value prop in order for the component to reflect user actions. If the value prop is not updated, the component will continue to render the supplied value prop instead of the expected result of any user actions.",
+-    useCase: {
+-      variants: {
+-        name: "Variants",
+-        description:
+-          "The component supports a few different variants. If heavy customization of a specific variant is needed, it can be easily refactored. The default is `checkbox`.",
+-        checkbox: {
+-          label: "`checkbox` variant",
+-          helper: "This can be used for a single on/off input.",
+-        },
+-        radio: {
+-          label: "`radio` variant",
+-          helper: "Use this when you have multiple options.",
+-        },
+-        switch: {
+-          label: "`switch` variant",
+-          helper: "A more prominent on/off input. Has better accessibility support.",
+-        },
+-      },
+-      statuses: {
+-        name: "Statuses",
+-        description:
+-          "There is a status prop - similar to `preset` in other components, but affects component functionality as well.",
+-        noStatus: "No status - this is the default",
+-        errorStatus: "Error status - use when there is an error",
+-        disabledStatus: "Disabled status - disables the editability and mutes input",
+-      },
+-      passingContent: {
+-        name: "Passing Content",
+-        description: "There are a few different ways to pass content.",
+-        useCase: {
+-          checkBox: {
+-            label: "Via `labelTx` prop",
+-            helper: "Via `helperTx` prop.",
+-          },
+-          checkBoxMultiLine: {
+-            helper: "Supports multiline - Nulla proident consectetur labore sunt ea labore. ",
+-          },
+-          radioChangeSides: {
+-            helper: "You can change sides - Laborum labore adipisicing in eu ipsum deserunt.",
+-          },
+-          customCheckBox: {
+-            label: "Pass in a custom checkbox icon.",
+-          },
+-          switch: {
+-            label: "Switches can be read as text",
+-            helper:
+-              "By default, this option doesn't use `Text` since depending on the font, the on/off characters might look weird. Customize as needed.",
+-          },
+-          switchAid: {
+-            label: "Or aided with an icon",
+-          },
+-        },
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-        outerWrapper: "1 - style the input outer wrapper",
+-        innerWrapper: "2 - style the input inner wrapper",
+-        inputDetail: "3 - style the input detail",
+-        labelTx: "You can also style the labelTx",
+-        styleContainer: "Or, style the entire container",
+-      },
+-    },
+-  },
+-  demoButton: {
+-    description:
+-      "A component that allows users to take actions and make choices. Wraps the Text component with a Pressable component.",
+-    useCase: {
+-      presets: {
+-        name: "Presets",
+-        description: "There are a few presets that are preconfigured.",
+-      },
+-      passingContent: {
+-        name: "Passing Content",
+-        description: "There are a few different ways to pass content.",
+-        viaTextProps: "Via `text` Prop - Billum In",
+-        children: "Children - Irure Reprehenderit",
+-        rightAccessory: "RightAccessory - Duis Quis",
+-        leftAccessory: "LeftAccessory - Duis Proident",
+-        nestedChildren: "Nested children - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren3: "Occaecat aliqua irure proident veniam.",
+-        multiLine:
+-          "Multiline - consequat veniam veniam reprehenderit. Fugiat id nisi quis duis sunt proident mollit dolor mollit adipisicing proident deserunt.",
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-        styleContainer: "Style Container - Exercitation",
+-        styleText: "Style Text - Ea Anim",
+-        styleAccessories: "Style Accessories - enim ea id fugiat anim ad.",
+-        pressedState: "Style Pressed State - fugiat anim",
+-      },
+-      disabling: {
+-        name: "Disabling",
+-        description:
+-          "The component can be disabled, and styled based on that. Press behavior will be disabled.",
+-        standard: "Disabled - standard",
+-        filled: "Disabled - filled",
+-        reversed: "Disabled - reversed",
+-        accessory: "Disabled accessory style",
+-        textStyle: "Disabled text style",
+-      },
+-    },
+-  },
+-  demoListItem: {
+-    description: "A styled row component that can be used in FlatList, SectionList, or by itself.",
+-    useCase: {
+-      height: {
+-        name: "Height",
+-        description: "The row can be different heights.",
+-        defaultHeight: "Default height (56px)",
+-        customHeight: "Custom height via `height` prop",
+-        textHeight:
+-          "Height determined by text content - Reprehenderit incididunt deserunt do do ea labore.",
+-        longText:
+-          "Limit long text to one line - Reprehenderit incididunt deserunt do do ea labore.",
+-      },
+-      separators: {
+-        name: "Separators",
+-        description: "The separator / divider is preconfigured and optional.",
+-        topSeparator: "Only top separator",
+-        topAndBottomSeparator: "Top and bottom separators",
+-        bottomSeparator: "Only bottom separator",
+-      },
+-      icons: {
+-        name: "Icons",
+-        description: "You can customize the icons on the left or right.",
+-        leftIcon: "Left icon",
+-        rightIcon: "Right Icon",
+-        leftRightIcons: "Left & Right Icons",
+-      },
+-      customLeftRight: {
+-        name: "Custom Left/Right Components",
+-        description: "If you need a custom left/right component, you can pass it in.",
+-        customLeft: "Custom left component",
+-        customRight: "Custom right component",
+-      },
+-      passingContent: {
+-        name: "Passing Content",
+-        description: "There are a few different ways to pass content.",
+-        text: "Via `text` prop - reprehenderit sint",
+-        children: "Children - mostrud mollit",
+-        nestedChildren1: "Nested children - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-      },
+-      listIntegration: {
+-        name: "Integrating w/ FlatList & FlashList",
+-        description: "The component can be easily integrated with your favorite list interface.",
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-        styledText: "Styled Text",
+-        styledContainer: "Styled Container (separators)",
+-        tintedIcons: "Tinted Icons",
+-      },
+-    },
+-  },
+-  demoCard: {
+-    description:
+-      "Cards are useful for displaying related information in a contained way. If a ListItem displays content horizontally, a Card can be used to display content vertically.",
+-    useCase: {
+-      presets: {
+-        name: "Presets",
+-        description: "There are a few presets that are preconfigured.",
+-        default: {
+-          heading: "Default Preset (default)",
+-          content: "Incididunt magna ut aliquip consectetur mollit dolor.",
+-          footer: "Consectetur nulla non aliquip velit.",
+-        },
+-        reversed: {
+-          heading: "Reversed Preset",
+-          content: "Reprehenderit occaecat proident amet id laboris.",
+-          footer: "Consectetur tempor ea non labore anim .",
+-        },
+-      },
+-      verticalAlignment: {
+-        name: "Vertical Alignment",
+-        description:
+-          "Depending on what's required, the card comes preconfigured with different alignment strategies.",
+-        top: {
+-          heading: "Top (default)",
+-          content: "All content is automatically aligned to the top.",
+-          footer: "Even the footer",
+-        },
+-        center: {
+-          heading: "Center",
+-          content: "Content is centered relative to the card's height.",
+-          footer: "Me too!",
+-        },
+-        spaceBetween: {
+-          heading: "Space Between",
+-          content: "All content is spaced out evenly.",
+-          footer: "I am where I want to be.",
+-        },
+-        reversed: {
+-          heading: "Force Footer Bottom",
+-          content: "This pushes the footer where it belongs.",
+-          footer: "I'm so lonely down here.",
+-        },
+-      },
+-      passingContent: {
+-        name: "Passing Content",
+-        description: "There are a few different ways to pass content.",
+-        heading: "Via `heading` Prop",
+-        content: "Via `content` Prop",
+-        footer: "I'm so lonely down here.",
+-      },
+-      customComponent: {
+-        name: "Custom Components",
+-        description:
+-          "Any of the preconfigured components can be replaced with your own. You can also add additional ones.",
+-        rightComponent: "RightComponent",
+-        leftComponent: "LeftComponent",
+-      },
+-      style: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-        heading: "Style the Heading",
+-        content: "Style the Content",
+-        footer: "Style the Footer",
+-      },
+-    },
+-  },
+-  demoAutoImage: {
+-    description: "An Image component that automatically sizes a remote or data-uri image.",
+-    useCase: {
+-      remoteUri: { name: "Remote URI" },
+-      base64Uri: { name: "Base64 URI" },
+-      scaledToFitDimensions: {
+-        name: "Scaled to Fit Dimensions",
+-        description:
+-          "Providing a `maxWidth` and/or `maxHeight` props, the image will automatically scale while retaining it's aspect ratio. How is this different from `resizeMode: 'contain'`? Firstly, you can specify only one side's size (not both). Secondly, the image will scale to fit the desired dimensions instead of just being contained within its image-container.",
+-        heightAuto: "width: 60 / height: auto",
+-        widthAuto: "width: auto / height: 32",
+-        bothManual: "width: 60 / height: 60",
+-      },
+-    },
+-  },
+-  demoText: {
+-    description:
+-      "For your text displaying needs. This component is a HOC over the built-in React Native one.",
+-    useCase: {
+-      presets: {
+-        name: "Presets",
+-        description: "There are a few presets that are preconfigured.",
+-        default:
+-          "default preset - Cillum eu laboris in labore. Excepteur mollit tempor reprehenderit fugiat elit et eu consequat laborum.",
+-        bold: "bold preset - Tempor et ullamco cupidatat in officia. Nulla ea duis elit id sunt ipsum cillum duis deserunt nostrud ut nostrud id.",
+-        subheading: "subheading preset - In Cupidatat Cillum.",
+-        heading: "heading preset - Voluptate Adipis.",
+-      },
+-      sizes: {
+-        name: "Sizes",
+-        description: "There's a size prop.",
+-        xs: "xs - Ea ipsum est ea ex sunt.",
+-        sm: "sm - Lorem sunt adipisicin.",
+-        md: "md - Consequat id do lorem.",
+-        lg: "lg - Nostrud ipsum ea.",
+-        xl: "xl - Eiusmod ex excepteur.",
+-        xxl: "xxl - Cillum eu laboris.",
+-      },
+-      weights: {
+-        name: "Weights",
+-        description: "There's a weight prop.",
+-        light:
+-          "light - Nulla magna incididunt excepteur est occaecat duis culpa dolore cupidatat enim et.",
+-        normal:
+-          "normal - Magna incididunt dolor ut veniam veniam laboris aliqua velit ea incididunt.",
+-        medium: "medium - Non duis laborum quis laboris occaecat culpa cillum.",
+-        semibold: "semiBold - Exercitation magna nostrud pariatur laborum occaecat aliqua.",
+-        bold: "bold - Eiusmod ullamco magna exercitation est excepteur.",
+-      },
+-      passingContent: {
+-        name: "Passing Content",
+-        description: "There are a few different ways to pass content.",
+-        viaText:
+-          "via `text` prop - Billum in aute fugiat proident nisi pariatur est. Cupidatat anim cillum eiusmod ad. Officia eu magna aliquip labore dolore consequat.",
+-        viaTx: "via `tx` prop -",
+-        children: "children - Aliqua velit irure reprehenderit eu qui amet veniam consectetur.",
+-        nestedChildren: "Nested children -",
+-        nestedChildren2: "Occaecat aliqua irure proident veniam.",
+-        nestedChildren3: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren4: "Occaecat aliqua irure proident veniam.",
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-        text: "Consequat ullamco veniam velit mollit proident excepteur aliquip id culpa ipsum velit sint nostrud.",
+-        text2:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-        text3:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-      },
+-    },
+-  },
+-  demoHeader: {
+-    description:
+-      "Component that appears on many screens. Will hold navigation buttons and screen title.",
+-    useCase: {
+-      actionIcons: {
+-        name: "Action Icons",
+-        description: "You can easily pass in icons to the left or right action components.",
+-        leftIconTitle: "Left Icon",
+-        rightIconTitle: "Right Icon",
+-        bothIconsTitle: "Both Icons",
+-      },
+-      actionText: {
+-        name: "Action Text",
+-        description: "You can easily pass in text to the left or right action components.",
+-        leftTxTitle: "Via `leftTx`",
+-        rightTextTitle: "Via `rightText`",
+-      },
+-      customActionComponents: {
+-        name: "Custom Action Components",
+-        description:
+-          "If the icon or text options are not enough, you can pass in your own custom action component.",
+-        customLeftActionTitle: "Custom Left Action",
+-      },
+-      titleModes: {
+-        name: "Title Modes",
+-        description:
+-          "Title can be forced to stay in center (default) but may be cut off if it's too long. You can optionally make it adjust to the action buttons.",
+-        centeredTitle: "Centered Title",
+-        flexTitle: "Flex Title",
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-        styledTitle: "Styled Title",
+-        styledWrapperTitle: "Styled Wrapper",
+-        tintedIconsTitle: "Tinted Icons",
+-      },
+-    },
+-  },
+-  demoEmptyState: {
+-    description:
+-      "A component to use when there is no data to display. It can be utilized to direct the user what to do next",
+-    useCase: {
+-      presets: {
+-        name: "Presets",
+-        description:
+-          "You can create different text/image sets. One is predefined called `generic`. Note, there's no default in case you want to have a completely custom EmptyState.",
+-      },
+-      passingContent: {
+-        name: "Passing Content",
+-        description: "There are a few different ways to pass content.",
+-        customizeImageHeading: "Customize Image",
+-        customizeImageContent: "You can pass in any image source.",
+-        viaHeadingProp: "Via `heading` Prop",
+-        viaContentProp: "Via `content` prop.",
+-        viaButtonProp: "Via `button` Prop",
+-      },
+-      styling: {
+-        name: "Styling",
+-        description: "The component can be styled easily.",
+-      },
+-    },
+-  },
+-}
+-
+-export default demoEn
+-export type DemoTranslations = typeof demoEn
+diff --git a/IgniteDiffApp/app/i18n/demo-fr.ts b/IgniteDiffApp/app/i18n/demo-fr.ts
+deleted file mode 100644
+index bca8ede4..00000000
+--- a/IgniteDiffApp/app/i18n/demo-fr.ts
++++ /dev/null
+@@ -1,469 +0,0 @@
+-import { DemoTranslations } from "./demo-en"
+-
+-export const demoFr: DemoTranslations = {
+-  demoIcon: {
+-    description:
+-      "Un composant pour faire le rendu d’une icône enregistrée. Il est enveloppé dans un <TouchableOpacity /> si `onPress` est fourni, sinon dans une <View />.",
+-    useCase: {
+-      icons: {
+-        name: "Icônes",
+-        description: "Liste des icônes enregistrées dans le composant.",
+-      },
+-      size: {
+-        name: "Taille",
+-        description: "Il y a une prop de taille.",
+-      },
+-      color: {
+-        name: "Couleur",
+-        description: "Il y a une prop de couleur.",
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-      },
+-    },
+-  },
+-  demoTextField: {
+-    description: "Le composant <TextField /> permet la saisie et l'édition de texte.",
+-    useCase: {
+-      statuses: {
+-        name: "Statuts",
+-        description:
+-          "Il y a une prop de statut - similaire à `preset` dans d'autres composants, mais affecte également la fonctionnalité du composant.",
+-        noStatus: {
+-          label: "Pas de statut",
+-          helper: "C'est le statut par défaut",
+-          placeholder: "Le texte passe par là",
+-        },
+-        error: {
+-          label: "Statut d'erreur",
+-          helper: "Statut à utiliser en cas d’erreur",
+-          placeholder: "Le texte passe par ici",
+-        },
+-        disabled: {
+-          label: "Statut désactivé",
+-          helper: "Désactive l’édition et atténue le texte",
+-          placeholder: "Le texte repasse par là",
+-        },
+-      },
+-      passingContent: {
+-        name: "Transfert de contenu",
+-        description: "Il y a plusieurs façons de transmettre du contenu.",
+-        viaLabel: {
+-          labelTx: "Via la prop `label`",
+-          helper: "Via la prop `helper`",
+-          placeholder: "Via la prop `placeholder`",
+-        },
+-        rightAccessory: {
+-          label: "Accessoire droit",
+-          helper: "Cette prop demande une fonction qui retourne un élément React.",
+-        },
+-        leftAccessory: {
+-          label: "Accessoire gauche",
+-          helper: "Cette prop demande une fonction qui retourne un élément React.",
+-        },
+-        supportsMultiline: {
+-          label: "Supporte le multiligne",
+-          helper: "Permet une saisie plus longue pour le texte multiligne.",
+-        },
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-        styleInput: {
+-          label: "Style de saisie",
+-          helper: "Via la prop `style`",
+-        },
+-        styleInputWrapper: {
+-          label: "Style du wrapper de saisie",
+-          helper: "Via la prop `inputWrapperStyle`",
+-        },
+-        styleContainer: {
+-          label: "Style du conteneur",
+-          helper: "Via la prop `containerStyle`",
+-        },
+-        styleLabel: {
+-          label: "Style du label et de l’aide",
+-          helper: "Via les props de style `LabelTextProps` et `HelperTextProps`",
+-        },
+-        styleAccessories: {
+-          label: "Style des accessoires",
+-          helper: "Via les props de style `RightAccessory` et `LeftAccessory`",
+-        },
+-      },
+-    },
+-  },
+-  demoToggle: {
+-    description:
+-      "Fait le rendu d’un booléen. Ce composant contrôlé nécessite un callback `onValueChange` qui met à jour la prop `value` pour que le composant reflète les actions de l'utilisateur. Si la prop `value` n'est pas mise à jour, le composant continuera à rendre la prop `value` fournie au lieu du résultat attendu des actions de l'utilisateur.",
+-    useCase: {
+-      variants: {
+-        name: "Variantes",
+-        description:
+-          "Le composant supporte différentes variantes. Si une personnalisation poussée d'une variante spécifique est nécessaire, elle peut être facilement refactorisée. La valeur par défaut est `checkbox`.",
+-        checkbox: {
+-          label: "Variante `checkbox`",
+-          helper: "Peut être utilisée pour une seule valeure on/off.",
+-        },
+-        radio: {
+-          label: "Variante `radio`",
+-          helper: "Utilisez ceci quand vous avez plusieurs options.",
+-        },
+-        switch: {
+-          label: "Variante `switch`",
+-          helper:
+-            "Une entrée on/off plus proéminente. Possède un meilleur support d’accessibilité.",
+-        },
+-      },
+-      statuses: {
+-        name: "Statuts",
+-        description:
+-          "Il y a une prop de statut - similaire à `preset` dans d'autres composants, mais affecte également la fonctionnalité du composant.",
+-        noStatus: "Pas de statut - c'est le défaut",
+-        errorStatus: "Statut d’erreur - à utiliser quand il y a une erreur",
+-        disabledStatus: "Statut désactivé - désactive l’édition et atténue le style",
+-      },
+-      passingContent: {
+-        name: "Transfert de contenu",
+-        description: "Il y a plusieurs façons de transmettre du contenu.",
+-        useCase: {
+-          checkBox: {
+-            label: "Via la prop `labelTx`",
+-            helper: "Via la prop `helperTx`.",
+-          },
+-          checkBoxMultiLine: {
+-            helper: "Supporte le multiligne - Nulla proident consectetur labore sunt ea labore. ",
+-          },
+-          radioChangeSides: {
+-            helper:
+-              "Vous pouvez changer de côté - Laborum labore adipisicing in eu ipsum deserunt.",
+-          },
+-          customCheckBox: {
+-            label: "Passez une icône de case à cocher personnalisée.",
+-          },
+-          switch: {
+-            label: "Les interrupteurs peuvent être lus comme du texte",
+-            helper:
+-              "Par défaut, cette option n’utilise pas `Text` car selon la police, les caractères on/off pourraient paraître étranges. Personnalisez selon vos besoins.",
+-          },
+-          switchAid: {
+-            label: "Ou aidé d’une icône",
+-          },
+-        },
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-        outerWrapper: "1 - styliser le wrapper extérieur de l’entrée",
+-        innerWrapper: "2 - styliser le wrapper intérieur de l’entrée",
+-        inputDetail: "3 - styliser le détail de l’entrée",
+-        labelTx: "Vous pouvez aussi styliser le labelTx",
+-        styleContainer: "Ou, styliser le conteneur entier",
+-      },
+-    },
+-  },
+-  demoButton: {
+-    description:
+-      "Un composant qui permet aux utilisateurs d’effectuer des actions et de faire des choix. Enveloppe le composant Text avec un composant Pressable.",
+-    useCase: {
+-      presets: {
+-        name: "Préréglages",
+-        description: "Il y a quelques préréglages préconfigurés.",
+-      },
+-      passingContent: {
+-        name: "Transfert de contenu",
+-        description: "Il y a plusieurs façons de transmettre du contenu.",
+-        viaTextProps: "Via la prop `text` - Billum In",
+-        children: "Enfants - Irure Reprehenderit",
+-        rightAccessory: "Accessoire droit - Duis Quis",
+-        leftAccessory: "Accessoire gauche - Duis Proident",
+-        nestedChildren: "Enfants imbriqués - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren3: "Occaecat aliqua irure proident veniam.",
+-        multiLine:
+-          "Multiligne - consequat veniam veniam reprehenderit. Fugiat id nisi quis duis sunt proident mollit dolor mollit adipisicing proident deserunt.",
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-        styleContainer: "Style du conteneur - Exercitation",
+-        styleText: "Style du texte - Ea Anim",
+-        styleAccessories: "Style des accessoires - enim ea id fugiat anim ad.",
+-        pressedState: "Style de l’état pressé - fugiat anim",
+-      },
+-      disabling: {
+-        name: "Désactivation",
+-        description:
+-          "Le composant peut être désactivé et stylisé en conséquence. Le comportement de pression sera désactivé.",
+-        standard: "Désactivé - standard",
+-        filled: "Désactivé - rempli",
+-        reversed: "Désactivé - inversé",
+-        accessory: "Style d’accessoire désactivé",
+-        textStyle: "Style de texte désactivé",
+-      },
+-    },
+-  },
+-  demoListItem: {
+-    description:
+-      "Un composant de ligne stylisé qui peut être utilisé dans FlatList, SectionList, ou seul.",
+-    useCase: {
+-      height: {
+-        name: "Hauteur",
+-        description: "La ligne peut avoir différentes hauteurs.",
+-        defaultHeight: "Hauteur par défaut (56px)",
+-        customHeight: "Hauteur personnalisée via la prop `height`",
+-        textHeight:
+-          "Hauteur déterminée par le contenu du texte - Reprehenderit incididunt deserunt do do ea labore.",
+-        longText:
+-          "Limiter le texte long à une ligne - Reprehenderit incididunt deserunt do do ea labore.",
+-      },
+-      separators: {
+-        name: "Séparateurs",
+-        description: "Le séparateur / diviseur est préconfiguré et optionnel.",
+-        topSeparator: "Séparateur uniquement en haut",
+-        topAndBottomSeparator: "Séparateurs en haut et en bas",
+-        bottomSeparator: "Séparateur uniquement en bas",
+-      },
+-      icons: {
+-        name: "Icônes",
+-        description: "Vous pouvez personnaliser les icônes à gauche ou à droite.",
+-        leftIcon: "Icône gauche",
+-        rightIcon: "Icône droite",
+-        leftRightIcons: "Icônes gauche et droite",
+-      },
+-      customLeftRight: {
+-        name: "Composants personnalisés gauche/droite",
+-        description:
+-          "Si vous avez besoin d’un composant personnalisé à gauche/droite, vous pouvez le passer.",
+-        customLeft: "Composant personnalisé à gauche",
+-        customRight: "Composant personnalisé à droite",
+-      },
+-      passingContent: {
+-        name: "Transfert de contenu",
+-        description: "Il y a plusieurs façons de transmettre du contenu.",
+-        text: "Via la prop `text` - reprehenderit sint",
+-        children: "Enfants - mostrud mollit",
+-        nestedChildren1: "Enfants imbriqués - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-      },
+-      listIntegration: {
+-        name: "Intégration avec FlatList & FlashList",
+-        description:
+-          "Le composant peut être facilement intégré avec votre interface de liste préférée.",
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-        styledText: "Texte stylisé",
+-        styledContainer: "Conteneur stylisé (séparateurs)",
+-        tintedIcons: "Icônes teintées",
+-      },
+-    },
+-  },
+-  demoCard: {
+-    description:
+-      "Les cartes sont utiles pour afficher des informations connexes de manière contenue. Si un ListItem affiche le contenu horizontalement, une Card peut être utilisée pour afficher le contenu verticalement.",
+-    useCase: {
+-      presets: {
+-        name: "Préréglages",
+-        description: "Il y a quelques préréglages préconfigurés.",
+-        default: {
+-          heading: "Préréglage par défaut (default)",
+-          content: "Incididunt magna ut aliquip consectetur mollit dolor.",
+-          footer: "Consectetur nulla non aliquip velit.",
+-        },
+-        reversed: {
+-          heading: "Préréglage inversé",
+-          content: "Reprehenderit occaecat proident amet id laboris.",
+-          footer: "Consectetur tempor ea non labore anim .",
+-        },
+-      },
+-      verticalAlignment: {
+-        name: "Alignement vertical",
+-        description:
+-          "Selon les besoins, la carte est préconfigurée avec différentes stratégies d’alignement.",
+-        top: {
+-          heading: "Haut (par défaut)",
+-          content: "Tout le contenu est automatiquement aligné en haut.",
+-          footer: "Même le pied de page",
+-        },
+-        center: {
+-          heading: "Centre",
+-          content: "Le contenu est centré par rapport à la hauteur de la carte.",
+-          footer: "Moi aussi !",
+-        },
+-        spaceBetween: {
+-          heading: "Espace entre",
+-          content: "Tout le contenu est espacé uniformément.",
+-          footer: "Je suis là où je veux être.",
+-        },
+-        reversed: {
+-          heading: "Forcer le pied de page en bas",
+-          content: "Cela pousse le pied de page là où il appartient.",
+-          footer: "Je suis si seul ici en bas.",
+-        },
+-      },
+-      passingContent: {
+-        name: "Transfert de contenu",
+-        description: "Il y a plusieurs façons de transmettre du contenu.",
+-        heading: "Via la prop `heading`",
+-        content: "Via la prop `content`",
+-        footer: "Je suis si seul ici en bas.",
+-      },
+-      customComponent: {
+-        name: "Composants personnalisés",
+-        description:
+-          "N’importe quels composants préconfigurés peuvent être remplacé par le vôtre. Vous pouvez également en ajouter d’autres.",
+-        rightComponent: "Composant droit",
+-        leftComponent: "Composant gauche",
+-      },
+-      style: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-        heading: "Styliser l’en-tête",
+-        content: "Styliser le contenu",
+-        footer: "Styliser le pied de page",
+-      },
+-    },
+-  },
+-  demoAutoImage: {
+-    description:
+-      "Un composant Image qui dimensionne automatiquement une image distante ou data-uri.",
+-    useCase: {
+-      remoteUri: { name: "URI distante" },
+-      base64Uri: { name: "URI Base64" },
+-      scaledToFitDimensions: {
+-        name: "Mis à l’échelle pour s’adapter aux dimensions",
+-        description:
+-          "En fournissant les props `maxWidth` et/ou `maxHeight`, l’image se redimensionnera automatiquement à l’échelle tout en conservant son rapport d’aspect. En quoi est-ce différent de `resizeMode: 'contain'` ? Premièrement, vous pouvez spécifier la taille d'un seul côté (pas les deux). Deuxièmement, l'image s'adaptera aux dimensions souhaitées au lieu d'être simplement contenue dans son conteneur d'image.",
+-        heightAuto: "largeur: 60 / hauteur: auto",
+-        widthAuto: "largeur: auto / hauteur: 32",
+-        bothManual: "largeur: 60 / hauteur: 60",
+-      },
+-    },
+-  },
+-  demoText: {
+-    description:
+-      "Pour vos besoins d'affichage de texte. Ce composant est un HOC sur celui intégré à React Native.",
+-    useCase: {
+-      presets: {
+-        name: "Préréglages",
+-        description: "Il y a quelques réglages préconfigurés.",
+-        default:
+-          "préréglage par défaut - Cillum eu laboris in labore. Excepteur mollit tempor reprehenderit fugiat elit et eu consequat laborum.",
+-        bold: "préréglage gras - Tempor et ullamco cupidatat in officia. Nulla ea duis elit id sunt ipsum cillum duis deserunt nostrud ut nostrud id.",
+-        subheading: "préréglage sous-titre - In Cupidatat Cillum.",
+-        heading: "préréglage titre - Voluptate Adipis.",
+-      },
+-      sizes: {
+-        name: "Tailles",
+-        description: "Il y a une prop de taille.",
+-        xs: "xs - Ea ipsum est ea ex sunt.",
+-        sm: "sm - Lorem sunt adipisicin.",
+-        md: "md - Consequat id do lorem.",
+-        lg: "lg - Nostrud ipsum ea.",
+-        xl: "xl - Eiusmod ex excepteur.",
+-        xxl: "xxl - Cillum eu laboris.",
+-      },
+-      weights: {
+-        name: "Graisse",
+-        description: "Il y a une prop de graisse.",
+-        light:
+-          "léger - Nulla magna incididunt excepteur est occaecat duis culpa dolore cupidatat enim et.",
+-        normal:
+-          "normal - Magna incididunt dolor ut veniam veniam laboris aliqua velit ea incididunt.",
+-        medium: "moyen - Non duis laborum quis laboris occaecat culpa cillum.",
+-        semibold: "demi-gras - Exercitation magna nostrud pariatur laborum occaecat aliqua.",
+-        bold: "gras - Eiusmod ullamco magna exercitation est excepteur.",
+-      },
+-      passingContent: {
+-        name: "Transfert de contenu",
+-        description: "Il y a plusieurs façons de transférer du contenu.",
+-        viaText:
+-          "via la prop `text` - Billum in aute fugiat proident nisi pariatur est. Cupidatat anim cillum eiusmod ad. Officia eu magna aliquip labore dolore consequat.",
+-        viaTx: "via la prop `tx` -",
+-        children: "enfants - Aliqua velit irure reprehenderit eu qui amet veniam consectetur.",
+-        nestedChildren: "Enfants imbriqués -",
+-        nestedChildren2: "Occaecat aliqua irure proident veniam.",
+-        nestedChildren3: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren4: "Occaecat aliqua irure proident veniam.",
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-        text: "Consequat ullamco veniam velit mollit proident excepteur aliquip id culpa ipsum velit sint nostrud.",
+-        text2:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-        text3:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-      },
+-    },
+-  },
+-  demoHeader: {
+-    description:
+-      "Composant qui apparaît sur de nombreux écrans. Contiendra les boutons de navigation et le titre de l’écran.",
+-    useCase: {
+-      actionIcons: {
+-        name: "Icônes d’action",
+-        description:
+-          "Vous pouvez facilement passer des icônes aux composants d’action gauche ou droit.",
+-        leftIconTitle: "Icône gauche",
+-        rightIconTitle: "Icône droite",
+-        bothIconsTitle: "Les deux icônes",
+-      },
+-      actionText: {
+-        name: "Texte d’action",
+-        description:
+-          "Vous pouvez facilement passer du texte aux composants d’action gauche ou droit.",
+-        leftTxTitle: "Via `leftTx`",
+-        rightTextTitle: "Via `rightText`",
+-      },
+-      customActionComponents: {
+-        name: "Composants d’action personnalisés",
+-        description:
+-          "Si les options d’icône ou de texte ne suffisent pas, vous pouvez passer votre propre composant d’action personnalisé.",
+-        customLeftActionTitle: "Action gauche personnalisée",
+-      },
+-      titleModes: {
+-        name: "Modes de titre",
+-        description:
+-          "Le titre peut être forcé à rester au centre (par défaut) mais peut être coupé s’il est trop long. Vous pouvez éventuellement le faire s’ajuster aux boutons d’action.",
+-        centeredTitle: "Titre centré",
+-        flexTitle: "Titre flexible",
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-        styledTitle: "Titre stylisé",
+-        styledWrapperTitle: "Wrapper stylisé",
+-        tintedIconsTitle: "Icônes teintées",
+-      },
+-    },
+-  },
+-  demoEmptyState: {
+-    description:
+-      "Un composant à utiliser lorsqu’il n’y a pas de données à afficher. Il peut être utilisé pour diriger l’utilisateur sur ce qu’il faut faire ensuite.",
+-    useCase: {
+-      presets: {
+-        name: "Préréglages",
+-        description:
+-          "Vous pouvez créer différents ensembles de texte/image. Un est prédéfini appelé `generic`. Notez qu’il n’y a pas de valeur par défaut au cas où vous voudriez avoir un EmptyState complètement personnalisé.",
+-      },
+-      passingContent: {
+-        name: "Transfert de contenu",
+-        description: "Il y a plusieurs façons de transférer du contenu.",
+-        customizeImageHeading: "Personnaliser l’image",
+-        customizeImageContent: "Vous pouvez passer n’importe quelle source d'image.",
+-        viaHeadingProp: "Via la prop `heading`",
+-        viaContentProp: "Via la prop `content`.",
+-        viaButtonProp: "Via la prop `button`",
+-      },
+-      styling: {
+-        name: "Style",
+-        description: "Le composant peut être facilement stylisé.",
+-      },
+-    },
+-  },
+-}
+-
+-export default demoFr
+diff --git a/IgniteDiffApp/app/i18n/demo-hi.ts b/IgniteDiffApp/app/i18n/demo-hi.ts
+deleted file mode 100644
+index f4a14cde..00000000
+--- a/IgniteDiffApp/app/i18n/demo-hi.ts
++++ /dev/null
+@@ -1,466 +0,0 @@
+-import { DemoTranslations } from "./demo-en"
+-
+-export const demoHi: DemoTranslations = {
+-  demoIcon: {
+-    description:
+-      "एक पंजीकृत आइकन को रेंडर करने के लिए एक कंपोनेंट। यदि `onPress` प्रदान किया जाता है तो यह <TouchableOpacity /> में लपेटा जाता है, अन्यथा <View /> में।",
+-    useCase: {
+-      icons: {
+-        name: "आइकन",
+-        description: "कंपोनेंट के अंदर पंजीकृत आइकनों की सूची।",
+-      },
+-      size: {
+-        name: "आकार",
+-        description: "एक आकार प्रॉप है।",
+-      },
+-      color: {
+-        name: "रंग",
+-        description: "एक रंग प्रॉप है।",
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-      },
+-    },
+-  },
+-  demoTextField: {
+-    description: "टेक्स्टफील्ड कंपोनेंट टेक्स्ट दर्ज करने और संपादित करने की अनुमति देता है।",
+-    useCase: {
+-      statuses: {
+-        name: "स्थितियाँ",
+-        description:
+-          "एक स्थिति प्रॉप है - अन्य कंपोनेंट्स में `preset` के समान, लेकिन कंपोनेंट की कार्यक्षमता को भी प्रभावित करता है।",
+-        noStatus: {
+-          label: "कोई स्थिति नहीं",
+-          helper: "यह डिफ़ॉल्ट स्थिति है",
+-          placeholder: "टेक्स्ट यहाँ जाता है",
+-        },
+-        error: {
+-          label: "त्रुटि स्थिति",
+-          helper: "त्रुटि होने पर उपयोग करने के लिए स्थिति",
+-          placeholder: "टेक्स्ट यहाँ जाता है",
+-        },
+-        disabled: {
+-          label: "अक्षम स्थिति",
+-          helper: "संपादन को अक्षम करता है और टेक्स्ट को मंद करता है",
+-          placeholder: "टेक्स्ट यहाँ जाता है",
+-        },
+-      },
+-      passingContent: {
+-        name: "सामग्री पास करना",
+-        description: "सामग्री पास करने के कई तरीके हैं।",
+-        viaLabel: {
+-          labelTx: "`label` प्रॉप के माध्यम से",
+-          helper: "`helper` प्रॉप के माध्यम से",
+-          placeholder: "`placeholder` प्रॉप के माध्यम से",
+-        },
+-        rightAccessory: {
+-          label: "दायाँ सहायक",
+-          helper: "यह प्रॉप एक फ़ंक्शन लेता है जो एक React तत्व लौटाता है।",
+-        },
+-        leftAccessory: {
+-          label: "बायाँ सहायक",
+-          helper: "यह प्रॉप एक फ़ंक्शन लेता है जो एक React तत्व लौटाता है।",
+-        },
+-        supportsMultiline: {
+-          label: "मल्टीलाइन का समर्थन करता है",
+-          helper: "मल्टीलाइन टेक्स्ट के लिए एक लंबा इनपुट सक्षम करता है।",
+-        },
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-        styleInput: {
+-          label: "इनपुट स्टाइल",
+-          helper: "`style` प्रॉप के माध्यम से",
+-        },
+-        styleInputWrapper: {
+-          label: "इनपुट रैपर स्टाइल",
+-          helper: "`inputWrapperStyle` प्रॉप के माध्यम से",
+-        },
+-        styleContainer: {
+-          label: "कंटेनर स्टाइल",
+-          helper: "`containerStyle` प्रॉप के माध्यम से",
+-        },
+-        styleLabel: {
+-          label: "लेबल और हेल्पर स्टाइल",
+-          helper: "`LabelTextProps` और `HelperTextProps` स्टाइल प्रॉप के माध्यम से",
+-        },
+-        styleAccessories: {
+-          label: "सहायक स्टाइल",
+-          helper: "`RightAccessory` और `LeftAccessory` स्टाइल प्रॉप के माध्यम से",
+-        },
+-      },
+-    },
+-  },
+-  demoToggle: {
+-    description:
+-      "एक बूलियन इनपुट रेंडर करता है। यह एक नियंत्रित कंपोनेंट है जिसे उपयोगकर्ता क्रियाओं को दर्शाने के लिए value प्रॉप को अपडेट करने वाले onValueChange कॉलबैक की आवश्यकता होती है। यदि value प्रॉप अपडेट नहीं की जाती है, तो कंपोनेंट उपयोगकर्ता क्रियाओं के अपेक्षित परिणाम के बजाय आपूर्ति की गई value प्रॉप को रेंडर करना जारी रखेगा।",
+-    useCase: {
+-      variants: {
+-        name: "विविधताएँ",
+-        description:
+-          "कंपोनेंट कुछ अलग-अलग विविधताओं का समर्थन करता है। यदि किसी विशिष्ट विविधता के भारी अनुकूलन की आवश्यकता है, तो इसे आसानी से पुनर्गठित किया जा सकता है। डिफ़ॉल्ट `checkbox` है।",
+-        checkbox: {
+-          label: "`checkbox` विविधता",
+-          helper: "इसका उपयोग एकल चालू/बंद इनपुट के लिए किया जा सकता है।",
+-        },
+-        radio: {
+-          label: "`radio` विविधता",
+-          helper: "जब आपके पास कई विकल्प हों तो इसका उपयोग करें।",
+-        },
+-        switch: {
+-          label: "`switch` विविधता",
+-          helper: "एक अधिक प्रमुख चालू/बंद इनपुट। बेहतर पहुँच समर्थन है।",
+-        },
+-      },
+-      statuses: {
+-        name: "स्थितियाँ",
+-        description:
+-          "एक स्थिति प्रॉप है - अन्य कंपोनेंट्स में `preset` के समान, लेकिन कंपोनेंट की कार्यक्षमता को भी प्रभावित करता है।",
+-        noStatus: "कोई स्थिति नहीं - यह डिफ़ॉल्ट है",
+-        errorStatus: "त्रुटि स्थिति - जब कोई त्रुटि हो तो उपयोग करें",
+-        disabledStatus: "अक्षम स्थिति - संपादन को अक्षम करता है और इनपुट को मंद करता है",
+-      },
+-      passingContent: {
+-        name: "सामग्री पास करना",
+-        description: "सामग्री पास करने के कई तरीके हैं।",
+-        useCase: {
+-          checkBox: {
+-            label: "`labelTx` प्रॉप के माध्यम से",
+-            helper: "`helperTx` प्रॉप के माध्यम से।",
+-          },
+-          checkBoxMultiLine: {
+-            helper:
+-              "मल्टीलाइन का समर्थन करता है - Nulla proident consectetur labore sunt ea labore. ",
+-          },
+-          radioChangeSides: {
+-            helper: "आप पक्ष बदल सकते हैं - Laborum labore adipisicing in eu ipsum deserunt.",
+-          },
+-          customCheckBox: {
+-            label: "एक कस्टम चेकबॉक्स आइकन पास करें।",
+-          },
+-          switch: {
+-            label: "स्विच को टेक्स्ट के रूप में पढ़ा जा सकता है",
+-            helper:
+-              "डिफ़ॉल्ट रूप से, यह विकल्प `Text` का उपयोग नहीं करता है क्योंकि फ़ॉन्ट के आधार पर, चालू/बंद अक्षर अजीब दिख सकते हैं। आवश्यकतानुसार अनुकूलित करें।",
+-          },
+-          switchAid: {
+-            label: "या एक आइकन की मदद से",
+-          },
+-        },
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-        outerWrapper: "1 - इनपुट के बाहरी रैपर को स्टाइल करें",
+-        innerWrapper: "2 - इनपुट के आंतरिक रैपर को स्टाइल करें",
+-        inputDetail: "3 - इनपुट विवरण को स्टाइल करें",
+-        labelTx: "आप labelTx को भी स्टाइल कर सकते हैं",
+-        styleContainer: "या, पूरे कंटेनर को स्टाइल करें",
+-      },
+-    },
+-  },
+-  demoButton: {
+-    description:
+-      "एक कंपोनेंट जो उपयोगकर्ताओं को कार्रवाई करने और विकल्प चुनने की अनुमति देता है। Text कंपोनेंट को Pressable कंपोनेंट के साथ लपेटता है।",
+-    useCase: {
+-      presets: {
+-        name: "प्रीसेट",
+-        description: "कुछ पूर्व-कॉन्फ़िगर किए गए प्रीसेट हैं।",
+-      },
+-      passingContent: {
+-        name: "सामग्री पास करना",
+-        description: "सामग्री पास करने के कई तरीके हैं।",
+-        viaTextProps: "`text` प्रॉप के माध्यम से - Billum In",
+-        children: "चिल्ड्रन - Irure Reprehenderit",
+-        rightAccessory: "दायां एक्सेसरी - Duis Quis",
+-        leftAccessory: "बायां एक्सेसरी - Duis Proident",
+-        nestedChildren: "नेस्टेड चिल्ड्रन - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren3: "Occaecat aliqua irure proident veniam.",
+-        multiLine:
+-          "मल्टीलाइन - consequat veniam veniam reprehenderit. Fugiat id nisi quis duis sunt proident mollit dolor mollit adipisicing proident deserunt.",
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-        styleContainer: "कंटेनर स्टाइल - Exercitation",
+-        styleText: "टेक्स्ट स्टाइल - Ea Anim",
+-        styleAccessories: "एक्सेसरीज़ स्टाइल - enim ea id fugiat anim ad.",
+-        pressedState: "दबाए गए स्थिति का स्टाइल - fugiat anim",
+-      },
+-      disabling: {
+-        name: "अक्षम करना",
+-        description:
+-          "कंपोनेंट को अक्षम किया जा सकता है और उसके आधार पर स्टाइल किया जा सकता है। दबाने का व्यवहार अक्षम हो जाएगा।",
+-        standard: "अक्षम - मानक",
+-        filled: "अक्षम - भरा हुआ",
+-        reversed: "अक्षम - उलटा",
+-        accessory: "अक्षम एक्सेसरी स्टाइल",
+-        textStyle: "अक्षम टेक्स्ट स्टाइल",
+-      },
+-    },
+-  },
+-  demoListItem: {
+-    description:
+-      "एक स्टाइल किया गया पंक्ति कंपोनेंट जो FlatList, SectionList, या अकेले उपयोग किया जा सकता है।",
+-    useCase: {
+-      height: {
+-        name: "ऊँचाई",
+-        description: "पंक्ति की विभिन्न ऊँचाइयाँ हो सकती हैं।",
+-        defaultHeight: "डिफ़ॉल्ट ऊँचाई (56px)",
+-        customHeight: "`height` प्रॉप के माध्यम से कस्टम ऊँचाई",
+-        textHeight:
+-          "टेक्स्ट सामग्री द्वारा निर्धारित ऊँचाई - Reprehenderit incididunt deserunt do do ea labore.",
+-        longText:
+-          "लंबे टेक्स्ट को एक पंक्ति तक सीमित करें - Reprehenderit incididunt deserunt do do ea labore.",
+-      },
+-      separators: {
+-        name: "विभाजक",
+-        description: "विभाजक / डिवाइडर पूर्व-कॉन्फ़िगर किया गया है और वैकल्पिक है।",
+-        topSeparator: "केवल ऊपरी विभाजक",
+-        topAndBottomSeparator: "ऊपरी और निचले विभाजक",
+-        bottomSeparator: "केवल निचला विभाजक",
+-      },
+-      icons: {
+-        name: "आइकन",
+-        description: "आप बाएँ या दाएँ आइकन को कस्टमाइज़ कर सकते हैं।",
+-        leftIcon: "बायाँ आइकन",
+-        rightIcon: "दायाँ आइकन",
+-        leftRightIcons: "बाएँ और दाएँ आइकन",
+-      },
+-      customLeftRight: {
+-        name: "कस्टम बायाँ/दायाँ कंपोनेंट",
+-        description:
+-          "यदि आपको कस्टम बायाँ/दायाँ कंपोनेंट की आवश्यकता है, तो आप इसे पास कर सकते हैं।",
+-        customLeft: "कस्टम बायाँ कंपोनेंट",
+-        customRight: "कस्टम दायाँ कंपोनेंट",
+-      },
+-      passingContent: {
+-        name: "सामग्री पास करना",
+-        description: "सामग्री पास करने के कई तरीके हैं।",
+-        text: "`text` प्रॉप के माध्यम से - reprehenderit sint",
+-        children: "चिल्ड्रन - mostrud mollit",
+-        nestedChildren1: "नेस्टेड चिल्ड्रन - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-      },
+-      listIntegration: {
+-        name: "FlatList और FlashList के साथ एकीकरण",
+-        description:
+-          "कंपोनेंट को आसानी से आपके पसंदीदा सूची इंटरफेस के साथ एकीकृत किया जा सकता है।",
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-        styledText: "स्टाइल किया गया टेक्स्ट",
+-        styledContainer: "स्टाइल किया गया कंटेनर (विभाजक)",
+-        tintedIcons: "रंगीन आइकन",
+-      },
+-    },
+-  },
+-  demoCard: {
+-    description:
+-      "कार्ड संबंधित जानकारी को एक संयमित तरीके से प्रदर्शित करने के लिए उपयोगी हैं। यदि एक ListItem सामग्री को क्षैतिज रूप से प्रदर्शित करता है, तो एक कार्ड का उपयोग सामग्री को लंबवत रूप से प्रदर्शित करने के लिए किया जा सकता है।",
+-    useCase: {
+-      presets: {
+-        name: "प्रीसेट",
+-        description: "कुछ पूर्व-कॉन्फ़िगर किए गए प्रीसेट हैं।",
+-        default: {
+-          heading: "डिफ़ॉल्ट प्रीसेट (डिफ़ॉल्ट)",
+-          content: "Incididunt magna ut aliquip consectetur mollit dolor.",
+-          footer: "Consectetur nulla non aliquip velit.",
+-        },
+-        reversed: {
+-          heading: "रिवर्स्ड प्रीसेट",
+-          content: "Reprehenderit occaecat proident amet id laboris.",
+-          footer: "Consectetur tempor ea non labore anim .",
+-        },
+-      },
+-      verticalAlignment: {
+-        name: "ऊर्ध्वाधर संरेखण",
+-        description:
+-          "आवश्यकता के अनुसार, कार्ड विभिन्न संरेखण रणनीतियों के साथ पूर्व-कॉन्फ़िगर किया गया है।",
+-        top: {
+-          heading: "शीर्ष (डिफ़ॉल्ट)",
+-          content: "सभी सामग्री स्वचालित रूप से शीर्ष पर संरेखित होती है।",
+-          footer: "यहां तक कि फुटर भी",
+-        },
+-        center: {
+-          heading: "मध्य",
+-          content: "सामग्री कार्ड की ऊंचाई के सापेक्ष केंद्रित होती है।",
+-          footer: "मैं भी!",
+-        },
+-        spaceBetween: {
+-          heading: "स्पेस बिटवीन",
+-          content: "सभी सामग्री समान रूप से फैली हुई है।",
+-          footer: "मैं वहां हूं जहां मैं होना चाहता हूं।",
+-        },
+-        reversed: {
+-          heading: "फुटर को नीचे रखें",
+-          content: "यह फुटर को उसके सही स्थान पर धकेलता है।",
+-          footer: "मैं यहां नीचे बहुत अकेला हूं।",
+-        },
+-      },
+-      passingContent: {
+-        name: "सामग्री पास करना",
+-        description: "सामग्री पास करने के कई तरीके हैं।",
+-        heading: "`heading` प्रॉप के माध्यम से",
+-        content: "`content` प्रॉप के माध्यम से",
+-        footer: "मैं यहां नीचे बहुत अकेला हूं।",
+-      },
+-      customComponent: {
+-        name: "कस्टम कंपोनेंट्स",
+-        description:
+-          "किसी भी पूर्व-कॉन्फ़िगर किए गए कंपोनेंट को आपके अपने कंपोनेंट से बदला जा सकता है। आप अतिरिक्त कंपोनेंट भी जोड़ सकते हैं।",
+-        rightComponent: "दायाँ कंपोनेंट",
+-        leftComponent: "बायाँ कंपोनेंट",
+-      },
+-      style: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-        heading: "शीर्षक को स्टाइल करें",
+-        content: "सामग्री को स्टाइल करें",
+-        footer: "फुटर को स्टाइल करें",
+-      },
+-    },
+-  },
+-  demoAutoImage: {
+-    description:
+-      "एक छवि कंपोनेंट जो स्वचालित रूप से रिमोट या डेटा-यूआरआई छवि का आकार निर्धारित करता है।",
+-    useCase: {
+-      remoteUri: { name: "रिमोट यूआरआई" },
+-      base64Uri: { name: "बेस64 यूआरआई" },
+-      scaledToFitDimensions: {
+-        name: "आयामों के अनुरूप स्केल किया गया",
+-        description:
+-          "`maxWidth` और/या `maxHeight` प्रॉप्स प्रदान करने पर, छवि स्वचालित रूप से अपने आस्पेक्ट अनुपात को बनाए रखते हुए स्केल होगी। यह `resizeMode: 'contain'` से कैसे अलग है? पहला, आप केवल एक तरफ का आकार निर्दिष्ट कर सकते हैं (दोनों नहीं)। दूसरा, छवि वांछित आयामों के अनुरूप स्केल होगी, न कि केवल अपने छवि-कंटेनर के भीतर समाहित होगी।",
+-        heightAuto: "चौड़ाई: 60 / ऊंचाई: स्वचालित",
+-        widthAuto: "चौड़ाई: स्वचालित / ऊंचाई: 32",
+-        bothManual: "चौड़ाई: 60 / ऊंचाई: 60",
+-      },
+-    },
+-  },
+-  demoText: {
+-    description:
+-      "आपकी टेक्स्ट प्रदर्शन आवश्यकताओं के लिए। यह कंपोनेंट अंतर्निहित React Native कंपोनेंट पर एक HOC है।",
+-    useCase: {
+-      presets: {
+-        name: "प्रीसेट",
+-        description: "कुछ पूर्व-कॉन्फ़िगर किए गए प्रीसेट हैं।",
+-        default:
+-          "डिफ़ॉल्ट प्रीसेट - Cillum eu laboris in labore. Excepteur mollit tempor reprehenderit fugiat elit et eu consequat laborum.",
+-        bold: "बोल्ड प्रीसेट - Tempor et ullamco cupidatat in officia. Nulla ea duis elit id sunt ipsum cillum duis deserunt nostrud ut nostrud id.",
+-        subheading: "सबहेडिंग प्रीसेट - In Cupidatat Cillum.",
+-        heading: "हेडिंग प्रीसेट - Voluptate Adipis.",
+-      },
+-      sizes: {
+-        name: "आकार",
+-        description: "एक आकार प्रॉप है।",
+-        xs: "xs - Ea ipsum est ea ex sunt.",
+-        sm: "sm - Lorem sunt adipisicin.",
+-        md: "md - Consequat id do lorem.",
+-        lg: "lg - Nostrud ipsum ea.",
+-        xl: "xl - Eiusmod ex excepteur.",
+-        xxl: "xxl - Cillum eu laboris.",
+-      },
+-      weights: {
+-        name: "वजन",
+-        description: "एक वजन प्रॉप है।",
+-        light:
+-          "लाइट - Nulla magna incididunt excepteur est occaecat duis culpa dolore cupidatat enim et.",
+-        normal:
+-          "सामान्य - Magna incididunt dolor ut veniam veniam laboris aliqua velit ea incididunt.",
+-        medium: "मध्यम - Non duis laborum quis laboris occaecat culpa cillum.",
+-        semibold: "सेमीबोल्ड - Exercitation magna nostrud pariatur laborum occaecat aliqua.",
+-        bold: "बोल्ड - Eiusmod ullamco magna exercitation est excepteur.",
+-      },
+-      passingContent: {
+-        name: "सामग्री पास करना",
+-        description: "सामग्री पास करने के कई तरीके हैं।",
+-        viaText:
+-          "`text` प्रॉप के माध्यम से - Billum in aute fugiat proident nisi pariatur est. Cupidatat anim cillum eiusmod ad. Officia eu magna aliquip labore dolore consequat.",
+-        viaTx: "`tx` प्रॉप के माध्यम से -",
+-        children: "चिल्ड्रन - Aliqua velit irure reprehenderit eu qui amet veniam consectetur.",
+-        nestedChildren: "नेस्टेड चिल्ड्रन -",
+-        nestedChildren2: "Occaecat aliqua irure proident veniam.",
+-        nestedChildren3: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren4: "Occaecat aliqua irure proident veniam.",
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-        text: "Consequat ullamco veniam velit mollit proident excepteur aliquip id culpa ipsum velit sint nostrud.",
+-        text2:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-        text3:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-      },
+-    },
+-  },
+-  demoHeader: {
+-    description:
+-      "कई स्क्रीन पर दिखाई देने वाला कंपोनेंट। यह नेविगेशन बटन और स्क्रीन शीर्षक धारण करेगा।",
+-    useCase: {
+-      actionIcons: {
+-        name: "एक्शन आइकन",
+-        description: "आप आसानी से बाएँ या दाएँ एक्शन कंपोनेंट्स में आइकन पास कर सकते हैं।",
+-        leftIconTitle: "बायाँ आइकन",
+-        rightIconTitle: "दायाँ आइकन",
+-        bothIconsTitle: "दोनों आइकन",
+-      },
+-      actionText: {
+-        name: "एक्शन टेक्स्ट",
+-        description: "आप आसानी से बाएँ या दाएँ एक्शन कंपोनेंट्स में टेक्स्ट पास कर सकते हैं।",
+-        leftTxTitle: "`leftTx` के माध्यम से",
+-        rightTextTitle: "`rightText` के माध्यम से",
+-      },
+-      customActionComponents: {
+-        name: "कस्टम एक्शन कंपोनेंट्स",
+-        description:
+-          "यदि आइकन या टेक्स्ट विकल्प पर्याप्त नहीं हैं, तो आप अपना खुद का कस्टम एक्शन कंपोनेंट पास कर सकते हैं।",
+-        customLeftActionTitle: "कस्टम बायाँ एक्शन",
+-      },
+-      titleModes: {
+-        name: "शीर्षक मोड",
+-        description:
+-          "शीर्षक को मध्य में रहने के लिए मजबूर किया जा सकता है (डिफ़ॉल्ट) लेकिन यदि यह बहुत लंबा है तो काटा जा सकता है। वैकल्पिक रूप से आप इसे एक्शन बटनों के अनुसार समायोजित कर सकते हैं।",
+-        centeredTitle: "केंद्रित शीर्षक",
+-        flexTitle: "फ्लेक्स शीर्षक",
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-        styledTitle: "स्टाइल किया गया शीर्षक",
+-        styledWrapperTitle: "स्टाइल किया गया रैपर",
+-        tintedIconsTitle: "रंगीन आइकन",
+-      },
+-    },
+-  },
+-  demoEmptyState: {
+-    description:
+-      "जब प्रदर्शित करने के लिए कोई डेटा नहीं है तो उपयोग करने के लिए एक कंपोनेंट। इसका उपयोग उपयोगकर्ता को अगला क्या करना है, यह निर्देशित करने के लिए किया जा सकता है।",
+-    useCase: {
+-      presets: {
+-        name: "प्रीसेट",
+-        description:
+-          "आप विभिन्न टेक्स्ट/छवि सेट बना सकते हैं। एक पूर्व-परिभाषित है जिसे `generic` कहा जाता है। ध्यान दें, कोई डिफ़ॉल्ट नहीं है यदि आप पूरी तरह से कस्टम EmptyState चाहते हैं।",
+-      },
+-      passingContent: {
+-        name: "सामग्री पास करना",
+-        description: "सामग्री पास करने के कई तरीके हैं।",
+-        customizeImageHeading: "छवि को अनुकूलित करें",
+-        customizeImageContent: "आप कोई भी छवि स्रोत पास कर सकते हैं।",
+-        viaHeadingProp: "`heading` प्रॉप के माध्यम से",
+-        viaContentProp: "`content` प्रॉप के माध्यम से।",
+-        viaButtonProp: "`button` प्रॉप के माध्यम से",
+-      },
+-      styling: {
+-        name: "स्टाइलिंग",
+-        description: "कंपोनेंट को आसानी से स्टाइल किया जा सकता है।",
+-      },
+-    },
+-  },
+-}
+-
+-export default demoHi
+diff --git a/IgniteDiffApp/app/i18n/demo-ja.ts b/IgniteDiffApp/app/i18n/demo-ja.ts
+deleted file mode 100644
+index c0e35589..00000000
+--- a/IgniteDiffApp/app/i18n/demo-ja.ts
++++ /dev/null
+@@ -1,462 +0,0 @@
+-import { DemoTranslations } from "./demo-en"
+-
+-export const demoJa: DemoTranslations = {
+-  demoIcon: {
+-    description:
+-      "あらかじめ登録されたアイコンを描画するコンポーネントです。 `onPress` が提供されている場合は <TouchableOpacity /> にラップされますが、それ以外の場合は <View /> にラップされます。",
+-    useCase: {
+-      icons: {
+-        name: "アイコン",
+-        description: "登録されたアイコンのリストです。",
+-      },
+-      size: {
+-        name: "サイズ",
+-        description: "sizeのpropsです。",
+-      },
+-      color: {
+-        name: "カラー",
+-        description: "colorのpropsです。",
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-      },
+-    },
+-  },
+-  demoTextField: {
+-    description: "このコンポーネントはテキストの入力と編集ができます。",
+-    useCase: {
+-      statuses: {
+-        name: "ステータス",
+-        description:
+-          "status - これは他コンポーネントの`preset`の似ていますが、これはコンポーネントの機能も変えるpropsです。",
+-        noStatus: {
+-          label: "ステータスなし",
+-          helper: "デフォルトのステータスです",
+-          placeholder: "テキストが入力されます",
+-        },
+-        error: {
+-          label: "エラーステータス",
+-          helper: "エラーが発生した場合に使用されるステータスです",
+-          placeholder: "ここにテキストが入力されます",
+-        },
+-        disabled: {
+-          label: "無効(disabled)ステータス",
+-          helper: "編集不可となるステータスです",
+-          placeholder: "ここにテキストが入力されます",
+-        },
+-      },
+-      passingContent: {
+-        name: "コンテントを渡す",
+-        description: "コンテントを渡す方法はいくつかあります。",
+-        viaLabel: {
+-          labelTx: "`label` から",
+-          helper: "`helper` から",
+-          placeholder: "`placeholder` から",
+-        },
+-        rightAccessory: {
+-          label: "右側にアクセサリー",
+-          helper: "このpropsはReact要素を返す関数をうけとります。",
+-        },
+-        leftAccessory: {
+-          label: "左側にアクセサリー",
+-          helper: "このpropsはReact要素を返す関数をうけとります。",
+-        },
+-        supportsMultiline: {
+-          label: "複数行サポート",
+-          helper: "複数行の入力が出来るようになります。",
+-        },
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-        styleInput: {
+-          label: "インプットのスタイル",
+-          helper: "`style`から",
+-        },
+-        styleInputWrapper: {
+-          label: "インプットラッパーのスタイル",
+-          helper: "`inputWrapperStyle`から",
+-        },
+-        styleContainer: {
+-          label: "スタイルコンテナのスタイル",
+-          helper: "`containerStyle`から",
+-        },
+-        styleLabel: {
+-          label: "ラベルとヘルパーのスタイル",
+-          helper: "`LabelTextProps` & `HelperTextProps`から",
+-        },
+-        styleAccessories: {
+-          label: "アクセサリーのスタイル",
+-          helper: "`RightAccessory` & `LeftAccessory`から",
+-        },
+-      },
+-    },
+-  },
+-  demoToggle: {
+-    description:
+-      "ブーリアンの入力を表示するコンポーネントです。コンポーネントはvalueの値を使用して描画するので、onValueChangeコールバックを使って値を変更し、valueを更新する必要があります。valueの値が変更されていない場合は、描画が更新されません。",
+-    useCase: {
+-      variants: {
+-        name: "バリエーション",
+-        description:
+-          "このコンポーネントは数種類のバリエーションをサポートしています。もしカスタマイズが必要な場合、これらのバリエーションをリファクタリングできます。デフォルトは`checkbox`です。",
+-        checkbox: {
+-          label: "`checkbox`バリエーション",
+-          helper: "シンプルなon/offのインプットに使えます。",
+-        },
+-        radio: {
+-          label: "`radio`バリエーション",
+-          helper: "数個のオプションがある場合に使えます。",
+-        },
+-        switch: {
+-          label: "`switch`バリエーション",
+-          helper:
+-            "代表的なon/offのインプットです。他と比べアクセシビリティのサポートが充実しています。",
+-        },
+-      },
+-      statuses: {
+-        name: "ステータス",
+-        description:
+-          "status - これは他コンポーネントの`preset`の似ていますが、これはコンポーネントの機能も変えるpropsです。",
+-        noStatus: "ステータスなし - デフォルトです。",
+-        errorStatus: "エラー - エラーがある際に使えるステータスです。",
+-        disabledStatus: "無効(disabled) - 編集不可となるステータスです",
+-      },
+-      passingContent: {
+-        name: "コンテントを渡す",
+-        description: "コンテントを渡す方法はいくつかあります。",
+-        useCase: {
+-          checkBox: {
+-            label: "`labelTx`から",
+-            helper: "`helperTx`から",
+-          },
+-          checkBoxMultiLine: {
+-            helper: "複数行サポート - Nulla proident consectetur labore sunt ea labore. ",
+-          },
+-          radioChangeSides: {
+-            helper: "左右に変更 - Laborum labore adipisicing in eu ipsum deserunt.",
+-          },
+-          customCheckBox: {
+-            label: "カスタムアイコンも渡せます",
+-          },
+-          switch: {
+-            label: "スイッチはテキストとして読むこともできます。",
+-            helper:
+-              "デフォルトでは、このオプションはフォントの影響を受け、見た目が見苦しくなる可能性がある為`Text`コンポーネントを使用していません。必要に応じてカスタマイズしてください。",
+-          },
+-          switchAid: {
+-            label: "または補助アイコンもつけられます",
+-          },
+-        },
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-        outerWrapper: "1 - インプットの外側のラッパー",
+-        innerWrapper: "2 - インプットの内側のラッパー",
+-        inputDetail: "3 - インプットのそのもの",
+-        labelTx: "ラベルのスタイルも変更できます。",
+-        styleContainer: "もしくは、コンポーネントのコンテナ全体をスタイルすることもできます。",
+-      },
+-    },
+-  },
+-  demoButton: {
+-    description:
+-      "ユーザーにアクションや選択を促すコンポーネントです。`Text`コンポーネントを`Pressable`コンポーネントでラップしています。",
+-    useCase: {
+-      presets: {
+-        name: "プリセット",
+-        description: "数種類のプリセットが用意されています。",
+-      },
+-      passingContent: {
+-        name: "コンテントを渡す",
+-        description: "コンテントを渡す方法はいくつかあります。",
+-        viaTextProps: "`text`から - Billum In",
+-        children: "Childrenから - Irure Reprehenderit",
+-        rightAccessory: "RightAccessoryから - Duis Quis",
+-        leftAccessory: "LeftAccessoryから - Duis Proident",
+-        nestedChildren: "ネストされたchildrenから - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren3: "Occaecat aliqua irure proident veniam.",
+-        multiLine:
+-          "Multilineから - consequat veniam veniam reprehenderit. Fugiat id nisi quis duis sunt proident mollit dolor mollit adipisicing proident deserunt.",
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-        styleContainer: "コンテナのスタイル - Exercitation",
+-        styleText: "テキストのスタイル - Ea Anim",
+-        styleAccessories: "アクセサリーのスタイル - enim ea id fugiat anim ad.",
+-        pressedState: "押された状態のスタイル - fugiat anim",
+-      },
+-      disabling: {
+-        name: "無効化",
+-        description:
+-          "このコンポーネントは無効化できます。スタイルも同時に変更され、押した際の挙動も無効化されます。",
+-        standard: "無効化 - standard",
+-        filled: "無効化 - filled",
+-        reversed: "無効化 - reversed",
+-        accessory: "無効化されたアクセサリーのスタイル",
+-        textStyle: "無効化されたテキストのスタイル",
+-      },
+-    },
+-  },
+-  demoListItem: {
+-    description:
+-      "スタイルを指定されたリストの行のコンポーネントです。FlatListやSectionListなどのコンポーネントを使用することもできますし、単体でも使用できます。",
+-    useCase: {
+-      height: {
+-        name: "高さ",
+-        description: "高さの指定ができます。",
+-        defaultHeight: "デフォルトの高さ (56px)",
+-        customHeight: "`height`を使ったカスタムの高さ",
+-        textHeight:
+-          "テキストによって決まった高さ - Reprehenderit incididunt deserunt do do ea labore.",
+-        longText: "テキストを1行に制限する- Reprehenderit incididunt deserunt do do ea labore.",
+-      },
+-      separators: {
+-        name: "セパレーター",
+-        description: "セパレーター/ディバイダーは用意されてるかつ任意です。",
+-        topSeparator: "トップセパレーターのみ",
+-        topAndBottomSeparator: "トップとボトムのセパレーター",
+-        bottomSeparator: "ボトムのセパレーター",
+-      },
+-      icons: {
+-        name: "アイコン",
+-        description: "右または左のアイコンをカスタマイズすることができます。",
+-        leftIcon: "左のアイコン",
+-        rightIcon: "右のアイコン",
+-        leftRightIcons: "左右のアイコン",
+-      },
+-      customLeftRight: {
+-        name: "左右のコンポーネントのカスタマイズ",
+-        description: "左右のコンポーネントをカスタマイズすることができます。",
+-        customLeft: "カスタムされた左コンポーネント",
+-        customRight: "カスタムされた右コンポーネント",
+-      },
+-      passingContent: {
+-        name: "コンテントを渡す",
+-        description: "コンテントを渡す方法はいくつかあります。",
+-        text: "`text`から - reprehenderit sint",
+-        children: "Childrenから - mostrud mollit",
+-        nestedChildren1: "ネストされたchildrenから - proident veniam.",
+-        nestedChildren2: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-      },
+-      listIntegration: {
+-        name: "FlatList & FlashListに組みこむ場合",
+-        description:
+-          "このコンポーネントはお好みのリスト系のコンポーネントへ容易に組み込むことができます。",
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-        styledText: "スタイルされたテキスト",
+-        styledContainer: "スタイルされたコンテナ(セパレーター)",
+-        tintedIcons: "アイコンに色をつける",
+-      },
+-    },
+-  },
+-  demoCard: {
+-    description:
+-      "カードは関連する情報同士をまとめるのに役立ちます。ListItemが横に情報を表示するのに使え、こちらは縦に表示するのに使えます。",
+-    useCase: {
+-      presets: {
+-        name: "プリセット",
+-        description: "数種類のプリセットが用意されています。",
+-        default: {
+-          heading: "デフォルトのプリセット",
+-          content: "Incididunt magna ut aliquip consectetur mollit dolor.",
+-          footer: "Consectetur nulla non aliquip velit.",
+-        },
+-        reversed: {
+-          heading: "リバースのプリセット",
+-          content: "Reprehenderit occaecat proident amet id laboris.",
+-          footer: "Consectetur tempor ea non labore anim .",
+-        },
+-      },
+-      verticalAlignment: {
+-        name: "縦の位置調整",
+-        description: "カードは用意されたプリセットを使っての縦位置調整ができます。",
+-        top: {
+-          heading: "Top(デフォルト)",
+-          content: "全てのコンテンツは自動的に上に配置されます。",
+-          footer: "Footerも同じように上に配置されます。",
+-        },
+-        center: {
+-          heading: "センター",
+-          content: "全てのコンテンツはカードの高さから見て中央に配置されます。",
+-          footer: "Footerである私も!",
+-        },
+-        spaceBetween: {
+-          heading: "Space Between",
+-          content: "全てのコンテンツは均等に分配されます。",
+-          footer: "Footerの私はここが一番落ち着くね",
+-        },
+-        reversed: {
+-          heading: "Footerのみを下に配置する",
+-          content: "その名の通り、Footerのみを下に配置することができます。",
+-          footer: "Footerは一人で寂しい",
+-        },
+-      },
+-      passingContent: {
+-        name: "コンテントを渡す",
+-        description: "コンテントを渡す方法はいくつかあります。",
+-        heading: "`heading`から",
+-        content: "`content`から",
+-        footer: "`footer`から",
+-      },
+-      customComponent: {
+-        name: "カスタムコンポーネント",
+-        description:
+-          "全てのプリセットはカスタムコンポーネントを使って拡張/変更することができます。",
+-        rightComponent: "右コンポーネント",
+-        leftComponent: "左コンポーネント",
+-      },
+-      style: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-        heading: "ヘディングのスタイル",
+-        content: "コンテントのスタイル",
+-        footer: "フッターのスタイル",
+-      },
+-    },
+-  },
+-  demoAutoImage: {
+-    description: "リモートまたはデータURIによって自動的にサイズを変更する画像コンポーネントです。",
+-    useCase: {
+-      remoteUri: { name: "リモート URI" },
+-      base64Uri: { name: "Base64 URI" },
+-      scaledToFitDimensions: {
+-        name: "ディメンションにフィットするように拡大する",
+-        description:
+-          "`maxWidth` と/または `maxHeight`を指定することで、アスペクト比を維持したままサイズを変更することができます。`resizeMode: 'contain'`との違いとしては: \n1. 一方のサイズの指定でも良い（両方の指定の必要がない）。 \n2. 画像のコンテナに押し込められるのではなく、画像のディメンションを保ったまま指定したサイズに拡大、縮小を行うことができます。",
+-        heightAuto: "width: 60 / height: auto",
+-        widthAuto: "width: auto / height: 32",
+-        bothManual: "width: 60 / height: 60",
+-      },
+-    },
+-  },
+-  demoText: {
+-    description:
+-      "テキストを表示する為のコンポーネントです。これはReact NativeのTextコンポーネントを内包する高階コンポーネント(Higher Order Component)です。",
+-    useCase: {
+-      presets: {
+-        name: "プリセット",
+-        description: "数種類のプリセットが用意されています。",
+-        default:
+-          "デフォルトのプリセット - Cillum eu laboris in labore. Excepteur mollit tempor reprehenderit fugiat elit et eu consequat laborum.",
+-        bold: "ボールドのプリセット - Tempor et ullamco cupidatat in officia. Nulla ea duis elit id sunt ipsum cillum duis deserunt nostrud ut nostrud id.",
+-        subheading: "サブヘディングのプリセット - In Cupidatat Cillum.",
+-        heading: "ヘディングのプリセット - Voluptate Adipis.",
+-      },
+-      sizes: {
+-        name: "サイズ",
+-        description: "サイズ用のpropsです.",
+-        xs: "xs - Ea ipsum est ea ex sunt.",
+-        sm: "sm - Lorem sunt adipisicin.",
+-        md: "md - Consequat id do lorem.",
+-        lg: "lg - Nostrud ipsum ea.",
+-        xl: "xl - Eiusmod ex excepteur.",
+-        xxl: "xxl - Cillum eu laboris.",
+-      },
+-      weights: {
+-        name: "ウエイト",
+-        description: "ウエイト用のpropです。",
+-        light:
+-          "ライト - Nulla magna incididunt excepteur est occaecat duis culpa dolore cupidatat enim et.",
+-        normal:
+-          "ノーマル - Magna incididunt dolor ut veniam veniam laboris aliqua velit ea incididunt.",
+-        medium: "ミディアム - Non duis laborum quis laboris occaecat culpa cillum.",
+-        semibold: "セミボールド - Exercitation magna nostrud pariatur laborum occaecat aliqua.",
+-        bold: "ボールド - Eiusmod ullamco magna exercitation est excepteur.",
+-      },
+-      passingContent: {
+-        name: "コンテントを渡す",
+-        description: "コンテントを渡す方法はいくつかあります。",
+-        viaText:
+-          "`text`から - Billum in aute fugiat proident nisi pariatur est. Cupidatat anim cillum eiusmod ad. Officia eu magna aliquip labore dolore consequat.",
+-        viaTx: "`tx`から -",
+-        children: "childrenから - Aliqua velit irure reprehenderit eu qui amet veniam consectetur.",
+-        nestedChildren: "ネストされたchildrenから -",
+-        nestedChildren2: "Occaecat aliqua irure proident veniam.",
+-        nestedChildren3: "Ullamco cupidatat officia exercitation velit non ullamco nisi..",
+-        nestedChildren4: "Occaecat aliqua irure proident veniam.",
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-        text: "Consequat ullamco veniam velit mollit proident excepteur aliquip id culpa ipsum velit sint nostrud.",
+-        text2:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-        text3:
+-          "Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco adipisicing tempor adipisicing.",
+-      },
+-    },
+-  },
+-  demoHeader: {
+-    description:
+-      "様々なスクリーンで登場するコンポーネントです。ナビゲーションのボタンとスクリーンタイトルを含みます。",
+-    useCase: {
+-      actionIcons: {
+-        name: "アクションアイコン",
+-        description: "左右にアイコンを表示させることができます。",
+-        leftIconTitle: "左アイコン",
+-        rightIconTitle: "右アイコン",
+-        bothIconsTitle: "両方のアイコン",
+-      },
+-      actionText: {
+-        name: "アクションテキスト",
+-        description: "左右にテキストを表示させることができます。",
+-        leftTxTitle: "`leftTx`から",
+-        rightTextTitle: "`rightText`から",
+-      },
+-      customActionComponents: {
+-        name: "カスタムアクションコンポーネント",
+-        description:
+-          "アイコンまたはテキスト以外のものが必要な場合は、カスタムのアクションコンポーネントを渡すことができます。",
+-        customLeftActionTitle: "カスタムの左アクション",
+-      },
+-      titleModes: {
+-        name: "タイトルモード",
+-        description:
+-          "タイトルはデフォルトで中央に配置されますが、長すぎるとカットされてしまいます。Flexを使うことでアクションボタンから自動的にポジションを調整することもできます。",
+-        centeredTitle: "Centered Title",
+-        flexTitle: "Flex Title",
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-        styledTitle: "スタイルされたタイトル",
+-        styledWrapperTitle: "スタイルされたラッパー",
+-        tintedIconsTitle: "色付けされたアイコン",
+-      },
+-    },
+-  },
+-  demoEmptyState: {
+-    description:
+-      "表示する為のデータが存在しない場合に使えるコンポーネントです。ユーザーに取るべきアクションをお勧めする際に有用です。",
+-    useCase: {
+-      presets: {
+-        name: "プリセット",
+-        description:
+-          "text/imageのセットを使ってカスタマイズすることができます。これは`generic`のものです。カスタマイズが必要になることを想定して、このコンポーネントにデフォルトのプリセットは存在しません。",
+-      },
+-      passingContent: {
+-        name: "コンテントを渡す",
+-        description: "コンテントを渡す方法はいくつかあります。",
+-        customizeImageHeading: "画像をカスタマイズ",
+-        customizeImageContent: "画像のソースを渡すことができます。",
+-        viaHeadingProp: "`heading`から",
+-        viaContentProp: "`content`から",
+-        viaButtonProp: "`button`から",
+-      },
+-      styling: {
+-        name: "スタイリング",
+-        description: "このコンポーネントはスタイリングの変更ができます。",
+-      },
+-    },
+-  },
+-}
+-
+-export default demoJa
+diff --git a/IgniteDiffApp/app/i18n/demo-ko.ts b/IgniteDiffApp/app/i18n/demo-ko.ts
+deleted file mode 100644
+index 61ef883d..00000000
+--- a/IgniteDiffApp/app/i18n/demo-ko.ts
++++ /dev/null
+@@ -1,455 +0,0 @@
+-import { DemoTranslations } from "./demo-en"
+-
+-export const demoKo: DemoTranslations = {
+-  demoIcon: {
+-    description:
+-      "등록된 아이콘을 렌더링하는 컴포넌트입니다. `onPress`가 구현되어 있으면 <TouchableOpacity />로, 그렇지 않으면 <View />로 감쌉니다.",
+-    useCase: {
+-      icons: {
+-        name: "아이콘",
+-        description: "컴포넌트에 등록된 아이콘 목록입니다.",
+-      },
+-      size: {
+-        name: "크기",
+-        description: "크기 속성이 있습니다.",
+-      },
+-      color: {
+-        name: "색상",
+-        description: "색상 속성이 있습니다.",
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-      },
+-    },
+-  },
+-  demoTextField: {
+-    description: "TextField 컴포넌트는 텍스트 입력 및 편집을 허용합니다.",
+-    useCase: {
+-      statuses: {
+-        name: "상태",
+-        description:
+-          "다른 컴포넌트의 `preset`과 유사한 상태 속성이 있으며, 컴포넌트의 기능에도 영향을 미칩니다.",
+-        noStatus: {
+-          label: "상태 없음",
+-          helper: "이것이 기본 상태입니다",
+-          placeholder: "텍스트가 여기에 들어갑니다",
+-        },
+-        error: {
+-          label: "오류 상태",
+-          helper: "오류가 있을 때 사용하는 상태입니다",
+-          placeholder: "텍스트가 여기에 들어갑니다",
+-        },
+-        disabled: {
+-          label: "비활성 상태",
+-          helper: "편집 기능을 비활성화하고 텍스트를 표시하지 않습니다",
+-          placeholder: "텍스트가 여기에 들어갑니다",
+-        },
+-      },
+-      passingContent: {
+-        name: "내용 전달",
+-        description: "내용을 전달하는 몇 가지 방법이 있습니다.",
+-        viaLabel: {
+-          labelTx: "`label` 속성으로",
+-          helper: "`helper` 속성으로",
+-          placeholder: "`placeholder` 속성으로",
+-        },
+-        rightAccessory: {
+-          label: "오른쪽 액세서리",
+-          helper: "이 속성은 React 요소를 반환하는 함수를 받습니다.",
+-        },
+-        leftAccessory: {
+-          label: "왼쪽 액세서리",
+-          helper: "이 속성은 React 요소를 반환하는 함수를 받습니다.",
+-        },
+-        supportsMultiline: {
+-          label: "멀티라인 지원",
+-          helper: "멀티라인 텍스트를 위한 더 높은 입력을 활성화합니다.",
+-        },
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-        styleInput: {
+-          label: "입력 스타일",
+-          helper: "`style` 속성으로",
+-        },
+-        styleInputWrapper: {
+-          label: "입력 래퍼 스타일",
+-          helper: "`inputWrapperStyle` 속성으로",
+-        },
+-        styleContainer: {
+-          label: "컨테이너 스타일",
+-          helper: "`containerStyle` 속성으로",
+-        },
+-        styleLabel: {
+-          label: "레이블 및 헬퍼 스타일",
+-          helper: "`LabelTextProps` 및 `HelperTextProps` 스타일 속성으로",
+-        },
+-        styleAccessories: {
+-          label: "액세서리 스타일",
+-          helper: "`RightAccessory` 및 `LeftAccessory` 스타일 속성으로",
+-        },
+-      },
+-    },
+-  },
+-  demoToggle: {
+-    description:
+-      "불리언 입력을 렌더링합니다. 사용자가 수행한 작업을 반영하기 위해 값 속성을 업데이트하는 onValueChange 콜백이 필요한 제어된 컴포넌트입니다. 값 속성이 업데이트되지 않으면, 컴포넌트는 사용자 작업의 예상 결과 대신 제공된 값 속성을 계속 렌더링합니다.",
+-    useCase: {
+-      variants: {
+-        name: "변형",
+-        description:
+-          "이 컴포넌트는 몇 가지 변형을 지원합니다. 특정 변형을 대폭 커스터마이즈해야 하는 경우에는 쉽게 리팩토링할 수 있습니다. 기본값은 `체크박스`입니다.",
+-        checkbox: {
+-          label: "`체크박스` 변형",
+-          helper: "단일 켜기/끄기 입력에 사용할 수 있습니다.",
+-        },
+-        radio: {
+-          label: "`라디오` 변형",
+-          helper: "여러 옵션이 있는 경우 사용하십시오.",
+-        },
+-        switch: {
+-          label: "`스위치` 변형",
+-          helper: "더 눈에 띄는 켜기/끄기 입력입니다. 접근성 지원이 더 좋습니다.",
+-        },
+-      },
+-      statuses: {
+-        name: "상태",
+-        description:
+-          "다른 컴포넌트의 `preset`과 유사한 상태 속성이 있으며, 컴포넌트의 기능에도 영향을 미칩니다.",
+-        noStatus: "상태 없음 - 기본 상태",
+-        errorStatus: "오류 상태 - 오류가 있을 때 사용",
+-        disabledStatus: "비활성 상태 - 편집 기능을 비활성화하고 입력을 표시하지 않음",
+-      },
+-      passingContent: {
+-        name: "내용 전달",
+-        description: "내용을 전달하는 몇 가지 방법이 있습니다.",
+-        useCase: {
+-          checkBox: {
+-            label: "`labelTx` 속성으로",
+-            helper: "`helperTx` 속성으로",
+-          },
+-          checkBoxMultiLine: {
+-            helper: "멀티라인 지원 - 멀티라인 지원을 위한 예제 문장입니다. 하나 둘 셋.",
+-          },
+-          radioChangeSides: {
+-            helper: "양쪽을 변경할 수 있습니다 - 양쪽 변경을 위한 예제 문장입니다. 하나 둘 셋.",
+-          },
+-          customCheckBox: {
+-            label: "맞춤 체크박스 아이콘 전달.",
+-          },
+-          switch: {
+-            label: "스위치는 텍스트로 읽을 수 있습니다",
+-            helper:
+-              "기본적으로 이 옵션은 `Text`를 사용하지 않습니다. 폰트에 따라 켜기/끄기 문자가 이상하게 보일 수 있기 때문입니다. 필요에 따라 커스터마이즈하세요.",
+-          },
+-          switchAid: {
+-            label: "또는 아이콘으로 보조",
+-          },
+-        },
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-        outerWrapper: "1 - 입력 외부 래퍼 스타일링",
+-        innerWrapper: "2 - 입력 내부 래퍼 스타일링",
+-        inputDetail: "3 - 입력 디테일 스타일링",
+-        labelTx: "labelTx도 스타일링할 수 있습니다",
+-        styleContainer: "또는 전체 컨테이너 스타일링",
+-      },
+-    },
+-  },
+-  demoButton: {
+-    description:
+-      "사용자가 작업을 수행하고 선택을 할 수 있도록 하는 컴포넌트입니다. Text 컴포넌트를 Pressable 컴포넌트로 감쌉니다.",
+-    useCase: {
+-      presets: {
+-        name: "프리셋",
+-        description: "사전 구성된 몇 가지 프리셋이 있습니다.",
+-      },
+-      passingContent: {
+-        name: "내용 전달",
+-        description: "내용을 전달하는 몇 가지 방법이 있습니다.",
+-        viaTextProps: "`text` 속성으로 - 예제 문장입니다.",
+-        children: "자식 - 또 다른 예제 문장입니다.",
+-        rightAccessory: "오른쪽 액세서리 - 예제 문장입니다.",
+-        leftAccessory: "왼쪽 액세서리 - 예제 문장입니다.",
+-        nestedChildren: "중첩 자식 - 별 하나에 추억과 별 하나에 사랑과 별 하나에 쓸쓸함과",
+-        nestedChildren2: "별 하나에 동경과 별 하나에 시와 ",
+-        nestedChildren3: "별 하나에 어머니, 어머니.",
+-        multiLine:
+-          "멀티라인 - 죽는 날까지 하늘을 우러러 한 점 부끄럼이 없기를, 잎새에 이는 바람에도 나는 괴로워했다. 별을 노래하는 마음으로 모든 죽어 가는 것을 사랑해야지 그리고 나한테 주어진 길을 걸어가야겠다. 오늘 밤에도 별이 바람에 스치운다.",
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-        styleContainer: "스타일 컨테이너 - 예제 문장",
+-        styleText: "스타일 텍스트 - 예제 문장",
+-        styleAccessories: "스타일 액세서리 - 또 다른 예제 문장",
+-        pressedState: "스타일 눌린 상태 - 예제 문장",
+-      },
+-      disabling: {
+-        name: "비활성화",
+-        description:
+-          "컴포넌트는 비활성화할 수 있으며, 그에 따라 스타일링할 수 있습니다. 누르는 동작이 비활성화됩니다.",
+-        standard: "비활성화 - 표준",
+-        filled: "비활성화 - 채워진",
+-        reversed: "비활성화 - 역방향",
+-        accessory: "비활성화된 액세서리 스타일",
+-        textStyle: "비활성화된 텍스트 스타일",
+-      },
+-    },
+-  },
+-  demoListItem: {
+-    description: "FlatList, SectionList 또는 자체적으로 사용할 수 있는 스타일된 행 컴포넌트입니다.",
+-    useCase: {
+-      height: {
+-        name: "높이",
+-        description: "행은 다른 높이를 가질 수 있습니다.",
+-        defaultHeight: "기본 높이 (56px)",
+-        customHeight: "`height` 속성을 통해 사용자 정의 높이",
+-        textHeight:
+-          "텍스트 내용에 의해 결정된 높이 - 예제를 위한 긴 문장입니다. 하나 둘 셋. 안녕하세요.",
+-        longText:
+-          "긴 텍스트를 한 줄로 제한 - 이것 역시 예제를 위한 긴 문장입니다. 오늘 날씨는 어떤가요?",
+-      },
+-      separators: {
+-        name: "구분선",
+-        description: "구분선 / 디바이더가 사전 구성되어 있으며 선택 사항입니다.",
+-        topSeparator: "상단 구분선만",
+-        topAndBottomSeparator: "상단 및 하단 구분선",
+-        bottomSeparator: "하단 구분선만",
+-      },
+-      icons: {
+-        name: "아이콘",
+-        description: "왼쪽 또는 오른쪽 아이콘을 사용자 정의할 수 있습니다.",
+-        leftIcon: "왼쪽 아이콘",
+-        rightIcon: "오른쪽 아이콘",
+-        leftRightIcons: "왼쪽 및 오른쪽 아이콘",
+-      },
+-      customLeftRight: {
+-        name: "사용자 정의 왼쪽/오른쪽 컴포넌트",
+-        description: "필요시에는 사용자가 정의한 왼쪽/오른쪽 컴포넌트를 전달할 수 있습니다.",
+-        customLeft: "사용자 정의 왼쪽 컴포넌트",
+-        customRight: "사용자 정의 오른쪽 컴포넌트",
+-      },
+-      passingContent: {
+-        name: "내용 전달",
+-        description: "내용을 전달하는 몇 가지 방법이 있습니다.",
+-        text: "`text` 속성으로 - 예제 문장입니다.",
+-        children: "자식 - 또 다른 예제 문장입니다.",
+-        nestedChildren1: "중첩 자식 - 이것도 예제 문장입니다..",
+-        nestedChildren2: "또 다른 예제 문장, 중첩이 된 형태입니다.",
+-      },
+-      listIntegration: {
+-        name: "FlatList 및 FlashList 통합",
+-        description: "이 컴포넌트는 선호하는 리스트 인터페이스와 쉽게 통합할 수 있습니다.",
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-        styledText: "스타일된 텍스트",
+-        styledContainer: "스타일된 컨테이너 (구분선)",
+-        tintedIcons: "색이 입혀진 아이콘",
+-      },
+-    },
+-  },
+-  demoCard: {
+-    description:
+-      "카드는 관련 정보를 컨테이너에 담아 표시하는 데 유용합니다. ListItem이 내용을 수평으로 표시한다면, 카드는 내용을 수직으로 표시할 수 있습니다.",
+-    useCase: {
+-      presets: {
+-        name: "프리셋",
+-        description: "사전 구성된 몇 가지 프리셋이 있습니다.",
+-        default: {
+-          heading: "기본 프리셋 (기본값)",
+-          content: "예제 문장입니다. 그믐밤 반디불은 부서진 달조각",
+-          footer: "숲으로 가자 달조각을 주으려 숲으로 가자.",
+-        },
+-        reversed: {
+-          heading: "역방향 프리셋",
+-          content: "예제 문장입니다. 그믐밤 반디불은 부서진 달조각",
+-          footer: "숲으로 가자 달조각을 주으려 숲으로 가자.",
+-        },
+-      },
+-      verticalAlignment: {
+-        name: "수직 정렬",
+-        description: "카드는 필요에 따라 미리 구성된 다양한 정렬방법으로 제공됩니다.",
+-        top: {
+-          heading: "상단 (기본값)",
+-          content: "모든 콘텐츠가 자동으로 상단에 정렬됩니다.",
+-          footer: "심지어 푸터도",
+-        },
+-        center: {
+-          heading: "중앙",
+-          content: "콘텐츠는 카드 높이에 상대적으로 중앙에 배치됩니다.",
+-          footer: "나도!",
+-        },
+-        spaceBetween: {
+-          heading: "공간 사이",
+-          content: "모든 콘텐츠가 고르게 간격을 둡니다.",
+-          footer: "나는 내가 있고 싶은 곳에 있어요.",
+-        },
+-        reversed: {
+-          heading: "푸터 강제 하단",
+-          content: "푸터를 원하는 위치에 밀어 넣습니다.",
+-          footer: "여기 너무 외로워요.",
+-        },
+-      },
+-      passingContent: {
+-        name: "내용 전달",
+-        description: "내용을 전달하는 몇 가지 방법이 있습니다.",
+-        heading: "`heading` 속성으로",
+-        content: "`content` 속성으로",
+-        footer: "푸터도 외로워요.",
+-      },
+-      customComponent: {
+-        name: "사용자 정의 컴포넌트",
+-        description:
+-          "사전 구성된 컴포넌트 중 하나를 직접 만든 자신의 컴포넌트로 대체할 수 있습니다. 추가 컴포넌트도 덧붙여 넣을 수 있습니다.",
+-        rightComponent: "오른쪽 컴포넌트",
+-        leftComponent: "왼쪽 컴포넌트",
+-      },
+-      style: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-        heading: "헤딩 스타일링",
+-        content: "컨텐츠 스타일링",
+-        footer: "푸터 스타일링",
+-      },
+-    },
+-  },
+-  demoAutoImage: {
+-    description: "원격 또는 data-uri 이미지의 크기를 자동으로 조정하는 Image 컴포넌트입니다.",
+-    useCase: {
+-      remoteUri: { name: "원격 URI" },
+-      base64Uri: { name: "Base64 URI" },
+-      scaledToFitDimensions: {
+-        name: "치수에 맞게 조정",
+-        description:
+-          "`maxWidth` 단독으로, 혹은 `maxHeight` 속성과 함께 제공하면, 이미지는 비율을 유지하면서 자동으로 크기가 조정됩니다. 이것이 `resizeMode: 'contain'`과 다른 점은 무엇일까요? 첫째, 한쪽 크기만 지정할 수 있습니다. 둘째, 이미지가 이미지 컨테이너 내에 포함되는 대신 원하는 치수에 맞게 조정됩니다.",
+-        heightAuto: "너비: 60 / 높이: 자동",
+-        widthAuto: "너비: 자동 / 높이: 32",
+-        bothManual: "너비: 60 / 높이: 60",
+-      },
+-    },
+-  },
+-  demoText: {
+-    description:
+-      "텍스트 표시가 필요한 경우를 위해, 이 컴포넌트는 기본 React Native 컴포넌트 위에 HOC로 제작되었습니다.",
+-    useCase: {
+-      presets: {
+-        name: "프리셋",
+-        description: "사전 구성된 몇 가지 프리셋이 있습니다.",
+-        default: "기본 프리셋 - 예제 문장입니다. 하나 둘 셋.",
+-        bold: "볼드 프리셋 - 예제 문장입니다. 하나 둘 셋.",
+-        subheading: "서브헤딩 프리셋 - 예제 문장입니다. 하나 둘 셋.",
+-        heading: "헤딩 프리셋 - 예제 문장입니다. 하나 둘 셋.",
+-      },
+-      sizes: {
+-        name: "크기",
+-        description: "크기 속성이 있습니다.",
+-        xs: "xs - 조금 더 작은 크기 속성입니다.",
+-        sm: "sm - 작은 크기 속성입니다.",
+-        md: "md - 중간 크기 속성입니다.",
+-        lg: "lg - 큰 크기 속성입니다.",
+-        xl: "xl - 조금 더 큰 크기 속성입니다.",
+-        xxl: "xxl - 아주 큰 크기 속성입니다.",
+-      },
+-      weights: {
+-        name: "굵기",
+-        description: "굵기 속성이 있습니다.",
+-        light: "가벼움 - 예제 문장입니다. 안녕하세요. 하나 둘 셋.",
+-        normal: "보통 - 예제 문장입니다. 안녕하세요. 하나 둘 셋.",
+-        medium: "중간 - 예제 문장입니다. 안녕하세요. 하나 둘 셋.",
+-        semibold: "세미볼드 - 예제 문장입니다. 안녕하세요. 하나 둘 셋.",
+-        bold: "볼드 - 예제 문장입니다. 안녕하세요. 하나 둘 셋.",
+-      },
+-      passingContent: {
+-        name: "내용 전달",
+-        description: "내용을 전달하는 몇 가지 방법이 있습니다.",
+-        viaText:
+-          "`text` 속성으로 - 죽는 날까지 하늘을 우러러 한 점 부끄럼이 없기를, 잎새에 이는 바람에도 나는 괴로워했다. 별을 노래하는 마음으로 모든 죽어 가는 것을 사랑해야지 그리고 나한테 주어진 길을 걸어가야겠다. 오늘 밤에도 별이 바람에 스치운다.",
+-        viaTx: "`tx` 속성으로",
+-        children: "자식 - 또 다른 예제 문장입니다. 하나 둘 셋.",
+-        nestedChildren: "중첩 자식",
+-        nestedChildren2: "죽는 날까지 하늘을 우러러 한 점 부끄럼이 없기를, ",
+-        nestedChildren3: "잎새에 이는 바람에도 나는 괴로워했다.",
+-        nestedChildren4: "별을 노래하는 마음으로 모든 죽어 가는 것을 사랑해야지.",
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-        text: "그리고 나한테 주어진 길을 걸어가야겠다.",
+-        text2: "오늘 밤에도 별이 바람에 스치운다.",
+-        text3: "계속 이어지는 예제 문장입니다. 하나 둘 셋.",
+-      },
+-    },
+-  },
+-  demoHeader: {
+-    description:
+-      "여러 화면에 나타나는 컴포넌트입니다. 네비게이션 버튼과 화면 제목을 포함할 것입니다.",
+-    useCase: {
+-      actionIcons: {
+-        name: "액션 아이콘",
+-        description: "왼쪽 또는 오른쪽 액션 컴포넌트에 아이콘을 쉽게 전달할 수 있습니다.",
+-        leftIconTitle: "왼쪽 아이콘",
+-        rightIconTitle: "오른쪽 아이콘",
+-        bothIconsTitle: "양쪽 아이콘",
+-      },
+-      actionText: {
+-        name: "액션 텍스트",
+-        description: "왼쪽 또는 오른쪽 액션 컴포넌트에 텍스트를 쉽게 전달할 수 있습니다.",
+-        leftTxTitle: "`leftTx`를 통해",
+-        rightTextTitle: "`rightText`를 통해",
+-      },
+-      customActionComponents: {
+-        name: "사용자 정의 액션 컴포넌트",
+-        description:
+-          "아이콘이나 텍스트 옵션이 충분하지 않은 경우, 사용자 정의 액션 컴포넌트를 전달할 수 있습니다.",
+-        customLeftActionTitle: "사용자 정의 왼쪽 액션",
+-      },
+-      titleModes: {
+-        name: "제목 모드",
+-        description:
+-          "제목은 기본적으로 중앙에 고정되지만 너무 길면 잘릴 수 있습니다. 액션 버튼에 맞춰 조정할 수 있습니다.",
+-        centeredTitle: "중앙 제목",
+-        flexTitle: "유연한 제목",
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-        styledTitle: "스타일된 제목",
+-        styledWrapperTitle: "스타일된 래퍼",
+-        tintedIconsTitle: "색이 입혀진 아이콘",
+-      },
+-    },
+-  },
+-  demoEmptyState: {
+-    description:
+-      "표시할 데이터가 없을 때 사용할 수 있는 컴포넌트입니다. 사용자가 다음에 무엇을 할지 안내할 수 있습니다.",
+-    useCase: {
+-      presets: {
+-        name: "프리셋",
+-        description:
+-          "다양한 텍스트/이미지 세트를 만들 수 있습니다. `generic`이라는 사전 정의된 세트가 하나 있습니다. 기본값이 없으므로 완전히 사용자 정의된 EmptyState를 원할 경우 사용할 수 있습니다.",
+-      },
+-      passingContent: {
+-        name: "내용 전달",
+-        description: "내용을 전달하는 몇 가지 방법이 있습니다.",
+-        customizeImageHeading: "이미지 맞춤 설정",
+-        customizeImageContent: "어떤 이미지 소스도 전달할 수 있습니다.",
+-        viaHeadingProp: "`heading` 속성으로",
+-        viaContentProp: "`content` 속성으로",
+-        viaButtonProp: "`button` 속성으로",
+-      },
+-      styling: {
+-        name: "스타일링",
+-        description: "컴포넌트는 쉽게 스타일링할 수 있습니다.",
+-      },
+-    },
+-  },
+-}
+-
+-export default demoKo
+diff --git a/IgniteDiffApp/app/i18n/en.ts b/IgniteDiffApp/app/i18n/en.ts
+index 7ab6f8ae..95c9ab64 100644
+--- a/IgniteDiffApp/app/i18n/en.ts
++++ b/IgniteDiffApp/app/i18n/en.ts
+@@ -1,5 +1,3 @@
+-import demoEn from "./demo-en"
+-
+ const en = {
+   common: {
+     ok: "OK!",
+@@ -121,8 +119,6 @@ const en = {
+         "No favorites have been added yet. Tap the heart on an episode to add it to your favorites!",
+     },
+   },
+-
+-  ...demoEn,
+ }
+ 
+ export default en
+diff --git a/IgniteDiffApp/app/i18n/fr.ts b/IgniteDiffApp/app/i18n/fr.ts
+index b482c28a..7b70ac56 100644
+--- a/IgniteDiffApp/app/i18n/fr.ts
++++ b/IgniteDiffApp/app/i18n/fr.ts
+@@ -1,4 +1,3 @@
+-import demoFr from "./demo-fr"
+ import { Translations } from "./en"
+ 
+ const fr: Translations = {
+@@ -124,8 +123,6 @@ const fr: Translations = {
+         "Aucun favori n'a été ajouté pour le moment. Appuyez sur le cœur d'un épisode pour l'ajouter à vos favoris !",
+     },
+   },
+-
+-  ...demoFr,
+ }
+ 
+ export default fr
+diff --git a/IgniteDiffApp/app/i18n/hi.ts b/IgniteDiffApp/app/i18n/hi.ts
+deleted file mode 100644
+index 3694701b..00000000
+--- a/IgniteDiffApp/app/i18n/hi.ts
++++ /dev/null
+@@ -1,129 +0,0 @@
+-import demoHi from "./demo-hi"
+-import { Translations } from "./en"
+-
+-const hi: Translations = {
+-  common: {
+-    ok: "ठीक है!",
+-    cancel: "रद्द करें",
+-    back: "वापस",
+-    logOut: "लॉग आउट",
+-  },
+-  welcomeScreen: {
+-    postscript:
+-      "psst - शायद आपका ऐप ऐसा नहीं दिखता है। (जब तक कि आपके डिजाइनर ने आपको ये स्क्रीन नहीं दी हों, और उस स्थिति में, इसे लॉन्च करें!)",
+-    readyForLaunch: "आपका ऐप, लगभग लॉन्च के लिए तैयार है!",
+-    exciting: "(ओह, यह रोमांचक है!)",
+-    letsGo: "चलो चलते हैं!",
+-  },
+-  errorScreen: {
+-    title: "कुछ गलत हो गया!",
+-    friendlySubtitle:
+-      "यह वह स्क्रीन है जो आपके उपयोगकर्ता संचालन में देखेंगे जब कोई त्रुटि होगी। आप इस संदेश को बदलना चाहेंगे (जो `app/i18n/hi.ts` में स्थित है) और शायद लेआउट भी (`app/screens/ErrorScreen`)। यदि आप इसे पूरी तरह से हटाना चाहते हैं, तो `app/app.tsx` में <ErrorBoundary> कंपोनेंट की जांच करें।",
+-    reset: "ऐप रीसेट करें",
+-    traceTitle: "%{name} स्टैक से त्रुटि",
+-  },
+-  emptyStateComponent: {
+-    generic: {
+-      heading: "इतना खाली... इतना उदास",
+-      content: "अभी तक कोई डेटा नहीं मिला। रीफ्रेश करने या ऐप को पुनः लोड करने के लिए बटन दबाएं।",
+-      button: "चलो फिर से कोशिश करते हैं",
+-    },
+-  },
+-
+-  errors: {
+-    invalidEmail: "अमान्य ईमेल पता।",
+-  },
+-  loginScreen: {
+-    logIn: "लॉग इन करें",
+-    enterDetails:
+-      "सर्वश्रेष्ठ रहस्य पता करने के लिए नीचे अपना विवरण दर्ज करें। आप कभी अनुमान नहीं लगा पाएंगे कि हमारे पास क्या इंतजार कर रहा है। या शायद आप कर सकते हैं; यह रॉकेट साइंस नहीं है।",
+-    emailFieldLabel: "ईमेल",
+-    passwordFieldLabel: "पासवर्ड",
+-    emailFieldPlaceholder: "अपना ईमेल पता दर्ज करें",
+-    passwordFieldPlaceholder: "सुपर सीक्रेट पासवर्ड यहाँ",
+-    tapToLogIn: "लॉग इन करने के लिए टैप करें!",
+-    hint: "संकेत: आप किसी भी ईमेल पते और अपने पसंदीदा पासवर्ड का उपयोग कर सकते हैं :)",
+-  },
+-  demoNavigator: {
+-    componentsTab: "कंपोनेंट्स",
+-    debugTab: "डीबग",
+-    communityTab: "समुदाय",
+-    podcastListTab: "पॉडकास्ट",
+-  },
+-  demoCommunityScreen: {
+-    title: "समुदाय से जुड़ें",
+-    tagLine:
+-      "Infinite Red के React Native इंजीनियरों के समुदाय से जुड़ें और हमारे साथ अपने ऐप विकास को बेहतर बनाएं!",
+-    joinUsOnSlackTitle: "Slack पर हमसे जुड़ें",
+-    joinUsOnSlack:
+-      "क्या आप चाहते हैं कि दुनिया भर के React Native इंजीनियरों से जुड़ने के लिए कोई जगह हो? Infinite Red Community Slack में बातचीत में शामिल हों! हमारा बढ़ता हुआ समुदाय प्रश्न पूछने, दूसरों से सीखने और अपने नेटवर्क को बढ़ाने के लिए एक सुरक्षित स्थान है।",
+-    joinSlackLink: "Slack समुदाय में शामिल हों",
+-    makeIgniteEvenBetterTitle: "Ignite को और बेहतर बनाएं",
+-    makeIgniteEvenBetter:
+-      "Ignite को और बेहतर बनाने का कोई विचार है? हमें यह सुनकर खुशी होगी! हम हमेशा ऐसे लोगों की तलाश में रहते हैं जो हमें सर्वश्रेष्ठ React Native टूलिंग बनाने में मदद करना चाहते हैं। Ignite के भविष्य को बनाने में हमारे साथ शामिल होने के लिए GitHub पर हमसे जुड़ें।",
+-    contributeToIgniteLink: "Ignite में योगदान दें",
+-    theLatestInReactNativeTitle: "React Native में नवीनतम",
+-    theLatestInReactNative: "हम आपको React Native के सभी प्रस्तावों पर अपडेट रखने के लिए यहां हैं।",
+-    reactNativeRadioLink: "React Native रेडियो",
+-    reactNativeNewsletterLink: "React Native न्यूजलेटर",
+-    reactNativeLiveLink: "React Native लाइव",
+-    chainReactConferenceLink: "Chain React कॉन्फ्रेंस",
+-    hireUsTitle: "अपने अगले प्रोजेक्ट के लिए Infinite Red को काम पर रखें",
+-    hireUs:
+-      "चाहे वह एक पूरा प्रोजेक्ट चलाना हो या हमारे हैंड्स-ऑन प्रशिक्षण के साथ टीमों को गति देना हो, Infinite Red लगभग किसी भी React Native प्रोजेक्ट में मदद कर सकता है।",
+-    hireUsLink: "हमें एक संदेश भेजें",
+-  },
+-  demoShowroomScreen: {
+-    jumpStart: "अपने प्रोजेक्ट को जंप स्टार्ट करने के लिए कंपोनेंट्स!",
+-    lorem2Sentences:
+-      "कोई भी काम जो आप नहीं करना चाहते, उसे करने के लिए किसी और को ढूंढना चाहिए। जो लोग दूसरों की मदद करते हैं, वे खुद की भी मदद करते हैं।",
+-    demoHeaderTxExample: "हाँ",
+-    demoViaTxProp: "`tx` प्रॉप के माध्यम से",
+-    demoViaSpecifiedTxProp: "`{{prop}}Tx` प्रॉप के माध्यम से",
+-  },
+-  demoDebugScreen: {
+-    howTo: "कैसे करें",
+-    title: "डीबग",
+-    tagLine:
+-      "बधाई हो, आपके पास यहां एक बहुत उन्नत React Native ऐप टेम्पलेट है। इस बॉयलरप्लेट का लाभ उठाएं!",
+-    reactotron: "Reactotron को भेजें",
+-    reportBugs: "बग्स की रिपोर्ट करें",
+-    demoList: "डेमो सूची",
+-    demoPodcastList: "डेमो पॉडकास्ट सूची",
+-    androidReactotronHint:
+-      "यदि यह काम नहीं करता है, तो सुनिश्चित करें कि Reactotron डेस्कटॉप ऐप चल रहा है, अपने टर्मिनल से adb reverse tcp:9090 tcp:9090 चलाएं, और ऐप को पुनः लोड करें।",
+-    iosReactotronHint:
+-      "यदि यह काम नहीं करता है, तो सुनिश्चित करें कि Reactotron डेस्कटॉप ऐप चल रहा है और ऐप को पुनः लोड करें।",
+-    macosReactotronHint:
+-      "यदि यह काम नहीं करता है, तो सुनिश्चित करें कि Reactotron डेस्कटॉप ऐप चल रहा है और ऐप को पुनः लोड करें।",
+-    webReactotronHint:
+-      "यदि यह काम नहीं करता है, तो सुनिश्चित करें कि Reactotron डेस्कटॉप ऐप चल रहा है और ऐप को पुनः लोड करें।",
+-    windowsReactotronHint:
+-      "यदि यह काम नहीं करता है, तो सुनिश्चित करें कि Reactotron डेस्कटॉप ऐप चल रहा है और ऐप को पुनः लोड करें।",
+-  },
+-  demoPodcastListScreen: {
+-    title: "React Native रेडियो एपिसोड",
+-    onlyFavorites: "केवल पसंदीदा दिखाएं",
+-    favoriteButton: "पसंदीदा",
+-    unfavoriteButton: "नापसंद",
+-    accessibility: {
+-      cardHint:
+-        "एपिसोड सुनने के लिए डबल टैप करें। इस एपिसोड को {{action}} करने के लिए डबल टैप करें और होल्ड करें।",
+-      switch: "केवल पसंदीदा दिखाने के लिए स्विच करें",
+-      favoriteAction: "पसंदीदा टॉगल करें",
+-      favoriteIcon: "एपिसोड पसंदीदा नहीं है",
+-      unfavoriteIcon: "एपिसोड पसंदीदा है",
+-      publishLabel: "{{date}} को प्रकाशित",
+-      durationLabel: "अवधि: {{hours}} घंटे {{minutes}} मिनट {{seconds}} सेकंड",
+-    },
+-    noFavoritesEmptyState: {
+-      heading: "यह थोड़ा खाली लगता है",
+-      content:
+-        "अभी तक कोई पसंदीदा नहीं जोड़ा गया है। इसे अपने पसंदीदा में जोड़ने के लिए किसी एपिसोड पर दिल पर टैप करें!",
+-    },
+-  },
+-
+-  ...demoHi,
+-}
+-
+-export default hi
+diff --git a/IgniteDiffApp/app/i18n/i18n.ts b/IgniteDiffApp/app/i18n/i18n.ts
+index 26531d06..ee09968d 100644
+--- a/IgniteDiffApp/app/i18n/i18n.ts
++++ b/IgniteDiffApp/app/i18n/i18n.ts
+@@ -1,5 +1,5 @@
+ import * as Localization from "expo-localization"
+-import { I18n } from "i18n-js"
++import i18n from "i18n-js"
+ import { I18nManager } from "react-native"
+ 
+ // if English isn't your default language, move Translations to the appropriate language file.
+@@ -7,22 +7,16 @@ import en, { Translations } from "./en"
+ import ar from "./ar"
+ import ko from "./ko"
+ import fr from "./fr"
+-import ja from "./ja"
+-import hi from "./hi"
++import jp from "./jp"
+ 
+-// Migration guide from i18n 3.x -> 4.x:
+-// https://github.com/fnando/i18n-js/blob/main/MIGRATING_FROM_V3_TO_V4.md
+-// https://github.com/fnando/i18n/discussions/24
++i18n.fallbacks = true
+ 
+ // to use regional locales use { "en-US": enUS } etc
+-const fallbackLocale = "en-US"
+-export const i18n = new I18n(
+-  { ar, en, "en-US": en, ko, fr, ja, hi },
+-  { locale: fallbackLocale, defaultLocale: fallbackLocale, enableFallback: true },
+-)
++i18n.translations = { ar, en, "en-US": en, ko, fr, jp }
+ 
++const fallbackLocale = "en-US"
+ const systemLocale = Localization.getLocales()[0]
+-const systemLocaleTag = systemLocale?.languageTag ?? fallbackLocale
++const systemLocaleTag = systemLocale?.languageTag ?? "en-US"
+ 
+ if (Object.prototype.hasOwnProperty.call(i18n.translations, systemLocaleTag)) {
+   // if specific locales like en-FI or en-US is available, set it
+diff --git a/IgniteDiffApp/app/i18n/ja.ts b/IgniteDiffApp/app/i18n/jp.ts
+similarity index 96%
+rename from IgniteDiffApp/app/i18n/ja.ts
+rename to IgniteDiffApp/app/i18n/jp.ts
+index e6698963..c3919447 100644
+--- a/IgniteDiffApp/app/i18n/ja.ts
++++ b/IgniteDiffApp/app/i18n/jp.ts
+@@ -1,7 +1,6 @@
+-import demoJa from "./demo-ja"
+ import { Translations } from "./en"
+ 
+-const ja: Translations = {
++const jp: Translations = {
+   common: {
+     ok: "OK",
+     cancel: "キャンセル",
+@@ -35,14 +34,14 @@ const ja: Translations = {
+     invalidEmail: "有効なメールアドレスを入力してください.",
+   },
+   loginScreen: {
+-    logIn: "ログイン",
++    logIn: "サインイン",
+     enterDetails:
+       "ここにあなたの情報を入力してトップシークレットをアンロックしましょう。何が待ち構えているか予想もつかないはずです。はたまたそうでも無いかも - ロケットサイエンスほど複雑なものではありません。",
+     emailFieldLabel: "メールアドレス",
+     passwordFieldLabel: "パスワード",
+     emailFieldPlaceholder: "メールアドレスを入力してください",
+     passwordFieldPlaceholder: "パスワードを入力してください",
+-    tapToLogIn: "タップしてログインしよう！",
++    tapToLogIn: "タップしてサインインしよう！",
+     hint: "ヒント: お好みのメールアドレスとパスワードを使ってください :)",
+   },
+   demoNavigator: {
+@@ -79,8 +78,8 @@ const ja: Translations = {
+     lorem2Sentences:
+       "Nulla cupidatat deserunt amet quis aliquip nostrud do adipisicing. Adipisicing excepteur elit laborum Lorem adipisicing do duis.",
+     demoHeaderTxExample: "Yay",
+-    demoViaTxProp: "`tx`から",
+-    demoViaSpecifiedTxProp: "`{{prop}}Tx`から",
++    demoViaTxProp: "`tx` Propから",
++    demoViaSpecifiedTxProp: "`{{prop}}Tx` Propから",
+   },
+   demoDebugScreen: {
+     howTo: "ハウツー",
+@@ -122,8 +121,6 @@ const ja: Translations = {
+         "お気に入りのエピソードがまだありません。エピソードにあるハートマークにタップして、お気に入りに追加しましょう！",
+     },
+   },
+-
+-  ...demoJa,
+ }
+ 
+-export default ja
++export default jp
+diff --git a/IgniteDiffApp/app/i18n/ko.ts b/IgniteDiffApp/app/i18n/ko.ts
+index 2403206a..636efd28 100644
+--- a/IgniteDiffApp/app/i18n/ko.ts
++++ b/IgniteDiffApp/app/i18n/ko.ts
+@@ -1,4 +1,3 @@
+-import demoKo from "./demo-ko"
+ import { Translations } from "./en"
+ 
+ const ko: Translations = {
+@@ -121,8 +120,6 @@ const ko: Translations = {
+       content: "즐겨찾기가 없습니다. 에피소드에 있는 하트를 눌러서 즐겨찾기에 추가하세요.",
+     },
+   },
+-
+-  ...demoKo,
+ }
+ 
+ export default ko
+diff --git a/IgniteDiffApp/app/i18n/translate.ts b/IgniteDiffApp/app/i18n/translate.ts
+index 00c1c1e0..084fdcdf 100644
+--- a/IgniteDiffApp/app/i18n/translate.ts
++++ b/IgniteDiffApp/app/i18n/translate.ts
+@@ -1,5 +1,5 @@
+-import { TranslateOptions } from "i18n-js"
+-import { i18n, TxKeyPath } from "./i18n"
++import i18n from "i18n-js"
++import { TxKeyPath } from "./i18n"
+ 
+ /**
+  * Translates text.
+@@ -23,6 +23,6 @@ import { i18n, TxKeyPath } from "./i18n"
+  * // => "Hello world!"
+  * ```
+  */
+-export function translate(key: TxKeyPath, options?: TranslateOptions): string {
++export function translate(key: TxKeyPath, options?: i18n.TranslateOptions): string {
+   return i18n.t(key, options)
+ }
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index 79e57c6d..4bfe90f5 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -4,7 +4,7 @@ import { Image, ImageStyle, Platform, SectionList, TextStyle, View, ViewStyle }
+ import { Drawer } from "react-native-drawer-layout"
+ import { type ContentStyle } from "@shopify/flash-list"
+ import { ListItem, ListView, ListViewRef, Screen, Text } from "../../components"
+-import { TxKeyPath, isRTL, translate } from "../../i18n"
++import { isRTL } from "../../i18n"
+ import { DemoTabParamList, DemoTabScreenProps } from "../../navigators/DemoNavigator"
+ import { colors, spacing } from "../../theme"
+ import { useSafeAreaInsetsStyle } from "../../utils/useSafeAreaInsetsStyle"
+@@ -15,7 +15,7 @@ const logo = require("../../../assets/images/logo.png")
+ 
+ export interface Demo {
+   name: string
+-  description: TxKeyPath
++  description: string
+   data: ReactElement[]
+ }
+ 
+@@ -162,7 +162,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+               estimatedItemSize={250}
+               data={Object.values(Demos).map((d) => ({
+                 name: d.name,
+-                useCases: d.data.map((u) => translate(u.props.name)),
++                useCases: d.data.map((u) => u.props.name as string),
+               }))}
+               keyExtractor={(item) => item.name}
+               renderItem={({ item, index: sectionIndex }) => (
+@@ -194,7 +194,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+                   <Text preset="heading" style={$demoItemName}>
+                     {section.name}
+                   </Text>
+-                  <Text style={$demoItemDescription}>{translate(section.description)}</Text>
++                  <Text style={$demoItemDescription}>{section.description}</Text>
+                 </View>
+               )
+             }}
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+index 8fa9b8d9..402c906a 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoUseCase.tsx
+@@ -1,12 +1,11 @@
+ import React, { ReactNode } from "react"
+ import { TextStyle, View, ViewStyle } from "react-native"
+-import { TxKeyPath, translate } from "app/i18n"
+ import { Text } from "../../components"
+ import { colors, spacing, typography } from "../../theme"
+ 
+ interface DemoUseCaseProps {
+-  name: TxKeyPath
+-  description?: TxKeyPath
++  name: string
++  description?: string
+   layout?: "column" | "row"
+   children: ReactNode
+ }
+@@ -20,8 +19,9 @@ export function DemoUseCase(props: DemoUseCaseProps) {
+ 
+   return (
+     <View>
+-      <Text style={$name}>{translate(name)}</Text>
+-      {description && <Text style={$description}>{translate(description)}</Text>}
++      <Text style={$name}>{name}</Text>
++
++      {description && <Text style={$description}>{description}</Text>}
+ 
+       <View style={[layout === "row" && $rowLayout, $item]}>{children}</View>
+     </View>
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+index c52e4276..7f610d7f 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+@@ -6,7 +6,6 @@ import { colors, spacing } from "../../../theme"
+ import { Demo } from "../DemoShowroomScreen"
+ import { DemoDivider } from "../DemoDivider"
+ import { DemoUseCase } from "../DemoUseCase"
+-import { translate } from "app/i18n"
+ 
+ const $imageContainer: ViewStyle = {
+   alignItems: "center",
+@@ -38,9 +37,9 @@ const $aspectRatioBox: ViewStyle & ImageStyle = {
+ 
+ export const DemoAutoImage: Demo = {
+   name: "AutoImage",
+-  description: "demoAutoImage.description",
++  description: "An Image component that automatically sizes a remote or data-uri image.",
+   data: [
+-    <DemoUseCase name="demoAutoImage.useCase.remoteUri.name">
++    <DemoUseCase name="Remote URI">
+       <View style={$imageContainer}>
+         <AutoImage
+           source={{
+@@ -50,7 +49,7 @@ export const DemoAutoImage: Demo = {
+       </View>
+     </DemoUseCase>,
+ 
+-    <DemoUseCase name="demoAutoImage.useCase.base64Uri.name">
++    <DemoUseCase name="Base64 URI">
+       <View style={$imageContainer}>
+         <AutoImage
+           source={{
+@@ -61,8 +60,9 @@ export const DemoAutoImage: Demo = {
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoAutoImage.useCase.scaledToFitDimensions.name"
+-      description="demoAutoImage.useCase.scaledToFitDimensions.description"
++      name="Scaled to Fit Dimensions"
++      description="Providing a `maxWidth` and/or `maxHeight` props, the image will automatically scale while retaining it's aspect ratio. How is this different from `resizeMode: 'contain'`? Firstly, you can
++      specify only one side's size (not both). Secondly, the image will scale to fit the desired dimensions instead of just being contained within its image-container."
+     >
+       <View style={$aspectRatioWidthExampleContainer}>
+         <Text
+@@ -106,7 +106,7 @@ export const DemoAutoImage: Demo = {
+       </View>
+ 
+       <Text weight="bold" size="xs" style={$aspectRatioDescription}>
+-        {translate("demoAutoImage.useCase.scaledToFitDimensions.heightAuto")}
++        width: 60 / height: auto
+       </Text>
+ 
+       <DemoDivider size={40} />
+@@ -153,7 +153,7 @@ export const DemoAutoImage: Demo = {
+       </View>
+ 
+       <Text weight="bold" size="xs" style={$aspectRatioDescription}>
+-        {translate("demoAutoImage.useCase.scaledToFitDimensions.widthAuto")}
++        width: auto / height: 32
+       </Text>
+ 
+       <DemoDivider size={40} />
+@@ -201,7 +201,7 @@ export const DemoAutoImage: Demo = {
+       </View>
+ 
+       <Text weight="bold" size="xs" style={$aspectRatioDescription}>
+-        {translate("demoAutoImage.useCase.scaledToFitDimensions.bothManual")}
++        width: 60 / height: 60
+       </Text>
+     </DemoUseCase>,
+   ],
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx
+index a0646b3b..7580ee06 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx
+@@ -6,7 +6,6 @@ import { colors, typography } from "../../../theme"
+ import { Demo } from "../DemoShowroomScreen"
+ import { DemoDivider } from "../DemoDivider"
+ import { DemoUseCase } from "../DemoUseCase"
+-import { translate } from "app/i18n"
+ 
+ const $iconStyle: ImageStyle = { width: 30, height: 30 }
+ const $customButtonStyle: ViewStyle = { backgroundColor: colors.error, height: 100 }
+@@ -36,12 +35,10 @@ const $disabledButtonTextStyle: TextStyle = {
+ 
+ export const DemoButton: Demo = {
+   name: "Button",
+-  description: "demoButton.description",
++  description:
++    "A component that allows users to take actions and make choices. Wraps the Text component with a Pressable component.",
+   data: [
+-    <DemoUseCase
+-      name="demoButton.useCase.presets.name"
+-      description="demoButton.useCase.presets.description"
+-    >
++    <DemoUseCase name="Presets" description="There are a few presets that are preconfigured.">
+       <Button>Default - Laboris In Labore</Button>
+       <DemoDivider />
+ 
+@@ -52,16 +49,16 @@ export const DemoButton: Demo = {
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoButton.useCase.passingContent.name"
+-      description="demoButton.useCase.passingContent.description"
++      name="Passing Content"
++      description="There are a few different ways to pass content."
+     >
+-      <Button text={translate("demoButton.useCase.passingContent.viaTextProps")} />
++      <Button text="Via `text` Prop - Billum In" />
+       <DemoDivider />
+ 
+       <Button tx="demoShowroomScreen.demoViaTxProp" />
+       <DemoDivider />
+ 
+-      <Button>{translate("demoButton.useCase.passingContent.children")}</Button>
++      <Button>Children - Irure Reprehenderit</Button>
+       <DemoDivider />
+ 
+       <Button
+@@ -70,7 +67,7 @@ export const DemoButton: Demo = {
+           <Icon containerStyle={props.style} style={$iconStyle} icon="ladybug" />
+         )}
+       >
+-        {translate("demoButton.useCase.passingContent.rightAccessory")}
++        RightAccessory - Duis Quis
+       </Button>
+       <DemoDivider />
+ 
+@@ -80,21 +77,19 @@ export const DemoButton: Demo = {
+           <Icon containerStyle={props.style} style={$iconStyle} icon="ladybug" />
+         )}
+       >
+-        {translate("demoButton.useCase.passingContent.leftAccessory")}
++        LeftAccessory - Duis Proident
+       </Button>
+       <DemoDivider />
+ 
+       <Button>
+         <Text>
+-          <Text preset="bold">{translate("demoButton.useCase.passingContent.nestedChildren")}</Text>
++          <Text preset="bold">Nested children - proident veniam.</Text>
+           {` `}
+           <Text preset="default">
+-            {translate("demoButton.useCase.passingContent.nestedChildren2")}
++            Ullamco cupidatat officia exercitation velit non ullamco nisi..
+           </Text>
+           {` `}
+-          <Text preset="bold">
+-            {translate("demoButton.useCase.passingContent.nestedChildren3")}
+-          </Text>
++          <Text preset="bold">Occaecat aliqua irure proident veniam.</Text>
+         </Text>
+       </Button>
+       <DemoDivider />
+@@ -108,21 +103,17 @@ export const DemoButton: Demo = {
+           <Icon containerStyle={props.style} style={$iconStyle} icon="ladybug" />
+         )}
+       >
+-        {translate("demoButton.useCase.passingContent.multiLine")}
++        Multiline - consequat veniam veniam reprehenderit. Fugiat id nisi quis duis sunt proident
++        mollit dolor mollit adipisicing proident deserunt.
+       </Button>
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoButton.useCase.styling.name"
+-      description="demoButton.useCase.styling.description"
+-    >
+-      <Button style={$customButtonStyle}>
+-        {translate("demoButton.useCase.styling.styleContainer")}
+-      </Button>
++    <DemoUseCase name="Styling" description="The component can be styled easily.">
++      <Button style={$customButtonStyle}>Style Container - Exercitation</Button>
+       <DemoDivider />
+ 
+       <Button preset="filled" textStyle={$customButtonTextStyle}>
+-        {translate("demoButton.useCase.styling.styleText")}
++        Style Text - Ea Anim
+       </Button>
+       <DemoDivider />
+ 
+@@ -130,7 +121,7 @@ export const DemoButton: Demo = {
+         preset="reversed"
+         RightAccessory={() => <View style={$customButtonRightAccessoryStyle} />}
+       >
+-        {translate("demoButton.useCase.styling.styleAccessories")}
++        Style Accessories - enim ea id fugiat anim ad.
+       </Button>
+       <DemoDivider />
+ 
+@@ -148,13 +139,13 @@ export const DemoButton: Demo = {
+           />
+         )}
+       >
+-        {translate("demoButton.useCase.styling.pressedState")}
++        Style Pressed State - fugiat anim
+       </Button>
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoButton.useCase.disabling.name"
+-      description="demoButton.useCase.disabling.description"
++      name="Disabling"
++      description="The component can be disabled, and styled based on that. Press behavior will be disabled."
+     >
+       <Button
+         disabled
+@@ -162,7 +153,7 @@ export const DemoButton: Demo = {
+         pressedStyle={$customButtonPressedStyle}
+         pressedTextStyle={$customButtonPressedTextStyle}
+       >
+-        {translate("demoButton.useCase.disabling.standard")}
++        Disabled - standard
+       </Button>
+       <DemoDivider />
+ 
+@@ -173,7 +164,7 @@ export const DemoButton: Demo = {
+         pressedStyle={$customButtonPressedStyle}
+         pressedTextStyle={$customButtonPressedTextStyle}
+       >
+-        {translate("demoButton.useCase.disabling.filled")}
++        Disabled - filled
+       </Button>
+       <DemoDivider />
+ 
+@@ -184,7 +175,7 @@ export const DemoButton: Demo = {
+         pressedStyle={$customButtonPressedStyle}
+         pressedTextStyle={$customButtonPressedTextStyle}
+       >
+-        {translate("demoButton.useCase.disabling.reversed")}
++        Disabled - reversed
+       </Button>
+       <DemoDivider />
+ 
+@@ -202,7 +193,7 @@ export const DemoButton: Demo = {
+           />
+         )}
+       >
+-        {translate("demoButton.useCase.disabling.accessory")}
++        Disabled accessory style
+       </Button>
+       <DemoDivider />
+ 
+@@ -213,7 +204,7 @@ export const DemoButton: Demo = {
+         pressedStyle={$customButtonPressedStyle}
+         pressedTextStyle={$customButtonPressedTextStyle}
+       >
+-        {translate("demoButton.useCase.disabling.textStyle")}
++        Disabled text style
+       </Button>
+     </DemoUseCase>,
+   ],
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+index 23d993ad..1410f4b3 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+@@ -8,73 +8,67 @@ import { DemoUseCase } from "../DemoUseCase"
+ 
+ export const DemoCard: Demo = {
+   name: "Card",
+-  description: "demoCard.description",
++  description:
++    "Cards are useful for displaying related information in a contained way. If a ListItem displays content horizontally, a Card can be used to display content vertically.",
+   data: [
+-    <DemoUseCase
+-      name="demoCard.useCase.presets.name"
+-      description="demoCard.useCase.presets.description"
+-    >
++    <DemoUseCase name="Presets" description="There are a few presets that are preconfigured.">
+       <Card
+-        headingTx="demoCard.useCase.presets.default.heading"
+-        contentTx="demoCard.useCase.presets.default.content"
+-        footerTx="demoCard.useCase.presets.default.footer"
++        heading="Default Preset (default)"
++        content="Incididunt magna ut aliquip consectetur mollit dolor."
++        footer="Consectetur nulla non aliquip velit."
+       />
+       <DemoDivider />
+       <Card
+-        headingTx="demoCard.useCase.presets.reversed.heading"
+-        contentTx="demoCard.useCase.presets.reversed.content"
+-        footerTx="demoCard.useCase.presets.reversed.footer"
++        heading="Reversed Preset"
++        content="Reprehenderit occaecat proident amet id laboris."
++        footer="Consectetur tempor ea non labore anim ."
+         preset="reversed"
+       />
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoCard.useCase.verticalAlignment.name"
+-      description="demoCard.useCase.verticalAlignment.description"
++      name="Vertical Alignment"
++      description="Depending on what's required, the card comes preconfigured with different alignment strategies."
+     >
+       <Card
+-        headingTx="demoCard.useCase.verticalAlignment.top.heading"
+-        contentTx="demoCard.useCase.verticalAlignment.top.content"
+-        footerTx="demoCard.useCase.verticalAlignment.top.footer"
++        heading="Top (default)"
++        content="All content is automatically aligned to the top."
++        footer="Even the footer"
+         style={{ minHeight: 160 }}
+       />
+       <DemoDivider />
+       <Card
+-        headingTx="demoCard.useCase.verticalAlignment.center.heading"
++        heading="Center"
+         verticalAlignment="center"
+         preset="reversed"
+-        contentTx="demoCard.useCase.verticalAlignment.center.content"
+-        footerTx="demoCard.useCase.verticalAlignment.center.footer"
++        content="Content is centered relative to the card's height."
++        footer="Me too!"
+         style={{ minHeight: 160 }}
+       />
+       <DemoDivider />
+       <Card
+-        headingTx="demoCard.useCase.verticalAlignment.spaceBetween.heading"
++        heading="Space Between"
+         verticalAlignment="space-between"
+-        contentTx="demoCard.useCase.verticalAlignment.spaceBetween.content"
+-        footerTx="demoCard.useCase.verticalAlignment.spaceBetween.footer"
++        content="All content is spaced out evenly."
++        footer="I am where I want to be."
+         style={{ minHeight: 160 }}
+       />
+       <DemoDivider />
+       <Card
+         preset="reversed"
+-        headingTx="demoCard.useCase.verticalAlignment.reversed.heading"
++        heading="Force Footer Bottom"
+         verticalAlignment="force-footer-bottom"
+-        contentTx="demoCard.useCase.verticalAlignment.reversed.content"
+-        footerTx="demoCard.useCase.verticalAlignment.reversed.footer"
++        content="This pushes the footer where it belongs."
++        footer="I'm so lonely down here."
+         style={{ minHeight: 160 }}
+       />
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoCard.useCase.passingContent.name"
+-      description="demoCard.useCase.passingContent.description"
++      name="Passing Content"
++      description="There are a few different ways to pass content."
+     >
+-      <Card
+-        headingTx="demoCard.useCase.passingContent.heading"
+-        contentTx="demoCard.useCase.passingContent.content"
+-        footerTx="demoCard.useCase.passingContent.footer"
+-      />
++      <Card heading="Via `heading` Prop" content="Via `content` Prop" footer="Via `footer` Prop" />
+       <DemoDivider />
+       <Card
+         preset="reversed"
+@@ -88,8 +82,8 @@ export const DemoCard: Demo = {
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoCard.useCase.customComponent.name"
+-      description="demoCard.useCase.customComponent.description"
++      name="Custom Components"
++      description="Any of the preconfigured components can be replaced with your own. You can also add additional ones."
+     >
+       <Card
+         HeadingComponent={
+@@ -116,7 +110,7 @@ export const DemoCard: Demo = {
+       />
+       <DemoDivider />
+       <Card
+-        headingTx="demoCard.useCase.customComponent.rightComponent"
++        heading="RightComponent"
+         verticalAlignment="center"
+         RightComponent={
+           <AutoImage
+@@ -132,7 +126,7 @@ export const DemoCard: Demo = {
+       <DemoDivider />
+       <Card
+         preset="reversed"
+-        headingTx="demoCard.useCase.customComponent.leftComponent"
++        heading="LeftComponent"
+         verticalAlignment="center"
+         LeftComponent={
+           <AutoImage
+@@ -147,16 +141,13 @@ export const DemoCard: Demo = {
+       />
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoCard.useCase.style.name"
+-      description="demoCard.useCase.style.description"
+-    >
++    <DemoUseCase name="Styling" description="The component can be styled easily.">
+       <Card
+-        headingTx="demoCard.useCase.style.heading"
++        heading="Style the Heading"
+         headingStyle={{ color: colors.error }}
+-        contentTx="demoCard.useCase.style.content"
++        content="Style the Content"
+         contentStyle={{ backgroundColor: colors.error, color: colors.palette.neutral100 }}
+-        footerTx="demoCard.useCase.style.footer"
++        footer="Style the Footer"
+         footerStyle={{
+           textDecorationLine: "underline line-through",
+           textDecorationStyle: "dashed",
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx
+index 91ce644e..1d6f0236 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx
+@@ -8,31 +8,32 @@ import { DemoUseCase } from "../DemoUseCase"
+ 
+ export const DemoEmptyState: Demo = {
+   name: "EmptyState",
+-  description: "demoEmptyState.description",
++  description:
++    "A component to use when there is no data to display. It can be utilized to direct the user what to do next",
+   data: [
+     <DemoUseCase
+-      name="demoEmptyState.useCase.presets.name"
+-      description="demoEmptyState.useCase.presets.description"
++      name="Presets"
++      description="You can create different text/image sets. One is predefined called `generic`. Note, there's no default in case you want to have a completely custom EmptyState."
+     >
+       <EmptyState preset="generic" />
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoEmptyState.useCase.passingContent.name"
+-      description="demoEmptyState.useCase.passingContent.description"
++      name="Passing Content"
++      description="There are a few different ways to pass content."
+     >
+       <EmptyState
+         imageSource={require("../../../../assets/images/logo.png")}
+-        headingTx="demoEmptyState.useCase.passingContent.customizeImageHeading"
+-        contentTx="demoEmptyState.useCase.passingContent.customizeImageContent"
++        heading="Customize Image"
++        content="You can pass in any image source."
+       />
+ 
+       <DemoDivider size={30} line />
+ 
+       <EmptyState
+-        headingTx="demoEmptyState.useCase.passingContent.viaHeadingProp"
+-        contentTx="demoEmptyState.useCase.passingContent.viaContentProp"
+-        buttonTx="demoEmptyState.useCase.passingContent.viaButtonProp"
++        heading="Via `heading` Prop"
++        content="Via `content` prop."
++        button="Via `button` Prop"
+       />
+ 
+       <DemoDivider size={30} line />
+@@ -47,10 +48,7 @@ export const DemoEmptyState: Demo = {
+       />
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoEmptyState.useCase.styling.name"
+-      description="demoEmptyState.useCase.styling.description"
+-    >
++    <DemoUseCase name="Styling" description="The component can be styled easily.">
+       <EmptyState
+         preset="generic"
+         style={{ backgroundColor: colors.error, paddingVertical: 20 }}
+@@ -66,10 +64,7 @@ export const DemoEmptyState: Demo = {
+           textDecorationLine: "underline",
+           textDecorationColor: colors.palette.neutral100,
+         }}
+-        buttonStyle={{
+-          alignSelf: "center",
+-          backgroundColor: colors.palette.neutral100,
+-        }}
++        buttonStyle={{ alignSelf: "center", backgroundColor: colors.palette.neutral100 }}
+         buttonTextStyle={{ color: colors.error }}
+         ButtonProps={{
+           preset: "reversed",
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+index 157d4dd1..6e29ff48 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+@@ -32,55 +32,39 @@ const $customWhiteTitle: TextStyle = { color: colors.palette.neutral100 }
+ 
+ export const DemoHeader: Demo = {
+   name: "Header",
+-  description: "demoHeader.description",
++  description:
++    "Component that appears on many screens. Will hold navigation buttons and screen title.",
+   data: [
+     <DemoUseCase
+-      name="demoHeader.useCase.actionIcons.name"
+-      description="demoHeader.useCase.actionIcons.description"
++      name="Action Icons"
++      description="You can easily pass in icons to the left or right action components."
+     >
+-      <Header
+-        titleTx="demoHeader.useCase.actionIcons.leftIconTitle"
+-        leftIcon="ladybug"
+-        safeAreaEdges={[]}
+-      />
++      <Header title="Left Icon" leftIcon="ladybug" safeAreaEdges={[]} />
+       <DemoDivider size={24} />
+-      <Header
+-        titleTx="demoHeader.useCase.actionIcons.rightIconTitle"
+-        rightIcon="ladybug"
+-        safeAreaEdges={[]}
+-      />
++      <Header title="Right Icon" rightIcon="ladybug" safeAreaEdges={[]} />
+       <DemoDivider size={24} />
+-      <Header
+-        titleTx="demoHeader.useCase.actionIcons.bothIconsTitle"
+-        leftIcon="ladybug"
+-        rightIcon="ladybug"
+-        safeAreaEdges={[]}
+-      />
++      <Header title="Both Icons" leftIcon="ladybug" rightIcon="ladybug" safeAreaEdges={[]} />
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoHeader.useCase.actionText.name"
+-      description="demoHeader.useCase.actionText.description"
++      name="Action Text"
++      description="You can easily pass in text to the left or right action components."
+     >
+       <Header
+-        titleTx="demoHeader.useCase.actionText.leftTxTitle"
++        title="Via `leftTx`"
+         leftTx="demoShowroomScreen.demoHeaderTxExample"
+         safeAreaEdges={[]}
+       />
+       <DemoDivider size={24} />
+-      <Header
+-        titleTx="demoHeader.useCase.actionText.rightTextTitle"
+-        rightText="Yay"
+-        safeAreaEdges={[]}
+-      />
++      <Header title="Via `rightText`" rightText="Yay" safeAreaEdges={[]} />
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoHeader.useCase.customActionComponents.name"
+-      description="demoHeader.useCase.customActionComponents.description"
++      name="Custom Action Components"
++      description="If the icon or text options are not enough, you can pass in your own custom action component."
+     >
+       <Header
+-        titleTx="demoHeader.useCase.customActionComponents.customLeftActionTitle"
++        title="Custom Left Action"
+         titleMode="flex"
+         titleStyle={$rightAlignTitle}
+         LeftActionComponent={
+@@ -95,18 +79,13 @@ export const DemoHeader: Demo = {
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoHeader.useCase.titleModes.name"
+-      description="demoHeader.useCase.titleModes.description"
++      name="Title Modes"
++      description="Title can be forced to stay in center (default) but may be cut off if it's too long. You can optionally make it adjust to the action buttons."
+     >
+-      <Header
+-        titleTx="demoHeader.useCase.titleModes.centeredTitle"
+-        leftIcon="ladybug"
+-        rightText="Hooray"
+-        safeAreaEdges={[]}
+-      />
++      <Header title="Centered Title" leftIcon="ladybug" rightText="Hooray" safeAreaEdges={[]} />
+       <DemoDivider size={24} />
+       <Header
+-        titleTx="demoHeader.useCase.titleModes.flexTitle"
++        title="Flex Title"
+         titleMode="flex"
+         leftIcon="ladybug"
+         rightText="Hooray"
+@@ -114,18 +93,11 @@ export const DemoHeader: Demo = {
+       />
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoHeader.useCase.styling.name"
+-      description="demoHeader.useCase.styling.description"
+-    >
+-      <Header
+-        titleTx="demoHeader.useCase.styling.styledTitle"
+-        titleStyle={$customTitle}
+-        safeAreaEdges={[]}
+-      />
++    <DemoUseCase name="Styling" description="The component can be styled easily.">
++      <Header title="Styled Title" titleStyle={$customTitle} safeAreaEdges={[]} />
+       <DemoDivider size={24} />
+       <Header
+-        titleTx="demoHeader.useCase.styling.styledWrapperTitle"
++        title="Styled Wrapper"
+         titleStyle={$customWhiteTitle}
+         backgroundColor={colors.error}
+         style={{ height: 35 }}
+@@ -133,7 +105,7 @@ export const DemoHeader: Demo = {
+       />
+       <DemoDivider size={24} />
+       <Header
+-        titleTx="demoHeader.useCase.styling.tintedIconsTitle"
++        title="Tinted Icons"
+         titleStyle={$customWhiteTitle}
+         backgroundColor={colors.error}
+         leftIcon="ladybug"
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+index e94c2ca8..945752bd 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+@@ -32,11 +32,12 @@ const $customIcon: ImageStyle = {
+ 
+ export const DemoIcon: Demo = {
+   name: "Icon",
+-  description: "demoIcon.description",
++  description:
++    "A component to render a registered icon. It is wrapped in a <TouchableOpacity /> if `onPress` is provided, otherwise a <View />.",
+   data: [
+     <DemoUseCase
+-      name="demoIcon.useCase.icons.name"
+-      description="demoIcon.useCase.icons.description"
++      name="Icons"
++      description="List of icons registered inside the component."
+       layout="row"
+     >
+       {Object.keys(iconRegistry).map((icon) => (
+@@ -50,22 +51,14 @@ export const DemoIcon: Demo = {
+       ))}
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoIcon.useCase.size.name"
+-      description="demoIcon.useCase.size.description"
+-      layout="row"
+-    >
++    <DemoUseCase name="Size" description="There's a size prop." layout="row">
+       <Icon icon="ladybug" containerStyle={$demoIconContainer} />
+       <Icon icon="ladybug" size={35} containerStyle={$demoIconContainer} />
+       <Icon icon="ladybug" size={50} containerStyle={$demoIconContainer} />
+       <Icon icon="ladybug" size={75} containerStyle={$demoIconContainer} />
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoIcon.useCase.color.name"
+-      description="demoIcon.useCase.color.description"
+-      layout="row"
+-    >
++    <DemoUseCase name="Color" description="There's a color prop." layout="row">
+       <Icon icon="ladybug" color={colors.palette.accent500} containerStyle={$demoIconContainer} />
+       <Icon icon="ladybug" color={colors.palette.primary500} containerStyle={$demoIconContainer} />
+       <Icon
+@@ -77,11 +70,7 @@ export const DemoIcon: Demo = {
+       <Icon icon="ladybug" color={colors.palette.angry500} containerStyle={$demoIconContainer} />
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoIcon.useCase.styling.name"
+-      description="demoIcon.useCase.styling.description"
+-      layout="row"
+-    >
++    <DemoUseCase name="Styling" description="The component can be styled easily." layout="row">
+       <Icon icon="ladybug" style={$customIcon} size={40} containerStyle={$customIconContainer} />
+     </DemoUseCase>,
+   ],
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+index 704f0fd5..1b5b594e 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+@@ -6,7 +6,6 @@ import { colors, spacing } from "../../../theme"
+ import { Demo } from "../DemoShowroomScreen"
+ import { DemoDivider } from "../DemoDivider"
+ import { DemoUseCase } from "../DemoUseCase"
+-import { translate } from "app/i18n"
+ 
+ const listData =
+   `Tempor Id Ea Aliqua Pariatur Aliquip. Irure Minim Voluptate Consectetur Consequat Sint Esse Proident Irure. Nostrud Elit Veniam Nostrud Excepteur Minim Deserunt Quis Dolore Velit Nulla Irure Voluptate Tempor. Occaecat Amet Laboris Nostrud Qui Do Quis Lorem Ex Elit Fugiat Deserunt. In Pariatur Excepteur Exercitation Ex Incididunt Qui Mollit Dolor Sit Non. Culpa Officia Minim Cillum Exercitation Voluptate Proident Laboris Et Est Reprehenderit Quis Pariatur Nisi`
+@@ -44,64 +43,58 @@ const $listStyle: ViewStyle = {
+ 
+ export const DemoListItem: Demo = {
+   name: "ListItem",
+-  description: "demoListItem.description",
++  description: "A styled row component that can be used in FlatList, SectionList, or by itself.",
+   data: [
+-    <DemoUseCase
+-      name="demoListItem.useCase.height.name"
+-      description="demoListItem.useCase.height.description"
+-    >
+-      <ListItem topSeparator>{translate("demoListItem.useCase.height.defaultHeight")}</ListItem>
++    <DemoUseCase name="Height" description="The row can be different heights.">
++      <ListItem topSeparator>Default height (56px)</ListItem>
+ 
+       <ListItem topSeparator height={100}>
+-        {translate("demoListItem.useCase.height.customHeight")}
++        Custom height via `height` prop
+       </ListItem>
+ 
+-      <ListItem topSeparator>{translate("demoListItem.useCase.height.textHeight")}</ListItem>
++      <ListItem topSeparator>
++        Height determined by text content - Reprehenderit incididunt deserunt do do ea labore.
++      </ListItem>
+ 
+       <ListItem topSeparator bottomSeparator TextProps={{ numberOfLines: 1 }}>
+-        {translate("demoListItem.useCase.height.longText")}
++        Limit long text to one line - Reprehenderit incididunt deserunt do do ea labore.
+       </ListItem>
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoListItem.useCase.separators.name"
+-      description="demoListItem.useCase.separators.description"
++      name="Separators"
++      description="The separator / divider is preconfigured and optional."
+     >
+-      <ListItem topSeparator>{translate("demoListItem.useCase.separators.topSeparator")}</ListItem>
++      <ListItem topSeparator>Only top separator</ListItem>
+ 
+       <DemoDivider size={40} />
+ 
+       <ListItem topSeparator bottomSeparator>
+-        {translate("demoListItem.useCase.separators.topAndBottomSeparator")}
++        Top and bottom separators
+       </ListItem>
+ 
+       <DemoDivider size={40} />
+ 
+-      <ListItem bottomSeparator>
+-        {translate("demoListItem.useCase.separators.bottomSeparator")}
+-      </ListItem>
++      <ListItem bottomSeparator>Only bottom separator</ListItem>
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoListItem.useCase.icons.name"
+-      description="demoListItem.useCase.icons.description"
+-    >
++    <DemoUseCase name="Icons" description="You can customize the icons on the left or right.">
+       <ListItem topSeparator leftIcon="ladybug">
+-        {translate("demoListItem.useCase.icons.leftIcon")}
++        Left icon
+       </ListItem>
+ 
+       <ListItem topSeparator rightIcon="ladybug">
+-        {translate("demoListItem.useCase.icons.rightIcon")}
++        Right Icon
+       </ListItem>
+ 
+       <ListItem topSeparator bottomSeparator rightIcon="ladybug" leftIcon="ladybug">
+-        {translate("demoListItem.useCase.icons.leftRightIcons")}
++        Left & Right Icons
+       </ListItem>
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoListItem.useCase.customLeftRight.name"
+-      description="demoListItem.useCase.customLeftRight.description"
++      name="Custom Left/Right Components"
++      description="If you need a custom left/right component, you can pass it in."
+     >
+       <ListItem
+         topSeparator
+@@ -113,7 +106,7 @@ export const DemoListItem: Demo = {
+           </View>
+         }
+       >
+-        {translate("demoListItem.useCase.customLeftRight.customLeft")}
++        Custom left component
+       </ListItem>
+ 
+       <ListItem
+@@ -127,33 +120,31 @@ export const DemoListItem: Demo = {
+           </View>
+         }
+       >
+-        {translate("demoListItem.useCase.customLeftRight.customRight")}
++        Custom right component
+       </ListItem>
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoListItem.useCase.passingContent.name"
+-      description="demoListItem.useCase.passingContent.description"
++      name="Passing Content"
++      description="There are a few different ways to pass content."
+     >
+-      <ListItem topSeparator text={translate("demoListItem.useCase.passingContent.children")} />
++      <ListItem topSeparator text="Via `text` prop - reprehenderit sint" />
+       <ListItem topSeparator tx="demoShowroomScreen.demoViaTxProp" />
+-      <ListItem topSeparator>{translate("demoListItem.useCase.passingContent.children")}</ListItem>
++      <ListItem topSeparator>Children - mostrud mollit</ListItem>
+       <ListItem topSeparator bottomSeparator>
+         <Text>
+-          <Text preset="bold">
+-            {translate("demoListItem.useCase.passingContent.nestedChildren1")}
+-          </Text>
++          <Text preset="bold">Nested children - proident veniam.</Text>
+           {` `}
+           <Text preset="default">
+-            {translate("demoListItem.useCase.passingContent.nestedChildren2")}
++            Ullamco cupidatat officia exercitation velit non ullamco nisi..
+           </Text>
+         </Text>
+       </ListItem>
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoListItem.useCase.listIntegration.name"
+-      description="demoListItem.useCase.listIntegration.description"
++      name="Integrating w/ FlatList & FlashList"
++      description="The component can be easily integrated with your favorite list interface."
+     >
+       <View style={$listStyle}>
+         <ListView<string>
+@@ -171,12 +162,9 @@ export const DemoListItem: Demo = {
+       </View>
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoListItem.useCase.styling.name"
+-      description="demoListItem.useCase.styling.description"
+-    >
++    <DemoUseCase name="Styling" description="The component can be styled easily.">
+       <ListItem topSeparator textStyle={$customTextStyle}>
+-        {translate("demoListItem.useCase.styling.styledText")}
++        Styled Text
+       </ListItem>
+ 
+       <ListItem
+@@ -184,7 +172,7 @@ export const DemoListItem: Demo = {
+         textStyle={{ color: colors.palette.neutral100 }}
+         style={$customTouchableStyle}
+       >
+-        {translate("demoListItem.useCase.styling.styledText")}
++        Styled Text
+       </ListItem>
+ 
+       <ListItem
+@@ -193,7 +181,7 @@ export const DemoListItem: Demo = {
+         style={$customTouchableStyle}
+         containerStyle={$customContainerStyle}
+       >
+-        {translate("demoListItem.useCase.styling.styledContainer")}
++        Styled Container (separators)
+       </ListItem>
+       <ListItem
+         topSeparator
+@@ -205,7 +193,7 @@ export const DemoListItem: Demo = {
+         rightIconColor={colors.palette.neutral100}
+         leftIconColor={colors.palette.neutral100}
+       >
+-        {translate("demoListItem.useCase.styling.tintedIcons")}
++        Tinted Icons
+       </ListItem>
+     </DemoUseCase>,
+   ],
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx
+index 756299f3..aa60bc45 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx
+@@ -5,124 +5,125 @@ import { colors } from "../../../theme"
+ import { Demo } from "../DemoShowroomScreen"
+ import { DemoDivider } from "../DemoDivider"
+ import { DemoUseCase } from "../DemoUseCase"
+-import { translate } from "app/i18n"
+ 
+ export const DemoText: Demo = {
+   name: "Text",
+-  description: "demoText.description",
++  description:
++    "For your text displaying needs. This component is a HOC over the built-in React Native one.",
+   data: [
+-    <DemoUseCase
+-      name="demoText.useCase.presets.name"
+-      description="demoText.useCase.presets.description"
+-    >
+-      <Text>{translate("demoText.useCase.presets.default")}</Text>
++    <DemoUseCase name="Presets" description="There are a few presets that are preconfigured.">
++      <Text>
++        default preset - Cillum eu laboris in labore. Excepteur mollit tempor reprehenderit fugiat
++        elit et eu consequat laborum.
++      </Text>
+ 
+       <DemoDivider />
+ 
+-      <Text preset="bold">{translate("demoText.useCase.presets.bold")}</Text>
++      <Text preset="bold">
++        bold preset - Tempor et ullamco cupidatat in officia. Nulla ea duis elit id sunt ipsum
++        cillum duis deserunt nostrud ut nostrud id.
++      </Text>
+ 
+       <DemoDivider />
+ 
+-      <Text preset="subheading">{translate("demoText.useCase.presets.subheading")}</Text>
++      <Text preset="subheading">subheading preset - In Cupidatat Cillum.</Text>
+ 
+       <DemoDivider />
+ 
+-      <Text preset="heading">{translate("demoText.useCase.presets.heading")}</Text>
++      <Text preset="heading">heading preset - Voluptate Adipis.</Text>
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoText.useCase.sizes.name"
+-      description="demoText.useCase.sizes.description"
+-    >
+-      <Text size="xs">{translate("demoText.useCase.sizes.xs")}</Text>
++    <DemoUseCase name="Sizes" description="There's a size prop.">
++      <Text size="xs">xs - Ea ipsum est ea ex sunt.</Text>
+ 
+       <DemoDivider />
+ 
+-      <Text size="sm">{translate("demoText.useCase.sizes.sm")}</Text>
++      <Text size="sm">sm - Lorem sunt adipisicin.</Text>
+ 
+       <DemoDivider />
+ 
+-      <Text size="md">{translate("demoText.useCase.sizes.md")}</Text>
++      <Text size="md">md - Consequat id do lorem.</Text>
+ 
+       <DemoDivider />
+ 
+-      <Text size="lg">{translate("demoText.useCase.sizes.lg")}</Text>
++      <Text size="lg">lg - Nostrud ipsum ea.</Text>
+ 
+       <DemoDivider />
+ 
+-      <Text size="xl">{translate("demoText.useCase.sizes.xl")}</Text>
++      <Text size="xl">xl - Eiusmod ex excepteur.</Text>
+ 
+       <DemoDivider />
+ 
+-      <Text size="xxl">{translate("demoText.useCase.sizes.xxl")}</Text>
++      <Text size="xxl">xxl - Cillum eu laboris.</Text>
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoText.useCase.weights.name"
+-      description="demoText.useCase.weights.description"
+-    >
+-      <Text weight="light">{translate("demoText.useCase.weights.light")}</Text>
++    <DemoUseCase name="Weights" description="There's a weight prop.">
++      <Text weight="light">
++        light - Nulla magna incididunt excepteur est occaecat duis culpa dolore cupidatat enim et.
++      </Text>
+ 
+       <DemoDivider />
+ 
+-      <Text weight="normal">{translate("demoText.useCase.weights.normal")}</Text>
++      <Text weight="normal">
++        normal - Magna incididunt dolor ut veniam veniam laboris aliqua velit ea incididunt.
++      </Text>
+ 
+       <DemoDivider />
+ 
+-      <Text weight="medium">{translate("demoText.useCase.weights.medium")}</Text>
++      <Text weight="medium">medium - Non duis laborum quis laboris occaecat culpa cillum.</Text>
+ 
+       <DemoDivider />
+ 
+-      <Text weight="semiBold">{translate("demoText.useCase.weights.semibold")}</Text>
++      <Text weight="semiBold">
++        semiBold - Exercitation magna nostrud pariatur laborum occaecat aliqua.
++      </Text>
+ 
+       <DemoDivider />
+ 
+-      <Text weight="bold">{translate("demoText.useCase.weights.bold")}</Text>
++      <Text weight="bold">bold - Eiusmod ullamco magna exercitation est excepteur.</Text>
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoText.useCase.passingContent.name"
+-      description="demoText.useCase.passingContent.description"
++      name="Passing Content"
++      description="There are a few different ways to pass content."
+     >
+-      <Text text={translate("demoText.useCase.passingContent.viaText")} />
++      <Text text="via `text` prop - Billum in aute fugiat proident nisi pariatur est. Cupidatat anim cillum eiusmod ad. Officia eu magna aliquip labore dolore consequat." />
+ 
+       <DemoDivider />
+ 
+       <Text>
+-        <Text tx="demoText.useCase.passingContent.viaTx" />
++        <Text text="via `tx` prop - " />
+         <Text tx="demoShowroomScreen.lorem2Sentences" />
+       </Text>
+ 
+       <DemoDivider />
+ 
+-      <Text>{translate("demoText.useCase.passingContent.children")}</Text>
++      <Text>children - Aliqua velit irure reprehenderit eu qui amet veniam consectetur.</Text>
+ 
+       <DemoDivider />
+ 
+       <Text>
+-        <Text>{translate("demoText.useCase.passingContent.nestedChildren")}</Text>
+-        <Text preset="bold">{translate("demoText.useCase.passingContent.nestedChildren2")}</Text>
++        <Text>nested children - </Text>
++        <Text preset="bold">Occaecat aliqua irure proident veniam.</Text>
+         {` `}
+-        <Text preset="default">{translate("demoText.useCase.passingContent.nestedChildren3")}</Text>
++        <Text preset="default">
++          Ullamco cupidatat officia exercitation velit non ullamco nisi..
++        </Text>
+         {` `}
+-        <Text preset="bold"> {translate("demoText.useCase.passingContent.nestedChildren4")}</Text>
++        <Text preset="bold">Occaecat aliqua irure proident veniam.</Text>
+       </Text>
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoText.useCase.styling.name"
+-      description="demoText.useCase.styling.description"
+-    >
++    <DemoUseCase name="Styling" description="The component can be styled easily.">
+       <Text>
+-        <Text style={{ color: colors.error }}>{translate("demoText.useCase.styling.text")}</Text>
++        <Text style={{ color: colors.error }}>
++          Consequat ullamco veniam velit mollit proident excepteur aliquip id culpa ipsum velit sint
++          nostrud.
++        </Text>
+         {` `}
+-        <Text
+-          style={{
+-            color: colors.palette.neutral100,
+-            backgroundColor: colors.error,
+-          }}
+-        >
+-          {translate("demoText.useCase.styling.text2")}
++        <Text style={{ color: colors.palette.neutral100, backgroundColor: colors.error }}>
++          Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco
++          adipisicing tempor adipisicing.
+         </Text>
+         {` `}
+         <Text
+@@ -134,7 +135,8 @@ export const DemoText: Demo = {
+             textDecorationColor: colors.error,
+           }}
+         >
+-          {translate("demoText.useCase.styling.text3")}
++          Eiusmod occaecat laboris eu ex veniam ipsum adipisicing consectetur. Magna ullamco
++          adipisicing tempor adipisicing.
+         </Text>
+       </Text>
+     </DemoUseCase>,
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+index d519660b..cc1e6ca6 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+@@ -43,20 +43,17 @@ const $customRightAccessoryStyle: ViewStyle = {
+ 
+ export const DemoTextField: Demo = {
+   name: "TextField",
+-  description: "demoTextField.description",
++  description: "TextField component allows for the entering and editing of text.",
+   data: [
+     <DemoUseCase
+-      name="demoTextField.useCase.statuses.name"
+-      description="demoTextField.useCase.statuses.description"
++      name="Statuses"
++      description="There is a status prop - similar to `preset` in other components, but affects component functionality as well."
+     >
+       <TextField
++        label="No Status"
+         value="Labore occaecat in id eu commodo aliquip occaecat veniam officia pariatur."
+-        labelTx="demoTextField.useCase.statuses.noStatus.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.statuses.noStatus.helper"
+-        helperTxOptions={{ prop: "helper" }}
+-        placeholderTx="demoTextField.useCase.statuses.noStatus.placeholder"
+-        placeholderTxOptions={{ prop: "placeholder" }}
++        helper="This is the default status"
++        placeholder="Text goes here"
+       />
+ 
+       <DemoDivider size={24} />
+@@ -64,12 +61,9 @@ export const DemoTextField: Demo = {
+       <TextField
+         status="error"
+         value="Est Lorem duis sunt sunt duis proident minim elit dolore incididunt pariatur eiusmod anim cillum."
+-        labelTx="demoTextField.useCase.statuses.error.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.statuses.error.helper"
+-        helperTxOptions={{ prop: "helper" }}
+-        placeholderTx="demoTextField.useCase.statuses.error.placeholder"
+-        placeholderTxOptions={{ prop: "placeholder" }}
++        label="Error Status"
++        helper="Status to use when there is an error"
++        placeholder="Text goes here"
+       />
+ 
+       <DemoDivider size={24} />
+@@ -77,26 +71,20 @@ export const DemoTextField: Demo = {
+       <TextField
+         status="disabled"
+         value="Eu ipsum mollit non minim voluptate nulla fugiat aliqua ullamco aute consectetur nulla nulla amet."
+-        labelTx="demoTextField.useCase.statuses.disabled.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.statuses.disabled.helper"
+-        helperTxOptions={{ prop: "helper" }}
+-        placeholderTx="demoTextField.useCase.statuses.disabled.placeholder"
+-        placeholderTxOptions={{ prop: "placeholder" }}
++        label="Disabled Status"
++        helper="Disables the editability and mutes text"
++        placeholder="Text goes here"
+       />
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoTextField.useCase.passingContent.name"
+-      description="demoTextField.useCase.passingContent.description"
++      name="Passing Content"
++      description="There are a few different ways to pass content."
+     >
+       <TextField
+-        labelTx="demoTextField.useCase.passingContent.viaLabel.labelTx"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.passingContent.viaLabel.helper"
+-        helperTxOptions={{ prop: "helper" }}
+-        placeholderTx="demoTextField.useCase.passingContent.viaLabel.placeholder"
+-        placeholderTxOptions={{ prop: "placeholder" }}
++        label="Via `label` prop"
++        helper="Via `helper` prop"
++        placeholder="Via `placeholder` prop"
+       />
+ 
+       <DemoDivider size={24} />
+@@ -113,21 +101,17 @@ export const DemoTextField: Demo = {
+       <DemoDivider size={24} />
+ 
+       <TextField
++        label="RightAccessory"
++        helper="This prop takes a function that returns a React element."
+         value="Reprehenderit Lorem magna non consequat ullamco cupidatat."
+-        labelTx="demoTextField.useCase.passingContent.rightAccessory.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.passingContent.rightAccessory.helper"
+-        helperTxOptions={{ prop: "helper" }}
+         RightAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} size={21} />}
+       />
+ 
+       <DemoDivider size={24} />
+ 
+       <TextField
+-        labelTx="demoTextField.useCase.passingContent.leftAccessory.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.passingContent.leftAccessory.helper"
+-        helperTxOptions={{ prop: "helper" }}
++        label="LeftAccessory"
++        helper="This prop takes a function that returns a React element."
+         value="Eiusmod exercitation mollit elit magna occaecat eiusmod Lorem minim veniam."
+         LeftAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} size={21} />}
+       />
+@@ -135,25 +119,18 @@ export const DemoTextField: Demo = {
+       <DemoDivider size={24} />
+ 
+       <TextField
+-        labelTx="demoTextField.useCase.passingContent.supportsMultiline.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.passingContent.supportsMultiline.helper"
+-        helperTxOptions={{ prop: "helper" }}
++        label="Supports Multiline"
++        helper="Enables a taller input for multiline text."
+         value="Eiusmod exercitation mollit elit magna occaecat eiusmod Lorem minim veniam. Laborum Lorem velit velit minim irure ad in ut adipisicing consectetur."
+         multiline
+         RightAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} size={21} />}
+       />
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoTextField.useCase.styling.name"
+-      description="demoTextField.useCase.styling.description"
+-    >
++    <DemoUseCase name="Styling" description="The component can be styled easily.">
+       <TextField
+-        labelTx="demoTextField.useCase.styling.styleInput.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.styling.styleInput.helper"
+-        helperTxOptions={{ prop: "helper" }}
++        label="Style Input"
++        helper="Via `style` prop"
+         value="Laborum cupidatat aliquip sunt sunt voluptate sint sit proident sunt mollit exercitation ullamco ea elit."
+         style={$customInputStyle}
+       />
+@@ -161,10 +138,8 @@ export const DemoTextField: Demo = {
+       <DemoDivider size={24} />
+ 
+       <TextField
+-        labelTx="demoTextField.useCase.styling.styleInputWrapper.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.styling.styleInputWrapper.helper"
+-        helperTxOptions={{ prop: "helper" }}
++        label="Style Input Wrapper"
++        helper="Via `inputWrapperStyle` prop"
+         value="Aute velit esse dolore pariatur exercitation irure nulla do sunt in duis mollit duis et."
+         inputWrapperStyle={$customInputWrapperStyle}
+         style={$customInputStyle}
+@@ -173,10 +148,8 @@ export const DemoTextField: Demo = {
+       <DemoDivider size={24} />
+ 
+       <TextField
+-        labelTx="demoTextField.useCase.styling.styleContainer.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.styling.styleContainer.helper"
+-        helperTxOptions={{ prop: "helper" }}
++        label="Style Container"
++        helper="Via `containerStyle` prop"
+         value="Aliquip proident commodo adipisicing non adipisicing Lorem excepteur ullamco voluptate laborum."
+         style={$customInputStyle}
+         containerStyle={$customContainerStyle}
+@@ -186,10 +159,8 @@ export const DemoTextField: Demo = {
+       <DemoDivider size={24} />
+ 
+       <TextField
+-        labelTx="demoTextField.useCase.styling.styleLabel.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.styling.styleLabel.helper"
+-        helperTxOptions={{ prop: "helper" }}
++        label="Style Label & Helper"
++        helper="Via `LabelTextProps` & `HelperTextProps` style prop"
+         value="Ex culpa in consectetur dolor irure velit."
+         style={$customInputStyle}
+         containerStyle={$customContainerStyle}
+@@ -201,10 +172,8 @@ export const DemoTextField: Demo = {
+       <DemoDivider size={24} />
+ 
+       <TextField
+-        labelTx="demoTextField.useCase.styling.styleAccessories.label"
+-        labelTxOptions={{ prop: "label" }}
+-        helperTx="demoTextField.useCase.styling.styleAccessories.helper"
+-        helperTxOptions={{ prop: "helper" }}
++        label="Style Accessories"
++        helper="Via `RightAccessory` & `LeftAccessory` style prop"
+         value="Aute nisi dolore fugiat anim mollit nulla ex minim ipsum ex elit."
+         style={$customInputWithAbsoluteAccessoriesStyle}
+         LeftAccessory={() => (
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+index a3818136..377d6a8c 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+@@ -6,7 +6,6 @@ import { colors, spacing } from "../../../theme"
+ import { Demo } from "../DemoShowroomScreen"
+ import { DemoDivider } from "../DemoDivider"
+ import { DemoUseCase } from "../DemoUseCase"
+-import { translate } from "app/i18n"
+ 
+ function ControlledToggle(props: ToggleProps) {
+   const [value, setValue] = React.useState(props.value || false)
+@@ -26,34 +25,35 @@ const $centeredText: TextStyle = {
+ 
+ export const DemoToggle: Demo = {
+   name: "Toggle",
+-  description: "demoToggle.description",
++  description:
++    "Renders a boolean input. This is a controlled component that requires an onValueChange callback that updates the value prop in order for the component to reflect user actions. If the value prop is not updated, the component will continue to render the supplied value prop instead of the expected result of any user actions.",
+   data: [
+     <DemoUseCase
+-      name="demoToggle.useCase.variants.name"
+-      description="demoToggle.useCase.variants.description"
++      name="Variants"
++      description="The component supports a few different variants. If heavy customization of a specific variant is needed, it can be easily refactored. The default is `checkbox`."
+     >
+       <ControlledToggle
+         variant="checkbox"
+-        labelTx="demoToggle.useCase.variants.checkbox.label"
+-        helperTx="demoToggle.useCase.variants.checkbox.helper"
++        label="`checkbox` variant"
++        helper="This can be used for a single on/off input."
+       />
+       <DemoDivider size={24} />
+       <ControlledToggle
+         variant="radio"
+-        labelTx="demoToggle.useCase.variants.radio.label"
+-        helperTx="demoToggle.useCase.variants.radio.helper"
++        label="`radio` variant"
++        helper="Use this when you have multiple options."
+       />
+       <DemoDivider size={24} />
+       <ControlledToggle
+         variant="switch"
+-        labelTx="demoToggle.useCase.variants.switch.label"
+-        helperTx="demoToggle.useCase.variants.switch.helper"
++        label="`switch` variant"
++        helper="A more prominent on/off input. Has better accessibility support."
+       />
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoToggle.useCase.statuses.name"
+-      description="demoToggle.useCase.statuses.description"
++      name="Statuses"
++      description="There is a status prop - similar to `preset` in other components, but affects component functionality as well."
+       layout="row"
+     >
+       <ControlledToggle variant="checkbox" containerStyle={$centeredOneThirdCol} />
+@@ -64,7 +64,7 @@ export const DemoToggle: Demo = {
+       <ControlledToggle variant="radio" value containerStyle={$centeredOneThirdCol} />
+       <ControlledToggle variant="switch" value containerStyle={$centeredOneThirdCol} />
+       <Text preset="formHelper" style={$centeredText}>
+-        {translate("demoToggle.useCase.statuses.noStatus")}
++        No status - this is the default
+       </Text>
+ 
+       <DemoDivider size={24} style={{ width: "100%" }} />
+@@ -92,7 +92,7 @@ export const DemoToggle: Demo = {
+         containerStyle={$centeredOneThirdCol}
+       />
+       <Text preset="formHelper" style={$centeredText}>
+-        {translate("demoToggle.useCase.statuses.errorStatus")}
++        Error status - use when there is an error
+       </Text>
+ 
+       <DemoDivider size={24} style={{ width: "100%" }} />
+@@ -124,19 +124,19 @@ export const DemoToggle: Demo = {
+         containerStyle={$centeredOneThirdCol}
+       />
+       <Text preset="formHelper" style={$centeredText}>
+-        {translate("demoToggle.useCase.statuses.disabledStatus")}
++        Disabled status - disables the editability and mutes input
+       </Text>
+     </DemoUseCase>,
+ 
+     <DemoUseCase
+-      name="demoToggle.useCase.passingContent.name"
+-      description="demoToggle.useCase.passingContent.description"
++      name="Passing Content"
++      description="There are a few different ways to pass content."
+     >
+       <ControlledToggle
+         variant="checkbox"
+         value
+-        labelTx="demoToggle.useCase.passingContent.useCase.checkBox.label"
+-        helperTx="demoToggle.useCase.passingContent.useCase.checkBox.helper"
++        label="Via `label` prop"
++        helper="Via `helper` prop."
+       />
+       <DemoDivider size={24} />
+       <ControlledToggle
+@@ -151,14 +151,14 @@ export const DemoToggle: Demo = {
+       <ControlledToggle
+         variant="checkbox"
+         value
+-        labelTx="demoToggle.useCase.passingContent.useCase.checkBoxMultiLine.helper"
++        label="Supports multiline - Nulla proident consectetur labore sunt ea labore. "
+         editable={false}
+       />
+       <DemoDivider size={24} />
+       <ControlledToggle
+         variant="radio"
+         value
+-        labelTx="demoToggle.useCase.passingContent.useCase.radioChangeSides.helper"
++        label="You can change sides - Laborum labore adipisicing in eu ipsum deserunt."
+         labelPosition="left"
+       />
+       <DemoDivider size={24} />
+@@ -167,16 +167,16 @@ export const DemoToggle: Demo = {
+         value
+         status="error"
+         checkboxIcon="ladybug"
+-        labelTx="demoToggle.useCase.passingContent.useCase.customCheckBox.label"
++        label="Pass in a custom checkbox icon."
+       />
+       <DemoDivider size={24} />
+       <ControlledToggle
+         value
+         variant="switch"
+         switchAccessibilityMode="text"
+-        labelTx="demoToggle.useCase.passingContent.useCase.switch.label"
++        label="Switches can be read as text"
+         status="error"
+-        helperTx="demoToggle.useCase.passingContent.useCase.switch.helper"
++        helper="By default, this option doesn't use `Text` since depending on the font, the on/off characters might look weird. Customize as needed."
+       />
+       <DemoDivider size={24} />
+       <ControlledToggle
+@@ -184,15 +184,11 @@ export const DemoToggle: Demo = {
+         variant="switch"
+         labelPosition="left"
+         switchAccessibilityMode="icon"
+-        labelTx="demoToggle.useCase.passingContent.useCase.switchAid.label"
++        label="Or aided with an icon"
+       />
+     </DemoUseCase>,
+ 
+-    <DemoUseCase
+-      name="demoToggle.useCase.styling.name"
+-      description="demoToggle.useCase.styling.description"
+-      layout="row"
+-    >
++    <DemoUseCase name="Styling" description="The component can be styled easily." layout="row">
+       <ControlledToggle
+         variant="checkbox"
+         containerStyle={$centeredOneThirdCol}
+@@ -226,7 +222,7 @@ export const DemoToggle: Demo = {
+         }}
+       />
+       <Text preset="formHelper" style={$centeredText}>
+-        {translate("demoToggle.useCase.styling.outerWrapper")}
++        1 - style the input outer wrapper
+       </Text>
+ 
+       <DemoDivider style={{ width: "100%" }} />
+@@ -278,7 +274,7 @@ export const DemoToggle: Demo = {
+         }}
+       />
+       <Text preset="formHelper" style={$centeredText}>
+-        {translate("demoToggle.useCase.styling.innerWrapper")}
++        2 - style the input inner wrapper
+       </Text>
+ 
+       <DemoDivider style={{ width: "100%" }} />
+@@ -351,7 +347,7 @@ export const DemoToggle: Demo = {
+       />
+ 
+       <Text preset="formHelper" style={$centeredText}>
+-        {translate("demoToggle.useCase.styling.inputDetail")}
++        3 - style the input detail
+       </Text>
+ 
+       <DemoDivider size={32} style={{ width: "100%" }} />
+@@ -360,7 +356,7 @@ export const DemoToggle: Demo = {
+         <ControlledToggle
+           value
+           variant="radio"
+-          labelTx="demoToggle.useCase.styling.labelTx"
++          label="You can also style the label"
+           LabelTextProps={{ size: "xs", weight: "bold" }}
+           status="error"
+           labelStyle={{
+@@ -379,7 +375,7 @@ export const DemoToggle: Demo = {
+           variant="radio"
+           labelPosition="left"
+           containerStyle={{ padding: 10, backgroundColor: colors.error }}
+-          labelTx="demoToggle.useCase.styling.styleContainer"
++          label="Or, style the entire container"
+           status="error"
+           labelStyle={{ color: colors.palette.neutral100 }}
+         />
+diff --git a/IgniteDiffApp/app/utils/formatDate.ts b/IgniteDiffApp/app/utils/formatDate.ts
+index 1e2a89ee..5f87b893 100644
+--- a/IgniteDiffApp/app/utils/formatDate.ts
++++ b/IgniteDiffApp/app/utils/formatDate.ts
+@@ -1,3 +1,5 @@
++import I18n from "i18n-js"
++
+ // Note the syntax of these imports from the date-fns library.
+ // If you import with the syntax: import { format } from "date-fns" the ENTIRE library
+ // will be included in your production bundle (even if you only use one function).
+@@ -8,12 +10,11 @@ import parseISO from "date-fns/parseISO"
+ import ar from "date-fns/locale/ar-SA"
+ import ko from "date-fns/locale/ko"
+ import en from "date-fns/locale/en-US"
+-import { i18n } from "app/i18n"
+ 
+ type Options = Parameters<typeof format>[2]
+ 
+ const getLocale = (): Locale => {
+-  const locale = i18n.locale.split("-")[0]
++  const locale = I18n.currentLocale().split("-")[0]
+   return locale === "ar" ? ar : locale === "ko" ? ko : en
+ }
+ 
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 6eb113d6..f9ba4e38 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -48,7 +48,7 @@
+     "expo-localization": "~15.0.3",
+     "expo-splash-screen": "~0.27.4",
+     "expo-status-bar": "~1.12.1",
+-    "i18n-js": "^4.4.3",
++    "i18n-js": "3.9.2",
+     "mobx": "6.10.2",
+     "mobx-react-lite": "4.0.5",
+     "mobx-state-tree": "5.3.0",
+diff --git a/IgniteDiffApp/test/setup.ts b/IgniteDiffApp/test/setup.ts
+index ff75c97f..1c671011 100644
+--- a/IgniteDiffApp/test/setup.ts
++++ b/IgniteDiffApp/test/setup.ts
+@@ -27,21 +27,18 @@ jest.mock("@react-native-async-storage/async-storage", () =>
+   require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
+ )
+ 
++jest.mock("i18n-js", () => ({
++  currentLocale: () => "en",
++  t: (key: string, params: Record<string, string>) => {
++    return `${key} ${JSON.stringify(params)}`
++  },
++}))
++
+ jest.mock("expo-localization", () => ({
+   ...jest.requireActual("expo-localization"),
+   getLocales: () => [{ languageTag: "en-US", textDirection: "ltr" }],
+ }))
+ 
+-jest.mock("../app/i18n/i18n.ts", () => ({
+-  i18n: {
+-    locale: "en",
+-    t: (key: string, params: Record<string, string>) => {
+-      return `${key} ${JSON.stringify(params)}`
+-    },
+-    numberToCurrency: jest.fn(),
+-  },
+-}))
+-
+ declare const tron // eslint-disable-line @typescript-eslint/no-unused-vars
+ 
+ declare global {
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 71133c47..ab37834a 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -3268,11 +3268,6 @@ big-integer@1.6.x:
+   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.52.tgz#60a887f3047614a8e1bffe5d7173490a97dc8c85"
+   integrity sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==
+ 
+-bignumber.js@*:
+-  version "9.1.2"
+-  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.2.tgz#b7c4242259c008903b13707983b5f4bbd31eda0c"
+-  integrity sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==
+-
+ bl@^4.1.0:
+   version "4.1.0"
+   resolved "https://registry.yarnpkg.com/bl/-/bl-4.1.0.tgz#451535264182bec2fbbc83a62ab98cf11d9f7b3a"
+@@ -5425,14 +5420,10 @@ hyphenate-style-name@^1.0.3:
+   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.1.0.tgz#1797bf50369588b47b72ca6d5e65374607cf4436"
+   integrity sha512-WDC/ui2VVRrz3jOVi+XtjqkDjiVjTtFaAGiW37k6b+ohyQ5wYDOGkvCZa8+H0nx3gyvv0+BST9xuOgIyGQ00gw==
+ 
+-i18n-js@^4.4.3:
+-  version "4.5.0"
+-  resolved "https://registry.yarnpkg.com/i18n-js/-/i18n-js-4.5.0.tgz#c2cc98df71746fecf2c8831f90eb9b6a5a4566c5"
+-  integrity sha512-eiT3ZzK+k1VUR/oDz0Nne3dWU6DE+4P3FxtHXgHMZyzW1lKAHsjEYaOPZClU4QA9rI+uoeE71zq1QzLnZ6LDJQ==
+-  dependencies:
+-    bignumber.js "*"
+-    lodash "*"
+-    make-plural "*"
++i18n-js@3.9.2:
++  version "3.9.2"
++  resolved "https://registry.yarnpkg.com/i18n-js/-/i18n-js-3.9.2.tgz#4a015dcfabd4c9fc73115fc2d02d2627e4c15ca5"
++  integrity sha512-+Gm8h5HL0emzKhRx2avMKX+nKiVPXeaOZm7Euf2/pbbFcLQoJ3zZYiUykAzoRasijCoWos2Kl1tslmScTgAQKw==
+ 
+ iconv-lite@0.6.3:
+   version "0.6.3"
+@@ -6665,7 +6656,7 @@ lodash.throttle@^4.1.1:
+   resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
+   integrity sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==
+ 
+-lodash@*, lodash@^4.17.10, lodash@^4.17.13, lodash@^4.17.19, lodash@^4.17.21:
++lodash@^4.17.10, lodash@^4.17.13, lodash@^4.17.19, lodash@^4.17.21:
+   version "4.17.21"
+   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+@@ -6740,11 +6731,6 @@ make-error@^1.1.1, make-error@^1.3.6:
+   resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.6.tgz#2eb2e37ea9b67c4891f684a1394799af484cf7a2"
+   integrity sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==
+ 
+-make-plural@*:
+-  version "7.4.0"
+-  resolved "https://registry.yarnpkg.com/make-plural/-/make-plural-7.4.0.tgz#fa6990dd550dea4de6b20163f74e5ed83d8a8d6d"
+-  integrity sha512-4/gC9KVNTV6pvYg2gFeQYTW3mWaoJt7WZE5vrp1KnQDgW92JtYZnzmZT81oj/dUTqAIu0ufI2x3dkgu3bB1tYg==
+-
+ makeerror@1.0.12:
+   version "1.0.12"
+   resolved "https://registry.yarnpkg.com/makeerror/-/makeerror-1.0.12.tgz#3e5dd2079a82e812e983cc6610c4a2cb0eaa801a"
