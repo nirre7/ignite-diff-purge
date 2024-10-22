@@ -1,0 +1,418 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index e9d9a185..f28eb0f5 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -73,6 +73,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.7.2"
++    "version": "9.8.2"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index 1df69d5a..c28eaaa0 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -16,6 +16,7 @@ if (__DEV__) {
+   // If you turn it off in metro.config.js, you'll have to manually import it.
+   require("./devtools/ReactotronConfig.ts")
+ }
++import "./utils/gestureHandler"
+ import "./i18n"
+ import "./utils/ignoreWarnings"
+ import { useFonts } from "expo-font"
+@@ -28,8 +29,6 @@ import { ErrorBoundary } from "./screens/ErrorScreen/ErrorBoundary"
+ import * as storage from "./utils/storage"
+ import { customFontsToLoad } from "./theme"
+ import Config from "./config"
+-import { GestureHandlerRootView } from "react-native-gesture-handler"
+-import { ViewStyle } from "react-native"
+ 
+ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
+ 
+@@ -102,20 +101,14 @@ function App(props: AppProps) {
+   return (
+     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+       <ErrorBoundary catchErrors={Config.catchErrors}>
+-        <GestureHandlerRootView style={$container}>
+-          <AppNavigator
+-            linking={linking}
+-            initialState={initialNavigationState}
+-            onStateChange={onNavigationStateChange}
+-          />
+-        </GestureHandlerRootView>
++        <AppNavigator
++          linking={linking}
++          initialState={initialNavigationState}
++          onStateChange={onNavigationStateChange}
++        />
+       </ErrorBoundary>
+     </SafeAreaProvider>
+   )
+ }
+ 
+ export default App
+-
+-const $container: ViewStyle = {
+-  flex: 1,
+-}
+diff --git a/IgniteDiffApp/app/components/Text.test.tsx b/IgniteDiffApp/app/components/Text.test.tsx
+new file mode 100644
+index 00000000..7368b7b5
+--- /dev/null
++++ b/IgniteDiffApp/app/components/Text.test.tsx
+@@ -0,0 +1,16 @@
++import { render } from "@testing-library/react-native"
++import React from "react"
++
++import { Text } from "./Text"
++
++/* This is an example component test using react-native-testing-library. For more
++ * information on how to write your own, see the documentation here:
++ * https://callstack.github.io/react-native-testing-library/ */
++const testText = "Test string"
++
++describe("Text", () => {
++  it("should render the component", () => {
++    const { getByText } = render(<Text text={testText} />)
++    expect(getByText(testText)).toBeDefined()
++  })
++})
+diff --git a/IgniteDiffApp/app/i18n/i18n.ts b/IgniteDiffApp/app/i18n/i18n.ts
+index ee09968d..be45a5bd 100644
+--- a/IgniteDiffApp/app/i18n/i18n.ts
++++ b/IgniteDiffApp/app/i18n/i18n.ts
+@@ -1,5 +1,5 @@
+ import * as Localization from "expo-localization"
+-import i18n from "i18n-js"
++import { I18n } from "i18n-js"
+ import { I18nManager } from "react-native"
+ 
+ // if English isn't your default language, move Translations to the appropriate language file.
+@@ -9,14 +9,19 @@ import ko from "./ko"
+ import fr from "./fr"
+ import jp from "./jp"
+ 
+-i18n.fallbacks = true
++// Migration guide from i18n 3.x -> 4.x:
++// https://github.com/fnando/i18n-js/blob/main/MIGRATING_FROM_V3_TO_V4.md
++// https://github.com/fnando/i18n/discussions/24
+ 
+ // to use regional locales use { "en-US": enUS } etc
+-i18n.translations = { ar, en, "en-US": en, ko, fr, jp }
+-
+ const fallbackLocale = "en-US"
++export const i18n = new I18n(
++  { ar, en, "en-US": en, ko, fr, jp },
++  { locale: fallbackLocale, defaultLocale: fallbackLocale, enableFallback: true },
++)
++
+ const systemLocale = Localization.getLocales()[0]
+-const systemLocaleTag = systemLocale?.languageTag ?? "en-US"
++const systemLocaleTag = systemLocale?.languageTag ?? fallbackLocale
+ 
+ if (Object.prototype.hasOwnProperty.call(i18n.translations, systemLocaleTag)) {
+   // if specific locales like en-FI or en-US is available, set it
+diff --git a/IgniteDiffApp/app/i18n/translate.ts b/IgniteDiffApp/app/i18n/translate.ts
+index 084fdcdf..00c1c1e0 100644
+--- a/IgniteDiffApp/app/i18n/translate.ts
++++ b/IgniteDiffApp/app/i18n/translate.ts
+@@ -1,5 +1,5 @@
+-import i18n from "i18n-js"
+-import { TxKeyPath } from "./i18n"
++import { TranslateOptions } from "i18n-js"
++import { i18n, TxKeyPath } from "./i18n"
+ 
+ /**
+  * Translates text.
+@@ -23,6 +23,6 @@ import { TxKeyPath } from "./i18n"
+  * // => "Hello world!"
+  * ```
+  */
+-export function translate(key: TxKeyPath, options?: i18n.TranslateOptions): string {
++export function translate(key: TxKeyPath, options?: TranslateOptions): string {
+   return i18n.t(key, options)
+ }
+diff --git a/IgniteDiffApp/app/utils/formatDate.ts b/IgniteDiffApp/app/utils/formatDate.ts
+index 5f87b893..1e2a89ee 100644
+--- a/IgniteDiffApp/app/utils/formatDate.ts
++++ b/IgniteDiffApp/app/utils/formatDate.ts
+@@ -1,5 +1,3 @@
+-import I18n from "i18n-js"
+-
+ // Note the syntax of these imports from the date-fns library.
+ // If you import with the syntax: import { format } from "date-fns" the ENTIRE library
+ // will be included in your production bundle (even if you only use one function).
+@@ -10,11 +8,12 @@ import parseISO from "date-fns/parseISO"
+ import ar from "date-fns/locale/ar-SA"
+ import ko from "date-fns/locale/ko"
+ import en from "date-fns/locale/en-US"
++import { i18n } from "app/i18n"
+ 
+ type Options = Parameters<typeof format>[2]
+ 
+ const getLocale = (): Locale => {
+-  const locale = I18n.currentLocale().split("-")[0]
++  const locale = i18n.locale.split("-")[0]
+   return locale === "ar" ? ar : locale === "ko" ? ko : en
+ }
+ 
+diff --git a/IgniteDiffApp/app/utils/gestureHandler.native.ts b/IgniteDiffApp/app/utils/gestureHandler.native.ts
+new file mode 100644
+index 00000000..b72fc946
+--- /dev/null
++++ b/IgniteDiffApp/app/utils/gestureHandler.native.ts
+@@ -0,0 +1,3 @@
++// Only import react-native-gesture-handler on native platforms
++// https://reactnavigation.org/docs/drawer-navigator/#installation
++import "react-native-gesture-handler"
+diff --git a/IgniteDiffApp/app/utils/gestureHandler.ts b/IgniteDiffApp/app/utils/gestureHandler.ts
+new file mode 100644
+index 00000000..172371fd
+--- /dev/null
++++ b/IgniteDiffApp/app/utils/gestureHandler.ts
+@@ -0,0 +1,2 @@
++// Don't import react-native-gesture-handler on web
++// https://reactnavigation.org/docs/drawer-navigator/#installation
+diff --git a/IgniteDiffApp/jest.config.js b/IgniteDiffApp/jest.config.js
+index 426d6adc..8b5505b4 100644
+--- a/IgniteDiffApp/jest.config.js
++++ b/IgniteDiffApp/jest.config.js
+@@ -1,34 +1,5 @@
+-const { defaults: tsjPreset } = require("ts-jest/presets")
+-
+-const thirdPartyIgnorePatterns = [
+-  "((jest-)?react-native|@react-native(-community)?)",
+-  "expo(nent)?",
+-  "@expo(nent)?/.*",
+-  "@expo-google-fonts/.*",
+-  "react-navigation",
+-  "@react-navigation/.*",
+-  "@unimodules/.*",
+-  "unimodules",
+-  "sentry-expo",
+-  "native-base",
+-  "react-native-svg",
+-  "react-clone-referenced-element",
+-  "react-native-code-push",
+-]
+-
+ /** @type {import('@jest/types').Config.ProjectConfig} */
+ module.exports = {
+-  ...tsjPreset,
+   preset: "jest-expo",
+-  transformIgnorePatterns: [
+-    `<rootDir>/node_modules/(?!${thirdPartyIgnorePatterns.join("|")})`,
+-    "jest-runner",
+-  ],
+-  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/.maestro/", "@react-native"],
+   setupFiles: ["<rootDir>/test/setup.ts"],
+-  transform:{
+-    '^.+\\.test.tsx?$': ['ts-jest', {
+-      tsconfig: '<rootDir>/test/test-tsconfig.json'
+-    }]
+-  }
+ }
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 470f00b3..6eb113d6 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -48,7 +48,7 @@
+     "expo-localization": "~15.0.3",
+     "expo-splash-screen": "~0.27.4",
+     "expo-status-bar": "~1.12.1",
+-    "i18n-js": "3.9.2",
++    "i18n-js": "^4.4.3",
+     "mobx": "6.10.2",
+     "mobx-react-lite": "4.0.5",
+     "mobx-state-tree": "5.3.0",
+@@ -69,10 +69,10 @@
+     "@babel/plugin-transform-template-literals": "^7.0.0",
+     "@babel/preset-env": "^7.20.0",
+     "@babel/runtime": "^7.20.0",
++    "@testing-library/react-native": "^12.5.2",
+     "@types/i18n-js": "3.8.2",
+     "@types/jest": "^29.2.1",
+     "@types/react": "~18.2.14",
+-    "@types/react-test-renderer": "^18.0.0",
+     "@typescript-eslint/eslint-plugin": "^5.59.0",
+     "@typescript-eslint/parser": "^5.59.0",
+     "babel-jest": "^29.2.1",
+@@ -90,7 +90,6 @@
+     "patch-package": "^8.0.0",
+     "postinstall-prepare": "1.0.1",
+     "prettier": "2.8.8",
+-    "react-test-renderer": "18.2.0",
+     "reactotron-core-client": "^2.8.13",
+     "reactotron-mst": "^3.1.7",
+     "reactotron-react-js": "^3.3.11",
+diff --git a/IgniteDiffApp/test/setup.ts b/IgniteDiffApp/test/setup.ts
+index 1c671011..ff75c97f 100644
+--- a/IgniteDiffApp/test/setup.ts
++++ b/IgniteDiffApp/test/setup.ts
+@@ -27,18 +27,21 @@ jest.mock("@react-native-async-storage/async-storage", () =>
+   require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
+ )
+ 
+-jest.mock("i18n-js", () => ({
+-  currentLocale: () => "en",
+-  t: (key: string, params: Record<string, string>) => {
+-    return `${key} ${JSON.stringify(params)}`
+-  },
+-}))
+-
+ jest.mock("expo-localization", () => ({
+   ...jest.requireActual("expo-localization"),
+   getLocales: () => [{ languageTag: "en-US", textDirection: "ltr" }],
+ }))
+ 
++jest.mock("../app/i18n/i18n.ts", () => ({
++  i18n: {
++    locale: "en",
++    t: (key: string, params: Record<string, string>) => {
++      return `${key} ${JSON.stringify(params)}`
++    },
++    numberToCurrency: jest.fn(),
++  },
++}))
++
+ declare const tron // eslint-disable-line @typescript-eslint/no-unused-vars
+ 
+ declare global {
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index 6dd7c357..71133c47 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -2458,6 +2458,15 @@
+   dependencies:
+     "@sinonjs/commons" "^3.0.0"
+ 
++"@testing-library/react-native@^12.5.2":
++  version "12.7.2"
++  resolved "https://registry.yarnpkg.com/@testing-library/react-native/-/react-native-12.7.2.tgz#d9dc62979264902c22ac9154eee0dc10914d1518"
++  integrity sha512-fSUIruOUFcuwssC8+m9H+9ib7P/+JrtIszHS4eZ6O9e4FjpjS3m24UnkJXTRl+FCbknz8oxH5Tw+thzy0qsIMg==
++  dependencies:
++    jest-matcher-utils "^29.7.0"
++    pretty-format "^29.7.0"
++    redent "^3.0.0"
++
+ "@tootallnate/once@2":
+   version "2.0.0"
+   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
+@@ -2613,21 +2622,6 @@
+   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.13.tgz#2af91918ee12d9d32914feb13f5326658461b451"
+   integrity sha512-hCZTSvwbzWGvhqxp/RqVqwU999pBf2vp7hzIjiYOsl8wqOmUxkQ6ddw1cV3l8811+kdUFus/q4d1Y3E3SyEifA==
+ 
+-"@types/react-test-renderer@^18.0.0":
+-  version "18.3.0"
+-  resolved "https://registry.yarnpkg.com/@types/react-test-renderer/-/react-test-renderer-18.3.0.tgz#839502eae70058a4ae161f63385a8e7929cef4c0"
+-  integrity sha512-HW4MuEYxfDbOHQsVlY/XtOvNHftCVEPhJF2pQXXwcUiUF+Oyb0usgp48HSgpK5rt8m9KZb22yqOeZm+rrVG8gw==
+-  dependencies:
+-    "@types/react" "*"
+-
+-"@types/react@*":
+-  version "18.3.11"
+-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.11.tgz#9d530601ff843ee0d7030d4227ea4360236bd537"
+-  integrity sha512-r6QZ069rFTjrEYgFdOck1gK7FLVsgJE7tTz0pQBczlBNUhBNk0MQH4UbnFSwjpQLMkLzgqvBBa+qGpLje16eTQ==
+-  dependencies:
+-    "@types/prop-types" "*"
+-    csstype "^3.0.2"
+-
+ "@types/react@~18.2.14":
+   version "18.2.79"
+   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.2.79.tgz#c40efb4f255711f554d47b449f796d1c7756d865"
+@@ -3274,6 +3268,11 @@ big-integer@1.6.x:
+   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.52.tgz#60a887f3047614a8e1bffe5d7173490a97dc8c85"
+   integrity sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==
+ 
++bignumber.js@*:
++  version "9.1.2"
++  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.2.tgz#b7c4242259c008903b13707983b5f4bbd31eda0c"
++  integrity sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==
++
+ bl@^4.1.0:
+   version "4.1.0"
+   resolved "https://registry.yarnpkg.com/bl/-/bl-4.1.0.tgz#451535264182bec2fbbc83a62ab98cf11d9f7b3a"
+@@ -5426,10 +5425,14 @@ hyphenate-style-name@^1.0.3:
+   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.1.0.tgz#1797bf50369588b47b72ca6d5e65374607cf4436"
+   integrity sha512-WDC/ui2VVRrz3jOVi+XtjqkDjiVjTtFaAGiW37k6b+ohyQ5wYDOGkvCZa8+H0nx3gyvv0+BST9xuOgIyGQ00gw==
+ 
+-i18n-js@3.9.2:
+-  version "3.9.2"
+-  resolved "https://registry.yarnpkg.com/i18n-js/-/i18n-js-3.9.2.tgz#4a015dcfabd4c9fc73115fc2d02d2627e4c15ca5"
+-  integrity sha512-+Gm8h5HL0emzKhRx2avMKX+nKiVPXeaOZm7Euf2/pbbFcLQoJ3zZYiUykAzoRasijCoWos2Kl1tslmScTgAQKw==
++i18n-js@^4.4.3:
++  version "4.5.0"
++  resolved "https://registry.yarnpkg.com/i18n-js/-/i18n-js-4.5.0.tgz#c2cc98df71746fecf2c8831f90eb9b6a5a4566c5"
++  integrity sha512-eiT3ZzK+k1VUR/oDz0Nne3dWU6DE+4P3FxtHXgHMZyzW1lKAHsjEYaOPZClU4QA9rI+uoeE71zq1QzLnZ6LDJQ==
++  dependencies:
++    bignumber.js "*"
++    lodash "*"
++    make-plural "*"
+ 
+ iconv-lite@0.6.3:
+   version "0.6.3"
+@@ -6662,7 +6665,7 @@ lodash.throttle@^4.1.1:
+   resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
+   integrity sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==
+ 
+-lodash@^4.17.10, lodash@^4.17.13, lodash@^4.17.19, lodash@^4.17.21:
++lodash@*, lodash@^4.17.10, lodash@^4.17.13, lodash@^4.17.19, lodash@^4.17.21:
+   version "4.17.21"
+   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+@@ -6737,6 +6740,11 @@ make-error@^1.1.1, make-error@^1.3.6:
+   resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.6.tgz#2eb2e37ea9b67c4891f684a1394799af484cf7a2"
+   integrity sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==
+ 
++make-plural@*:
++  version "7.4.0"
++  resolved "https://registry.yarnpkg.com/make-plural/-/make-plural-7.4.0.tgz#fa6990dd550dea4de6b20163f74e5ed83d8a8d6d"
++  integrity sha512-4/gC9KVNTV6pvYg2gFeQYTW3mWaoJt7WZE5vrp1KnQDgW92JtYZnzmZT81oj/dUTqAIu0ufI2x3dkgu3bB1tYg==
++
+ makeerror@1.0.12:
+   version "1.0.12"
+   resolved "https://registry.yarnpkg.com/makeerror/-/makeerror-1.0.12.tgz#3e5dd2079a82e812e983cc6610c4a2cb0eaa801a"
+@@ -7054,6 +7062,11 @@ mimic-fn@^2.1.0:
+   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.1.0.tgz#7ed2c2ccccaf84d3ffcb7a69b57711fc2083401b"
+   integrity sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==
+ 
++min-indent@^1.0.0:
++  version "1.0.1"
++  resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.1.tgz#a63f681673b30571fbe8bc25686ae746eefa9869"
++  integrity sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==
++
+ minimatch@^3.0.2, minimatch@^3.0.4, minimatch@^3.1.1, minimatch@^3.1.2:
+   version "3.1.2"
+   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.1.2.tgz#19cd194bfd3e428f049a70817c038d89ab4be35b"
+@@ -8162,6 +8175,14 @@ recyclerlistview@4.2.1:
+     prop-types "15.8.1"
+     ts-object-utils "0.0.5"
+ 
++redent@^3.0.0:
++  version "3.0.0"
++  resolved "https://registry.yarnpkg.com/redent/-/redent-3.0.0.tgz#e557b7998316bb53c9f1f56fa626352c6963059f"
++  integrity sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==
++  dependencies:
++    indent-string "^4.0.0"
++    strip-indent "^3.0.0"
++
+ regenerate-unicode-properties@^10.2.0:
+   version "10.2.0"
+   resolved "https://registry.yarnpkg.com/regenerate-unicode-properties/-/regenerate-unicode-properties-10.2.0.tgz#626e39df8c372338ea9b8028d1f99dc3fd9c3db0"
+@@ -8937,6 +8958,13 @@ strip-final-newline@^2.0.0:
+   resolved "https://registry.yarnpkg.com/strip-final-newline/-/strip-final-newline-2.0.0.tgz#89b852fb2fcbe936f6f4b3187afb0a12c1ab58ad"
+   integrity sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==
+ 
++strip-indent@^3.0.0:
++  version "3.0.0"
++  resolved "https://registry.yarnpkg.com/strip-indent/-/strip-indent-3.0.0.tgz#c32e1cee940b6b3432c771bc2c54bcce73cd3001"
++  integrity sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ==
++  dependencies:
++    min-indent "^1.0.0"
++
+ strip-json-comments@^3.1.0, strip-json-comments@^3.1.1:
+   version "3.1.1"
+   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
