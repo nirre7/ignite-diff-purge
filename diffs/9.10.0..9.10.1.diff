@@ -1,0 +1,25 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index c493c0bd..3301b0dc 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -73,6 +73,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.10.0"
++    "version": "9.10.1"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 6eb113d6..2bd5e974 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -90,6 +90,7 @@
+     "patch-package": "^8.0.0",
+     "postinstall-prepare": "1.0.1",
+     "prettier": "2.8.8",
++    "react-test-renderer": "18.2.0",
+     "reactotron-core-client": "^2.8.13",
+     "reactotron-mst": "^3.1.7",
+     "reactotron-react-js": "^3.3.11",
