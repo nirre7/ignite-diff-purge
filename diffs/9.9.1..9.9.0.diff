@@ -1,0 +1,109 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 9574478e..9792f56c 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -73,6 +73,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "9.9.1"
++    "version": "9.9.0"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Button.tsx b/IgniteDiffApp/app/components/Button.tsx
+index ed7ef069..33c6f29f 100644
+--- a/IgniteDiffApp/app/components/Button.tsx
++++ b/IgniteDiffApp/app/components/Button.tsx
+@@ -84,7 +84,7 @@ export interface ButtonProps extends PressableProps {
+ /**
+  * A component that allows users to take actions and make choices.
+  * Wraps the Text component with a Pressable component.
+- * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Button/}
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Button/}
+  * @param {ButtonProps} props - The props for the `Button` component.
+  * @returns {JSX.Element} The rendered `Button` component.
+  * @example
+diff --git a/IgniteDiffApp/app/components/ListView.tsx b/IgniteDiffApp/app/components/ListView.tsx
+index 5840b28f..ef3406a0 100644
+--- a/IgniteDiffApp/app/components/ListView.tsx
++++ b/IgniteDiffApp/app/components/ListView.tsx
+@@ -10,7 +10,7 @@ export type ListViewProps<T> = PropsWithoutRef<FlashListProps<T>>
+ /**
+  * This is a Higher Order Component meant to ease the pain of using @shopify/flash-list
+  * when there is a chance that a user would have their device language set to an
+- * RTL language like Arabic or Persian. This component will use react-native's
++ * RTL language like Arabic or Punjabi. This component will use react-native's
+  * FlatList if the user's language is RTL or FlashList if the user's language is LTR.
+  *
+  * Because FlashList's props are a superset of FlatList's, you must pass estimatedItemSize
+diff --git a/IgniteDiffApp/app/i18n/demo-ja.ts b/IgniteDiffApp/app/i18n/demo-jp.ts
+similarity index 99%
+rename from IgniteDiffApp/app/i18n/demo-ja.ts
+rename to IgniteDiffApp/app/i18n/demo-jp.ts
+index c0e35589..c30abbae 100644
+--- a/IgniteDiffApp/app/i18n/demo-ja.ts
++++ b/IgniteDiffApp/app/i18n/demo-jp.ts
+@@ -1,6 +1,6 @@
+ import { DemoTranslations } from "./demo-en"
+ 
+-export const demoJa: DemoTranslations = {
++export const demoJp: DemoTranslations = {
+   demoIcon: {
+     description:
+       "あらかじめ登録されたアイコンを描画するコンポーネントです。 `onPress` が提供されている場合は <TouchableOpacity /> にラップされますが、それ以外の場合は <View /> にラップされます。",
+@@ -459,4 +459,4 @@ export const demoJa: DemoTranslations = {
+   },
+ }
+ 
+-export default demoJa
++export default demoJp
+diff --git a/IgniteDiffApp/app/i18n/i18n.ts b/IgniteDiffApp/app/i18n/i18n.ts
+index 7aba470a..be45a5bd 100644
+--- a/IgniteDiffApp/app/i18n/i18n.ts
++++ b/IgniteDiffApp/app/i18n/i18n.ts
+@@ -7,7 +7,7 @@ import en, { Translations } from "./en"
+ import ar from "./ar"
+ import ko from "./ko"
+ import fr from "./fr"
+-import ja from "./ja"
++import jp from "./jp"
+ 
+ // Migration guide from i18n 3.x -> 4.x:
+ // https://github.com/fnando/i18n-js/blob/main/MIGRATING_FROM_V3_TO_V4.md
+@@ -16,7 +16,7 @@ import ja from "./ja"
+ // to use regional locales use { "en-US": enUS } etc
+ const fallbackLocale = "en-US"
+ export const i18n = new I18n(
+-  { ar, en, "en-US": en, ko, fr, ja },
++  { ar, en, "en-US": en, ko, fr, jp },
+   { locale: fallbackLocale, defaultLocale: fallbackLocale, enableFallback: true },
+ )
+ 
+diff --git a/IgniteDiffApp/app/i18n/ja.ts b/IgniteDiffApp/app/i18n/jp.ts
+similarity index 98%
+rename from IgniteDiffApp/app/i18n/ja.ts
+rename to IgniteDiffApp/app/i18n/jp.ts
+index e6698963..b26ff14e 100644
+--- a/IgniteDiffApp/app/i18n/ja.ts
++++ b/IgniteDiffApp/app/i18n/jp.ts
+@@ -1,7 +1,7 @@
+-import demoJa from "./demo-ja"
++import demoJp from "./demo-jp"
+ import { Translations } from "./en"
+ 
+-const ja: Translations = {
++const jp: Translations = {
+   common: {
+     ok: "OK",
+     cancel: "キャンセル",
+@@ -123,7 +123,7 @@ const ja: Translations = {
+     },
+   },
+ 
+-  ...demoJa,
++  ...demoJp,
+ }
+ 
+-export default ja
++export default jp
