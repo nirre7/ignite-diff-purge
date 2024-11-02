@@ -1,0 +1,25 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 49b876c0..33a1fd8c 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -74,6 +74,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.0.3"
++    "version": "10.0.4"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index f9c1909f..70515c33 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -97,7 +97,6 @@ function App(props: AppProps) {
+   // In iOS: application:didFinishLaunchingWithOptions:
+   // In Android: https://stackoverflow.com/a/45838109/204044
+   // You can replace with your own loading component if you wish.
+-
+   if (
+     !rehydrated ||
+     !isNavigationStateRestored ||
