@@ -1,0 +1,57 @@
+diff --git a/IgniteDiffApp/.eslintrc.js b/IgniteDiffApp/.eslintrc.js
+index a6b22119..2ac8146c 100644
+--- a/IgniteDiffApp/.eslintrc.js
++++ b/IgniteDiffApp/.eslintrc.js
+@@ -41,6 +41,8 @@ module.exports = {
+         ],
+       },
+     ],
++    // react
++    "react/prop-types": 0,
+     // react-native
+     "react-native/no-raw-text": 0,
+     // reactotron
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 1c8627fc..49b876c0 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -74,6 +74,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.0.2"
++    "version": "10.0.3"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 5a4a1214..41ef84a0 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -90,7 +90,7 @@
+     "postinstall-prepare": "1.0.1",
+     "prettier": "^3.3.3",
+     "react-test-renderer": "18.2.0",
+-    "reactotron-core-client": "^2.8.13",
++    "reactotron-core-client": "2.9.4",
+     "reactotron-mst": "^3.1.7",
+     "reactotron-react-js": "^3.3.11",
+     "reactotron-react-native": "^5.0.5",
+diff --git a/IgniteDiffApp/yarn.lock b/IgniteDiffApp/yarn.lock
+index e4267ae9..fd92fda5 100644
+--- a/IgniteDiffApp/yarn.lock
++++ b/IgniteDiffApp/yarn.lock
+@@ -8226,13 +8226,6 @@ reactotron-core-client@2.9.4:
+   dependencies:
+     reactotron-core-contract "0.2.4"
+ 
+-reactotron-core-client@^2.8.13:
+-  version "2.9.6"
+-  resolved "https://registry.yarnpkg.com/reactotron-core-client/-/reactotron-core-client-2.9.6.tgz#3130f06d85dec2a8d50404ffa4520f8c6cc04002"
+-  integrity sha512-7krCkKn/uy8VF1UhSmgrhYsPJ2VNJ+btYSG0S8NBlhW/EtsRHUtLQy+tbBVg2cHaTHbejY4qrvr0yP5L7L2Osw==
+-  dependencies:
+-    reactotron-core-contract "0.2.4"
+-
+ reactotron-core-contract@0.2.4:
+   version "0.2.4"
+   resolved "https://registry.yarnpkg.com/reactotron-core-contract/-/reactotron-core-contract-0.2.4.tgz#c7038ce6bac5b8674b462895d7fe5e30661b24e8"
