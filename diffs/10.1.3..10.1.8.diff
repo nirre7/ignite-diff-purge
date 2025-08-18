@@ -1,0 +1,371 @@
+diff --git a/IgniteDiffApp/App.tsx b/IgniteDiffApp/App.tsx
+deleted file mode 100644
+index e6ad5a79..00000000
+--- a/IgniteDiffApp/App.tsx
++++ /dev/null
+@@ -1,15 +0,0 @@
+-import "@expo/metro-runtime"
+-import { registerRootComponent } from "expo"
+-import * as SplashScreen from "expo-splash-screen"
+-import App from "@/app"
+-
+-SplashScreen.preventAutoHideAsync()
+-
+-function IgniteApp() {
+-  return <App hideSplashScreen={SplashScreen.hideAsync} />
+-}
+-
+-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
+-// It also ensures that whether you load the app in Expo Go or in a native build,
+-// the environment is set up appropriately
+-registerRootComponent(IgniteApp)
+diff --git a/IgniteDiffApp/README.md b/IgniteDiffApp/README.md
+index ddd8e779..0cd79609 100644
+--- a/IgniteDiffApp/README.md
++++ b/IgniteDiffApp/README.md
+@@ -10,16 +10,16 @@ This is the boilerplate that [Infinite Red](https://infinite.red) uses as a way
+ ## Getting Started
+ 
+ ```bash
+-yarn
+-yarn start
++bun install
++bun run start
+ ```
+ 
+ To make things work on your local simulator, or on your phone, you need first to [run `eas build`](https://github.com/infinitered/ignite/blob/master/docs/expo/EAS.md). We have many shortcuts on `package.json` to make it easier:
+ 
+ ```bash
+-yarn build:ios:sim # build for ios simulator
+-yarn build:ios:dev # build for ios device
+-yarn build:ios:prod # build for ios device
++bun run build:ios:sim # build for ios simulator
++bun run build:ios:dev # build for ios device
++bun run build:ios:prod # build for ios device
+ ```
+ 
+ ### `./assets` directory
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 31ca5c52..cee12089 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -23,7 +23,8 @@
+       "adaptiveIcon": {
+         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
+-      }
++      },
++      "allowBackup": false
+     },
+     "ios": {
+       "icon": "./assets/images/app-icon-ios.png",
+@@ -52,6 +53,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.3"
++    "version": "10.1.8"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index e3ac1718..21a3635c 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -23,6 +23,7 @@ import { useFonts } from "expo-font"
+ import { useEffect, useState } from "react"
+ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
+ import * as Linking from "expo-linking"
++import * as SplashScreen from "expo-splash-screen"
+ import { useInitialRootStore } from "./models"
+ import { AppNavigator, useNavigationPersistence } from "./navigators"
+ import { ErrorBoundary } from "./screens/ErrorScreen/ErrorBoundary"
+@@ -55,17 +56,12 @@ const config = {
+   },
+ }
+ 
+-interface AppProps {
+-  hideSplashScreen: () => Promise<void>
+-}
+-
+ /**
+  * This is the root component of our app.
+  * @param {AppProps} props - The props for the `App` component.
+  * @returns {JSX.Element} The rendered `App` component.
+  */
+-function App(props: AppProps) {
+-  const { hideSplashScreen } = props
++export function App() {
+   const {
+     initialNavigationState,
+     onNavigationStateChange,
+@@ -86,9 +82,7 @@ function App(props: AppProps) {
+ 
+     // If your initialization scripts run very fast, it's good to show the splash screen for just a bit longer to prevent flicker.
+     // Slightly delaying splash screen hiding for better UX; can be customized or removed as needed,
+-    // Note: (vanilla Android) The splash-screen will not appear if you launch your app via the terminal or Android Studio. Kill the app and launch it normally by tapping on the launcher icon. https://stackoverflow.com/a/69831106
+-    // Note: (vanilla iOS) You might notice the splash-screen logo change size. This happens in debug/development mode. Try building the app for release.
+-    setTimeout(hideSplashScreen, 500)
++    setTimeout(SplashScreen.hideAsync, 500)
+   })
+ 
+   // Before we show the app, we have to wait for our state to be ready.
+@@ -126,5 +120,3 @@ function App(props: AppProps) {
+     </SafeAreaProvider>
+   )
+ }
+-
+-export default App
+diff --git a/IgniteDiffApp/app/components/EmptyState.tsx b/IgniteDiffApp/app/components/EmptyState.tsx
+index f6a187a0..df33d508 100644
+--- a/IgniteDiffApp/app/components/EmptyState.tsx
++++ b/IgniteDiffApp/app/components/EmptyState.tsx
+@@ -1,9 +1,10 @@
+ import { Image, ImageProps, ImageStyle, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+-import { translate } from "../i18n"
++
+ import { Button, ButtonProps } from "./Button"
+ import { Text, TextProps } from "./Text"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import type { ThemedStyle } from "@/theme"
++import { translate } from "@/i18n/translate"
+ 
+ const sadFace = require("../../assets/images/sad-face.png")
+ 
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index b272aa23..a81ede72 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -7,7 +7,7 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import { isRTL, translate } from "../i18n"
++import { isRTL, translate } from "@/i18n"
+ import { $styles } from "../theme"
+ import { ExtendedEdge, useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ import { Icon, IconTypes } from "./Icon"
+diff --git a/IgniteDiffApp/app/components/Text.test.tsx b/IgniteDiffApp/app/components/Text.test.tsx
+index c8be8f58..b89d098e 100644
+--- a/IgniteDiffApp/app/components/Text.test.tsx
++++ b/IgniteDiffApp/app/components/Text.test.tsx
+@@ -1,4 +1,4 @@
+-import { render } from "@testing-library/react-native"
++import { render, screen } from "@testing-library/react-native"
+ import { Text } from "./Text"
+ 
+ /* This is an example component test using react-native-testing-library. For more
+@@ -8,7 +8,7 @@ const testText = "Test string"
+ 
+ describe("Text", () => {
+   it("should render the component", () => {
+-    const { getByText } = render(<Text text={testText} />)
+-    expect(getByText(testText)).toBeDefined()
++    render(<Text text={testText} />)
++    expect(screen.getByText(testText)).toBeDefined()
+   })
+ })
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index 86e57505..dbe0b41e 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -1,6 +1,6 @@
+ import { TOptions } from "i18next"
+ import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from "react-native"
+-import { isRTL, translate, TxKeyPath } from "../i18n"
++import { isRTL, translate, TxKeyPath } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import { typography } from "@/theme/typography"
+diff --git a/IgniteDiffApp/app/components/TextField.tsx b/IgniteDiffApp/app/components/TextField.tsx
+index bdb361fc..6e26f69b 100644
+--- a/IgniteDiffApp/app/components/TextField.tsx
++++ b/IgniteDiffApp/app/components/TextField.tsx
+@@ -9,7 +9,7 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import { isRTL, translate } from "../i18n"
++import { isRTL, translate } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+ import { $styles } from "../theme"
+ import { Text, TextProps } from "./Text"
+diff --git a/IgniteDiffApp/app/models/Episode.ts b/IgniteDiffApp/app/models/Episode.ts
+index 3f4b7ad8..285a33af 100644
+--- a/IgniteDiffApp/app/models/Episode.ts
++++ b/IgniteDiffApp/app/models/Episode.ts
+@@ -1,7 +1,7 @@
+ import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+ import { withSetPropAction } from "./helpers/withSetPropAction"
+ import { formatDate } from "../utils/formatDate"
+-import { translate } from "../i18n"
++import { translate } from "@/i18n"
+ 
+ interface Enclosure {
+   link: string
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 7c6afc5e..f4783337 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -3,7 +3,7 @@ import { CompositeScreenProps } from "@react-navigation/native"
+ import { TextStyle, ViewStyle } from "react-native"
+ import { useSafeAreaInsets } from "react-native-safe-area-context"
+ import { Icon } from "../components"
+-import { translate } from "../i18n"
++import { translate } from "@/i18n"
+ import { DemoCommunityScreen, DemoShowroomScreen, DemoDebugScreen } from "../screens"
+ import { DemoPodcastListScreen } from "../screens/DemoPodcastListScreen"
+ import type { ThemedStyle } from "@/theme"
+diff --git a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+index e2a02187..d957038c 100644
+--- a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+@@ -4,7 +4,7 @@ import { ListItem, Screen, Text } from "../components"
+ import { DemoTabScreenProps } from "../navigators/DemoNavigator"
+ import { $styles } from "../theme"
+ import { openLinkInBrowser } from "../utils/openLinkInBrowser"
+-import { isRTL } from "../i18n"
++import { isRTL } from "@/i18n"
+ import type { ThemedStyle } from "@/theme"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+index c217c8d9..50af4762 100644
+--- a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+@@ -13,7 +13,7 @@ import { Button, ListItem, Screen, Text } from "../components"
+ import { DemoTabScreenProps } from "../navigators/DemoNavigator"
+ import type { ThemedStyle } from "@/theme"
+ import { $styles } from "../theme"
+-import { isRTL } from "../i18n"
++import { isRTL } from "@/i18n"
+ import { useStores } from "../models"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 3e981ba9..d28a17ba 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -31,7 +31,7 @@ import {
+   Switch,
+   Text,
+ } from "@/components"
+-import { isRTL, translate } from "../i18n"
++import { isRTL, translate } from "@/i18n"
+ import { useStores } from "../models"
+ import { Episode } from "../models/Episode"
+ import { DemoTabScreenProps } from "../navigators/DemoNavigator"
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index 9867e312..dc6e7310 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -4,7 +4,7 @@ import { Image, ImageStyle, Platform, SectionList, TextStyle, View, ViewStyle }
+ import { Drawer } from "react-native-drawer-layout"
+ import { type ContentStyle } from "@shopify/flash-list"
+ import { ListItem, ListView, ListViewRef, Screen, Text } from "../../components"
+-import { TxKeyPath, isRTL, translate } from "../../i18n"
++import { TxKeyPath, isRTL, translate } from "@/i18n"
+ import { DemoTabParamList, DemoTabScreenProps } from "../../navigators/DemoNavigator"
+ import type { Theme, ThemedStyle } from "@/theme"
+ import { $styles } from "@/theme"
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 72a4c041..e0ab41c3 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -1,7 +1,7 @@
+ import { Pressable, PressableProps, ViewStyle, Platform } from "react-native"
+ import Animated, { interpolate, interpolateColor, useAnimatedStyle } from "react-native-reanimated"
+ import { useDrawerProgress } from "react-native-drawer-layout"
+-import { isRTL } from "../../i18n"
++import { isRTL } from "@/i18n"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ 
+ interface DrawerIconButtonProps extends PressableProps {}
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index c72a5f81..f3619269 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
+ import { FC } from "react"
+ import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+ import { Button, Text, Screen } from "@/components"
+-import { isRTL } from "../i18n"
++import { isRTL } from "@/i18n"
+ import { useStores } from "../models"
+ import { AppStackScreenProps } from "../navigators"
+ import { $styles, type ThemedStyle } from "@/theme"
+diff --git a/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs b/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
+index 006ced05..070081ab 100644
+--- a/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
++++ b/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
+@@ -9,3 +9,4 @@ test("can be created", () => {
+   expect(instance).toBeTruthy()
+ })
+ 
++
+diff --git a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+index 8a0b80a7..e7228184 100644
+--- a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
++++ b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+@@ -31,3 +31,4 @@ export interface <%= props.pascalCaseName %>SnapshotOut extends SnapshotOut<type
+ export interface <%= props.pascalCaseName %>SnapshotIn extends SnapshotIn<typeof <%= props.pascalCaseName %>Model> {}
+ export const create<%= props.pascalCaseName %>DefaultModel = () => types.optional(<%= props.pascalCaseName %>Model, {})
+ 
++
+diff --git a/IgniteDiffApp/index.tsx b/IgniteDiffApp/index.tsx
+new file mode 100644
+index 00000000..f7a15429
+--- /dev/null
++++ b/IgniteDiffApp/index.tsx
+@@ -0,0 +1,9 @@
++import "@expo/metro-runtime" // this is for fast refresh on web w/o expo-router
++import { registerRootComponent } from "expo"
++
++import { App } from "@/app"
++
++// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
++// It also ensures that whether you load the app in Expo Go or in a native build,
++// the environment is set up appropriately
++registerRootComponent(App)
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index fa13fa55..9046642f 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -2,7 +2,7 @@
+   "name": "ignite-diff-app",
+   "version": "0.0.1",
+   "private": true,
+-  "main": "App.tsx",
++  "main": "index.tsx",
+   "scripts": {
+     "compile": "tsc --noEmit -p . --pretty",
+     "lint": "eslint . --fix",
+@@ -19,12 +19,12 @@
+     "build:android:sim": "eas build --profile development --platform android --local",
+     "build:android:dev": "eas build --profile development:device --platform android --local",
+     "build:android:prod": "eas build --profile production --platform android --local",
+-    "start": "npx expo start",
+-    "android": "npx expo run:android",
+-    "ios": "npx expo run:ios",
+-    "web": "npx expo start --web",
++    "start": "expo start --dev-client",
++    "android": "expo run:android",
++    "ios": "expo run:ios",
++    "web": "expo start --web",
+     "bundle:web": "npx expo export --platform web",
+-    "serve:web": "npx server dist",
++    "serve:web": "npx serve dist",
+     "prebuild:clean": "npx expo prebuild --clean"
+   },
+   "dependencies": {
+diff --git a/IgniteDiffApp/test/mockFile.ts b/IgniteDiffApp/test/mockFile.ts
+index 5bf851af..41f073f9 100644
+--- a/IgniteDiffApp/test/mockFile.ts
++++ b/IgniteDiffApp/test/mockFile.ts
+@@ -2,5 +2,5 @@ export default {
+   height: 100,
+   width: 100,
+   scale: 2.0,
+-  uri: "https://placekitten.com/200/200",
++  uri: "https://placecats.com/200/200",
+ }

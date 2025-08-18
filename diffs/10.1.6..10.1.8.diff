@@ -1,0 +1,61 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index acb98cae..cee12089 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -23,7 +23,8 @@
+       "adaptiveIcon": {
+         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
+-      }
++      },
++      "allowBackup": false
+     },
+     "ios": {
+       "icon": "./assets/images/app-icon-ios.png",
+@@ -52,6 +53,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.6"
++    "version": "10.1.8"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Text.test.tsx b/IgniteDiffApp/app/components/Text.test.tsx
+index c8be8f58..b89d098e 100644
+--- a/IgniteDiffApp/app/components/Text.test.tsx
++++ b/IgniteDiffApp/app/components/Text.test.tsx
+@@ -1,4 +1,4 @@
+-import { render } from "@testing-library/react-native"
++import { render, screen } from "@testing-library/react-native"
+ import { Text } from "./Text"
+ 
+ /* This is an example component test using react-native-testing-library. For more
+@@ -8,7 +8,7 @@ const testText = "Test string"
+ 
+ describe("Text", () => {
+   it("should render the component", () => {
+-    const { getByText } = render(<Text text={testText} />)
+-    expect(getByText(testText)).toBeDefined()
++    render(<Text text={testText} />)
++    expect(screen.getByText(testText)).toBeDefined()
+   })
+ })
+diff --git a/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs b/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
+index 006ced05..070081ab 100644
+--- a/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
++++ b/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
+@@ -9,3 +9,4 @@ test("can be created", () => {
+   expect(instance).toBeTruthy()
+ })
+ 
++
+diff --git a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+index 8a0b80a7..e7228184 100644
+--- a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
++++ b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+@@ -31,3 +31,4 @@ export interface <%= props.pascalCaseName %>SnapshotOut extends SnapshotOut<type
+ export interface <%= props.pascalCaseName %>SnapshotIn extends SnapshotIn<typeof <%= props.pascalCaseName %>Model> {}
+ export const create<%= props.pascalCaseName %>DefaultModel = () => types.optional(<%= props.pascalCaseName %>Model, {})
+ 
++

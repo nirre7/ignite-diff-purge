@@ -1,0 +1,23 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index cee12089..227e1f6a 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -23,8 +23,7 @@
+       "adaptiveIcon": {
+         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
+-      },
+-      "allowBackup": false
++      }
+     },
+     "ios": {
+       "icon": "./assets/images/app-icon-ios.png",
+@@ -53,6 +52,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.8"
++    "version": "10.1.7"
+   }
+ }
+\ No newline at end of file
