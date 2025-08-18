@@ -53,7 +53,6 @@ function generateNewReleaseBranch () {
         --git \
         --packager=bun \
         --install-deps \
-        --new-arch=false \
         --target-path=$SCRIPT_DIR/wt-app/$AppName \
         --remove-demo=false \
         --workflow=cng \
