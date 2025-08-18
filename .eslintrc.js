@@ -14,6 +14,7 @@ module.exports = {
         'no-trailing-spaces': 'error',
         'quotes': ['error', 'single'],
         'semi': 'off',
+        'no-empty': 'off',
         'array-bracket-spacing': ['error', 'never'],
     },
 };
