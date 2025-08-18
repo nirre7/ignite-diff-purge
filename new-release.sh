@@ -30,7 +30,7 @@ function guardExisting () {
 
 function prepare () {
     git pull
-    yarn install
+    bun install
 }
 
 function generateNewReleaseBranch () {
@@ -52,13 +52,13 @@ function generateNewReleaseBranch () {
         --debug \
         --bundle=com.ignitediffapp \
         --git \
-        --packager=yarn \
+        --packager=bun \
         --install-deps \
+        --new-arch=false \
         --target-path=$SCRIPT_DIR/wt-app/$AppName \
         --remove-demo=false \
-        --workflow=CNG \
-        --state=mst \
-        --no-timeout=false
+        --workflow=cng \
+        --state=mst
 
     # remove the .git folder in created ignite app
     cd "$AppName"
