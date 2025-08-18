@@ -49,7 +49,6 @@ function generateNewReleaseBranch () {
 
     # generate app
     npx --yes ignite-cli@"$newRelease" new "$AppName" \
-        --debug \
         --bundle=com.ignitediffapp \
         --git \
         --packager=bun \
