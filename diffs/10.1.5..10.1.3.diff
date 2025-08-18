@@ -1,0 +1,165 @@
+diff --git a/IgniteDiffApp/App.tsx b/IgniteDiffApp/App.tsx
+new file mode 100644
+index 00000000..e6ad5a79
+--- /dev/null
++++ b/IgniteDiffApp/App.tsx
+@@ -0,0 +1,15 @@
++import "@expo/metro-runtime"
++import { registerRootComponent } from "expo"
++import * as SplashScreen from "expo-splash-screen"
++import App from "@/app"
++
++SplashScreen.preventAutoHideAsync()
++
++function IgniteApp() {
++  return <App hideSplashScreen={SplashScreen.hideAsync} />
++}
++
++// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
++// It also ensures that whether you load the app in Expo Go or in a native build,
++// the environment is set up appropriately
++registerRootComponent(IgniteApp)
+diff --git a/IgniteDiffApp/README.md b/IgniteDiffApp/README.md
+index 0cd79609..ddd8e779 100644
+--- a/IgniteDiffApp/README.md
++++ b/IgniteDiffApp/README.md
+@@ -10,16 +10,16 @@ This is the boilerplate that [Infinite Red](https://infinite.red) uses as a way
+ ## Getting Started
+ 
+ ```bash
+-bun install
+-bun run start
++yarn
++yarn start
+ ```
+ 
+ To make things work on your local simulator, or on your phone, you need first to [run `eas build`](https://github.com/infinitered/ignite/blob/master/docs/expo/EAS.md). We have many shortcuts on `package.json` to make it easier:
+ 
+ ```bash
+-bun run build:ios:sim # build for ios simulator
+-bun run build:ios:dev # build for ios device
+-bun run build:ios:prod # build for ios device
++yarn build:ios:sim # build for ios simulator
++yarn build:ios:dev # build for ios device
++yarn build:ios:prod # build for ios device
+ ```
+ 
+ ### `./assets` directory
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 78992884..31ca5c52 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -52,6 +52,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.5"
++    "version": "10.1.3"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index 21a3635c..e3ac1718 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -23,7 +23,6 @@ import { useFonts } from "expo-font"
+ import { useEffect, useState } from "react"
+ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
+ import * as Linking from "expo-linking"
+-import * as SplashScreen from "expo-splash-screen"
+ import { useInitialRootStore } from "./models"
+ import { AppNavigator, useNavigationPersistence } from "./navigators"
+ import { ErrorBoundary } from "./screens/ErrorScreen/ErrorBoundary"
+@@ -56,12 +55,17 @@ const config = {
+   },
+ }
+ 
++interface AppProps {
++  hideSplashScreen: () => Promise<void>
++}
++
+ /**
+  * This is the root component of our app.
+  * @param {AppProps} props - The props for the `App` component.
+  * @returns {JSX.Element} The rendered `App` component.
+  */
+-export function App() {
++function App(props: AppProps) {
++  const { hideSplashScreen } = props
+   const {
+     initialNavigationState,
+     onNavigationStateChange,
+@@ -82,7 +86,9 @@ export function App() {
+ 
+     // If your initialization scripts run very fast, it's good to show the splash screen for just a bit longer to prevent flicker.
+     // Slightly delaying splash screen hiding for better UX; can be customized or removed as needed,
+-    setTimeout(SplashScreen.hideAsync, 500)
++    // Note: (vanilla Android) The splash-screen will not appear if you launch your app via the terminal or Android Studio. Kill the app and launch it normally by tapping on the launcher icon. https://stackoverflow.com/a/69831106
++    // Note: (vanilla iOS) You might notice the splash-screen logo change size. This happens in debug/development mode. Try building the app for release.
++    setTimeout(hideSplashScreen, 500)
+   })
+ 
+   // Before we show the app, we have to wait for our state to be ready.
+@@ -120,3 +126,5 @@ export function App() {
+     </SafeAreaProvider>
+   )
+ }
++
++export default App
+diff --git a/IgniteDiffApp/index.tsx b/IgniteDiffApp/index.tsx
+deleted file mode 100644
+index f7a15429..00000000
+--- a/IgniteDiffApp/index.tsx
++++ /dev/null
+@@ -1,9 +0,0 @@
+-import "@expo/metro-runtime" // this is for fast refresh on web w/o expo-router
+-import { registerRootComponent } from "expo"
+-
+-import { App } from "@/app"
+-
+-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
+-// It also ensures that whether you load the app in Expo Go or in a native build,
+-// the environment is set up appropriately
+-registerRootComponent(App)
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 9046642f..fa13fa55 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -2,7 +2,7 @@
+   "name": "ignite-diff-app",
+   "version": "0.0.1",
+   "private": true,
+-  "main": "index.tsx",
++  "main": "App.tsx",
+   "scripts": {
+     "compile": "tsc --noEmit -p . --pretty",
+     "lint": "eslint . --fix",
+@@ -19,12 +19,12 @@
+     "build:android:sim": "eas build --profile development --platform android --local",
+     "build:android:dev": "eas build --profile development:device --platform android --local",
+     "build:android:prod": "eas build --profile production --platform android --local",
+-    "start": "expo start --dev-client",
+-    "android": "expo run:android",
+-    "ios": "expo run:ios",
+-    "web": "expo start --web",
++    "start": "npx expo start",
++    "android": "npx expo run:android",
++    "ios": "npx expo run:ios",
++    "web": "npx expo start --web",
+     "bundle:web": "npx expo export --platform web",
+-    "serve:web": "npx serve dist",
++    "serve:web": "npx server dist",
+     "prebuild:clean": "npx expo prebuild --clean"
+   },
+   "dependencies": {
+diff --git a/IgniteDiffApp/test/mockFile.ts b/IgniteDiffApp/test/mockFile.ts
+index 41f073f9..5bf851af 100644
+--- a/IgniteDiffApp/test/mockFile.ts
++++ b/IgniteDiffApp/test/mockFile.ts
+@@ -2,5 +2,5 @@ export default {
+   height: 100,
+   width: 100,
+   scale: 2.0,
+-  uri: "https://placecats.com/200/200",
++  uri: "https://placekitten.com/200/200",
+ }
