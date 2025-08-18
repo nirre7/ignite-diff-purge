@@ -1,0 +1,322 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index cee12089..890cda7c 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -53,6 +53,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.8"
++    "version": "10.2.0"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Text.test.tsx b/IgniteDiffApp/app/components/Text.test.tsx
+index b89d098e..0e3219d1 100644
+--- a/IgniteDiffApp/app/components/Text.test.tsx
++++ b/IgniteDiffApp/app/components/Text.test.tsx
+@@ -1,5 +1,6 @@
+-import { render, screen } from "@testing-library/react-native"
++import { render } from "@testing-library/react-native"
+ import { Text } from "./Text"
++import { NavigationContainer } from "@react-navigation/native"
+ 
+ /* This is an example component test using react-native-testing-library. For more
+  * information on how to write your own, see the documentation here:
+@@ -8,7 +9,11 @@ const testText = "Test string"
+ 
+ describe("Text", () => {
+   it("should render the component", () => {
+-    render(<Text text={testText} />)
+-    expect(screen.getByText(testText)).toBeDefined()
++    const { getByText } = render(
++      <NavigationContainer>
++        <Text text={testText} />
++      </NavigationContainer>,
++    )
++    expect(getByText(testText)).toBeDefined()
+   })
+ })
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index dbe0b41e..6349649b 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -4,7 +4,7 @@ import { isRTL, translate, TxKeyPath } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import { typography } from "@/theme/typography"
+-import { ReactNode } from "react"
++import { ReactNode, forwardRef, ForwardedRef } from "react"
+ 
+ type Sizes = keyof typeof $sizeStyles
+ type Weights = keyof typeof typography.primary
+@@ -53,7 +53,7 @@ export interface TextProps extends RNTextProps {
+  * @param {TextProps} props - The props for the `Text` component.
+  * @returns {JSX.Element} The rendered `Text` component.
+  */
+-export function Text(props: TextProps) {
++export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
+   const { weight, size, tx, txOptions, text, children, style: $styleOverride, ...rest } = props
+   const { themed } = useAppTheme()
+ 
+@@ -70,11 +70,11 @@ export function Text(props: TextProps) {
+   ]
+ 
+   return (
+-    <RNText {...rest} style={$styles}>
++    <RNText {...rest} style={$styles} ref={ref}>
+       {content}
+     </RNText>
+   )
+-}
++})
+ 
+ const $sizeStyles = {
+   xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,
+diff --git a/IgniteDiffApp/app/navigators/AppNavigator.tsx b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+index c9977d14..ce8dbc25 100644
+--- a/IgniteDiffApp/app/navigators/AppNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+@@ -88,7 +88,8 @@ const AppStack = observer(function AppStack() {
+   )
+ })
+ 
+-export interface NavigationProps extends Partial<ComponentProps<typeof NavigationContainer>> {}
++export interface NavigationProps
++  extends Partial<ComponentProps<typeof NavigationContainer<AppStackParamList>>> {}
+ 
+ export const AppNavigator = observer(function AppNavigator(props: NavigationProps) {
+   const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index dc6e7310..fc761b1f 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -41,14 +41,22 @@ const WebListItem: FC<DemoListItem> = ({ item, sectionIndex }) => {
+   const { themed } = useAppTheme()
+   return (
+     <View>
+-      <Link to={`/showroom/${sectionSlug}`} style={themed($menuContainer)}>
++      <Link
++        screen="DemoShowroom"
++        params={{ queryIndex: sectionSlug }}
++        style={themed($menuContainer)}
++      >
+         <Text preset="bold">{item.name}</Text>
+       </Link>
+       {item.useCases.map((u) => {
+         const itemSlug = slugify(u)
+ 
+         return (
+-          <Link key={`section${sectionIndex}-${u}`} to={`/showroom/${sectionSlug}/${itemSlug}`}>
++          <Link
++            key={`section${sectionIndex}-${u}`}
++            screen="DemoShowroom"
++            params={{ queryIndex: sectionSlug, itemIndex: itemSlug }}
++          >
+             <Text>{u}</Text>
+           </Link>
+         )
+@@ -71,7 +79,7 @@ const NativeListItem: FC<DemoListItem> = ({ item, sectionIndex, handleScroll })
+       {item.useCases.map((u, index) => (
+         <ListItem
+           key={`section${sectionIndex}-${u}`}
+-          onPress={() => handleScroll?.(sectionIndex, index + 1)}
++          onPress={() => handleScroll?.(sectionIndex, index)}
+           text={u}
+           rightIcon={isRTL ? "caretLeft" : "caretRight"}
+         />
+@@ -103,11 +111,16 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+     }, [open])
+ 
+     const handleScroll = useCallback((sectionIndex: number, itemIndex = 0) => {
+-      listRef.current?.scrollToLocation({
+-        animated: true,
+-        itemIndex,
+-        sectionIndex,
+-      })
++      try {
++        listRef.current?.scrollToLocation({
++          animated: true,
++          itemIndex,
++          sectionIndex,
++          viewPosition: 0.25,
++        })
++      } catch (e) {
++        console.error(e)
++      }
+     }, [])
+ 
+     // handle Web links
+@@ -122,7 +135,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+           try {
+             findItemIndex = demoValues[findSectionIndex]
+               .data({ themed, theme })
+-              .findIndex((u) => slugify(u.props.name) === params.itemIndex)
++              .findIndex((u) => slugify(translate(u.props.name)) === params.itemIndex)
+           } catch (err) {
+             console.error(err)
+           }
+diff --git a/IgniteDiffApp/bun.lock b/IgniteDiffApp/bun.lock
+index bae6f988..4ca3178d 100644
+--- a/IgniteDiffApp/bun.lock
++++ b/IgniteDiffApp/bun.lock
+@@ -6,15 +6,16 @@
+       "dependencies": {
+         "@expo-google-fonts/space-grotesk": "^0.2.2",
+         "@expo/metro-runtime": "~4.0.0",
+-        "@react-navigation/bottom-tabs": "^6.3.2",
+-        "@react-navigation/native": "^6.0.2",
+-        "@react-navigation/native-stack": "^6.0.2",
++        "@react-navigation/bottom-tabs": "^7.2.0",
++        "@react-navigation/native": "^7.0.14",
++        "@react-navigation/native-stack": "^7.2.0",
+         "@shopify/flash-list": "1.7.3",
+         "apisauce": "3.0.1",
+         "date-fns": "^4.1.0",
+         "expo": "~52.0.7",
+         "expo-application": "~6.0.1",
+         "expo-build-properties": "~0.13.1",
++        "expo-dev-client": "~5.0.1",
+         "expo-font": "~13.0.1",
+         "expo-linking": "~7.0.2",
+         "expo-localization": "~16.0.0",
+@@ -33,7 +34,7 @@
+         "react-native-drawer-layout": "^4.0.1",
+         "react-native-gesture-handler": "~2.20.2",
+         "react-native-keyboard-controller": "^1.12.7",
+-        "react-native-mmkv": "3.1.0",
++        "react-native-mmkv": "^2.12.2",
+         "react-native-reanimated": "~3.16.1",
+         "react-native-safe-area-context": "4.12.0",
+         "react-native-screens": "~4.4.0",
+@@ -515,17 +516,17 @@
+ 
+     "@react-native/virtualized-lists": ["@react-native/virtualized-lists@0.76.9", "", { "dependencies": { "invariant": "^2.2.4", "nullthrows": "^1.1.1" }, "peerDependencies": { "@types/react": "^18.2.6", "react": "*", "react-native": "*" }, "optionalPeers": ["@types/react"] }, "sha512-2neUfZKuqMK2LzfS8NyOWOyWUJOWgDym5fUph6fN9qF+LNPjAvnc4Zr9+o+59qjNu/yXwQgVMWNU4+8WJuPVWw=="],
+ 
+-    "@react-navigation/bottom-tabs": ["@react-navigation/bottom-tabs@6.6.1", "", { "dependencies": { "@react-navigation/elements": "^1.3.31", "color": "^4.2.3", "warn-once": "^0.1.0" }, "peerDependencies": { "@react-navigation/native": "^6.0.0", "react": "*", "react-native": "*", "react-native-safe-area-context": ">= 3.0.0", "react-native-screens": ">= 3.0.0" } }, "sha512-9oD4cypEBjPuaMiu9tevWGiQ4w/d6l3HNhcJ1IjXZ24xvYDSs0mqjUcdt8SWUolCvRrYc/DmNBLlT83bk0bHTw=="],
++    "@react-navigation/bottom-tabs": ["@react-navigation/bottom-tabs@7.4.6", "", { "dependencies": { "@react-navigation/elements": "^2.6.3", "color": "^4.2.3" }, "peerDependencies": { "@react-navigation/native": "^7.1.17", "react": ">= 18.2.0", "react-native": "*", "react-native-safe-area-context": ">= 4.0.0", "react-native-screens": ">= 4.0.0" } }, "sha512-f4khxwcL70O5aKfZFbxyBo5RnzPFnBNSXmrrT7q9CRmvN4mHov9KFKGQ3H4xD5sLonsTBtyjvyvPfyEC4G7f+g=="],
+ 
+-    "@react-navigation/core": ["@react-navigation/core@6.4.17", "", { "dependencies": { "@react-navigation/routers": "^6.1.9", "escape-string-regexp": "^4.0.0", "nanoid": "^3.1.23", "query-string": "^7.1.3", "react-is": "^16.13.0", "use-latest-callback": "^0.2.1" }, "peerDependencies": { "react": "*" } }, "sha512-Nd76EpomzChWAosGqWOYE3ItayhDzIEzzZsT7PfGcRFDgW5miHV2t4MZcq9YIK4tzxZjVVpYbIynOOQQd1e0Cg=="],
++    "@react-navigation/core": ["@react-navigation/core@7.12.4", "", { "dependencies": { "@react-navigation/routers": "^7.5.1", "escape-string-regexp": "^4.0.0", "nanoid": "^3.3.11", "query-string": "^7.1.3", "react-is": "^19.1.0", "use-latest-callback": "^0.2.4", "use-sync-external-store": "^1.5.0" }, "peerDependencies": { "react": ">= 18.2.0" } }, "sha512-xLFho76FA7v500XID5z/8YfGTvjQPw7/fXsq4BIrVSqetNe/o/v+KAocEw4ots6kyv3XvSTyiWKh2g3pN6xZ9Q=="],
+ 
+-    "@react-navigation/elements": ["@react-navigation/elements@1.3.31", "", { "peerDependencies": { "@react-navigation/native": "^6.0.0", "react": "*", "react-native": "*", "react-native-safe-area-context": ">= 3.0.0" } }, "sha512-bUzP4Awlljx5RKEExw8WYtif8EuQni2glDaieYROKTnaxsu9kEIA515sXQgUDZU4Ob12VoL7+z70uO3qrlfXcQ=="],
++    "@react-navigation/elements": ["@react-navigation/elements@2.6.3", "", { "dependencies": { "color": "^4.2.3", "use-latest-callback": "^0.2.4", "use-sync-external-store": "^1.5.0" }, "peerDependencies": { "@react-native-masked-view/masked-view": ">= 0.2.0", "@react-navigation/native": "^7.1.17", "react": ">= 18.2.0", "react-native": "*", "react-native-safe-area-context": ">= 4.0.0" }, "optionalPeers": ["@react-native-masked-view/masked-view"] }, "sha512-hcPXssZg5bFD5oKX7FP0D9ZXinRgPUHkUJbTegpenSEUJcPooH1qzWJkEP22GrtO+OPDLYrCVZxEX8FcMrn4pA=="],
+ 
+-    "@react-navigation/native": ["@react-navigation/native@6.1.18", "", { "dependencies": { "@react-navigation/core": "^6.4.17", "escape-string-regexp": "^4.0.0", "fast-deep-equal": "^3.1.3", "nanoid": "^3.1.23" }, "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-mIT9MiL/vMm4eirLcmw2h6h/Nm5FICtnYSdohq4vTLA2FF/6PNhByM7s8ffqoVfE5L0uAa6Xda1B7oddolUiGg=="],
++    "@react-navigation/native": ["@react-navigation/native@7.1.17", "", { "dependencies": { "@react-navigation/core": "^7.12.4", "escape-string-regexp": "^4.0.0", "fast-deep-equal": "^3.1.3", "nanoid": "^3.3.11", "use-latest-callback": "^0.2.4" }, "peerDependencies": { "react": ">= 18.2.0", "react-native": "*" } }, "sha512-uEcYWi1NV+2Qe1oELfp9b5hTYekqWATv2cuwcOAg5EvsIsUPtzFrKIasgUXLBRGb9P7yR5ifoJ+ug4u6jdqSTQ=="],
+ 
+-    "@react-navigation/native-stack": ["@react-navigation/native-stack@6.11.0", "", { "dependencies": { "@react-navigation/elements": "^1.3.31", "warn-once": "^0.1.0" }, "peerDependencies": { "@react-navigation/native": "^6.0.0", "react": "*", "react-native": "*", "react-native-safe-area-context": ">= 3.0.0", "react-native-screens": ">= 3.0.0" } }, "sha512-U5EcUB9Q2NQspCFwYGGNJm0h6wBCOv7T30QjndmvlawLkNt7S7KWbpWyxS9XBHSIKF57RgWjfxuJNTgTstpXxw=="],
++    "@react-navigation/native-stack": ["@react-navigation/native-stack@7.3.25", "", { "dependencies": { "@react-navigation/elements": "^2.6.3", "warn-once": "^0.1.1" }, "peerDependencies": { "@react-navigation/native": "^7.1.17", "react": ">= 18.2.0", "react-native": "*", "react-native-safe-area-context": ">= 4.0.0", "react-native-screens": ">= 4.0.0" } }, "sha512-jGcgUpif0dDGwuqag6rKTdS78MiAVAy8vmQppyaAgjS05VbCfDX+xjhc8dUxSClO5CoWlDoby1c8Hw4kBfL2UA=="],
+ 
+-    "@react-navigation/routers": ["@react-navigation/routers@6.1.9", "", { "dependencies": { "nanoid": "^3.1.23" } }, "sha512-lTM8gSFHSfkJvQkxacGM6VJtBt61ip2XO54aNfswD+KMw6eeZ4oehl7m0me3CR9hnDE4+60iAZR8sAhvCiI3NA=="],
++    "@react-navigation/routers": ["@react-navigation/routers@7.5.1", "", { "dependencies": { "nanoid": "^3.3.11" } }, "sha512-pxipMW/iEBSUrjxz2cDD7fNwkqR4xoi0E/PcfTQGCcdJwLoaxzab5kSadBLj1MTJyT0YRrOXL9umHpXtp+Dv4w=="],
+ 
+     "@rtsao/scc": ["@rtsao/scc@1.1.0", "", {}, "sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g=="],
+ 
+@@ -1125,16 +1126,28 @@
+ 
+     "expo-constants": ["expo-constants@17.0.8", "", { "dependencies": { "@expo/config": "~10.0.11", "@expo/env": "~0.4.2" }, "peerDependencies": { "expo": "*", "react-native": "*" } }, "sha512-XfWRyQAf1yUNgWZ1TnE8pFBMqGmFP5Gb+SFSgszxDdOoheB/NI5D4p7q86kI2fvGyfTrxAe+D+74nZkfsGvUlg=="],
+ 
++    "expo-dev-client": ["expo-dev-client@5.0.20", "", { "dependencies": { "expo-dev-launcher": "5.0.35", "expo-dev-menu": "6.0.25", "expo-dev-menu-interface": "1.9.3", "expo-manifests": "~0.15.8", "expo-updates-interface": "~1.0.0" }, "peerDependencies": { "expo": "*" } }, "sha512-bLNkHdU7V3I4UefgJbJnIDUBUL0LxIal/xYEx9BbgDd3B7wgQKY//+BpPIxBOKCQ22lkyiHY8y9tLhO903sAgg=="],
++
++    "expo-dev-launcher": ["expo-dev-launcher@5.0.35", "", { "dependencies": { "ajv": "8.11.0", "expo-dev-menu": "6.0.25", "expo-manifests": "~0.15.8", "resolve-from": "^5.0.0" }, "peerDependencies": { "expo": "*" } }, "sha512-hEQr0ZREnUMxZ6wtQgfK1lzYnbb0zar3HqYZhmANzXmE6UEPbQ4GByLzhpfz/d+xxdBVQZsrHdtiV28KPG2sog=="],
++
++    "expo-dev-menu": ["expo-dev-menu@6.0.25", "", { "dependencies": { "expo-dev-menu-interface": "1.9.3" }, "peerDependencies": { "expo": "*" } }, "sha512-K2m4z/I+CPWbMtHlDzU68lHaQs52De0v5gbsjAmA5ig8FrYh4MKZvPxSVANaiKENzgmtglu8qaFh7ua9Gt2TfA=="],
++
++    "expo-dev-menu-interface": ["expo-dev-menu-interface@1.9.3", "", { "peerDependencies": { "expo": "*" } }, "sha512-KY/dWTBE1l47i9V366JN5rC6YIdOc9hz8yAmZzkl5DrPia5l3M2WIjtnpHC9zUkNjiSiG2urYoOAq4H/uLdmyg=="],
++
+     "expo-file-system": ["expo-file-system@18.0.12", "", { "dependencies": { "web-streams-polyfill": "^3.3.2" }, "peerDependencies": { "expo": "*", "react-native": "*" } }, "sha512-HAkrd/mb8r+G3lJ9MzmGeuW2B+BxQR1joKfeCyY4deLl1zoZ48FrAWjgZjHK9aHUVhJ0ehzInu/NQtikKytaeg=="],
+ 
+     "expo-font": ["expo-font@13.0.4", "", { "dependencies": { "fontfaceobserver": "^2.1.0" }, "peerDependencies": { "expo": "*", "react": "*" } }, "sha512-eAP5hyBgC8gafFtprsz0HMaB795qZfgJWqTmU0NfbSin1wUuVySFMEPMOrTkTgmazU73v4Cb4x7p86jY1XXYUw=="],
+ 
++    "expo-json-utils": ["expo-json-utils@0.14.0", "", {}, "sha512-xjGfK9dL0B1wLnOqNkX0jM9p48Y0I5xEPzHude28LY67UmamUyAACkqhZGaPClyPNfdzczk7Ej6WaRMT3HfXvw=="],
++
+     "expo-keep-awake": ["expo-keep-awake@14.0.3", "", { "peerDependencies": { "expo": "*", "react": "*" } }, "sha512-6Jh94G6NvTZfuLnm2vwIpKe3GdOiVBuISl7FI8GqN0/9UOg9E0WXXp5cDcfAG8bn80RfgLJS8P7EPUGTZyOvhg=="],
+ 
+     "expo-linking": ["expo-linking@7.0.5", "", { "dependencies": { "expo-constants": "~17.0.5", "invariant": "^2.2.4" }, "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-3KptlJtcYDPWohk0MfJU75MJFh2ybavbtcSd84zEPfw9s1q3hjimw3sXnH03ZxP54kiEWldvKmmnGcVffBDB1g=="],
+ 
+     "expo-localization": ["expo-localization@16.0.1", "", { "dependencies": { "rtl-detect": "^1.0.2" }, "peerDependencies": { "expo": "*", "react": "*" } }, "sha512-kUrXiV/Pq9r7cG+TMt+Qa49IUQ9Y/czVwen4hmiboTclTopcWdIeCzYZv6JGtufoPpjEO9vVx1QJrXYl9V2u0Q=="],
+ 
++    "expo-manifests": ["expo-manifests@0.15.8", "", { "dependencies": { "@expo/config": "~10.0.11", "expo-json-utils": "~0.14.0" }, "peerDependencies": { "expo": "*" } }, "sha512-VuIyaMfRfLZeETNsRohqhy1l7iZ7I+HKMPfZXVL2Yn17TT0WkOhZoq1DzYwPbOHPgp1Uk6phNa86EyaHrD2DLw=="],
++
+     "expo-modules-autolinking": ["expo-modules-autolinking@2.0.8", "", { "dependencies": { "@expo/spawn-async": "^1.7.2", "chalk": "^4.1.0", "commander": "^7.2.0", "fast-glob": "^3.2.5", "find-up": "^5.0.0", "fs-extra": "^9.1.0", "require-from-string": "^2.0.2", "resolve-from": "^5.0.0" }, "bin": { "expo-modules-autolinking": "bin/expo-modules-autolinking.js" } }, "sha512-DezgnEYFQYic8hKGhkbztBA3QUmSftjaNDIKNAtS2iGJmzCcNIkatjN2slFDSWjSTNo8gOvPQyMKfyHWFvLpOQ=="],
+ 
+     "expo-modules-core": ["expo-modules-core@2.2.3", "", { "dependencies": { "invariant": "^2.2.4" } }, "sha512-01QqZzpP/wWlxnNly4G06MsOBUTbMDj02DQigZoXfDh80vd/rk3/uVXqnZgOdLSggTs6DnvOgAUy0H2q30XdUg=="],
+@@ -1145,6 +1158,8 @@
+ 
+     "expo-system-ui": ["expo-system-ui@4.0.9", "", { "dependencies": { "@react-native/normalize-colors": "0.76.8", "debug": "^4.3.2" }, "peerDependencies": { "expo": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native-web"] }, "sha512-hqBc0EWeK/BTB8i4H84vqNjje8GgxhapYrcWdg5qriaRA/u+bNNxhmpZXdAjFuhonOP4SmAbF+gjoJJWsTrhUg=="],
+ 
++    "expo-updates-interface": ["expo-updates-interface@1.0.0", "", { "peerDependencies": { "expo": "*" } }, "sha512-93oWtvULJOj+Pp+N/lpTcFfuREX1wNeHtp7Lwn8EbzYYmdn37MvZU3TPW2tYYCZuhzmKEXnUblYcruYoDu7IrQ=="],
++
+     "exponential-backoff": ["exponential-backoff@3.1.2", "", {}, "sha512-8QxYTVXUkuy7fIIoitQkPwGonB8F3Zj8eEO8Sqg9Zv/bkI7RJAzowee4gr81Hak/dUTpA2Z7VfQgoijjPNlUZA=="],
+ 
+     "fast-deep-equal": ["fast-deep-equal@3.1.3", "", {}, "sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q=="],
+@@ -1877,7 +1892,7 @@
+ 
+     "react-native-keyboard-controller": ["react-native-keyboard-controller@1.18.5", "", { "dependencies": { "react-native-is-edge-to-edge": "^1.2.1" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-reanimated": ">=3.0.0" } }, "sha512-wbYN6Tcu3G5a05dhRYBgjgd74KqoYWuUmroLpigRg9cXy5uYo7prTMIvMgvLtARQtUF7BOtFggUnzgoBOgk0TQ=="],
+ 
+-    "react-native-mmkv": ["react-native-mmkv@3.1.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-HDh89nYVSufHMweZ3TVNUHQp2lsEh1ApaoV08bUOU1nrlmGgC3I7tGUn1Uy40Hs7yRMPKx5NWKE5Dh86jTVrwg=="],
++    "react-native-mmkv": ["react-native-mmkv@2.12.2", "", { "peerDependencies": { "react": "*", "react-native": ">=0.71.0" } }, "sha512-6058Aq0p57chPrUutLGe9fYoiDVDNMU2PKV+lLFUJ3GhoHvUrLdsS1PDSCLr00yqzL4WJQ7TTzH+V8cpyrNcfg=="],
+ 
+     "react-native-reanimated": ["react-native-reanimated@3.16.7", "", { "dependencies": { "@babel/plugin-transform-arrow-functions": "^7.0.0-0", "@babel/plugin-transform-class-properties": "^7.0.0-0", "@babel/plugin-transform-classes": "^7.0.0-0", "@babel/plugin-transform-nullish-coalescing-operator": "^7.0.0-0", "@babel/plugin-transform-optional-chaining": "^7.0.0-0", "@babel/plugin-transform-shorthand-properties": "^7.0.0-0", "@babel/plugin-transform-template-literals": "^7.0.0-0", "@babel/plugin-transform-unicode-regex": "^7.0.0-0", "@babel/preset-typescript": "^7.16.7", "convert-source-map": "^2.0.0", "invariant": "^2.2.4" }, "peerDependencies": { "@babel/core": "^7.0.0-0", "react": "*", "react-native": "*" } }, "sha512-qoUUQOwE1pHlmQ9cXTJ2MX9FQ9eHllopCLiWOkDkp6CER95ZWeXhJCP4cSm6AD4jigL5jHcZf/SkWrg8ttZUsw=="],
+ 
+@@ -2407,7 +2422,7 @@
+ 
+     "@react-native/dev-middleware/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+ 
+-    "@react-navigation/core/react-is": ["react-is@16.13.1", "", {}, "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="],
++    "@react-navigation/core/react-is": ["react-is@19.1.1", "", {}, "sha512-tr41fA15Vn8p4X9ntI+yCyeGSf1TlYaY5vlTZfQmeLBrFo3psOPX6HhTDnFNL9uj3EhP0KAQ80cugCl4b4BERA=="],
+ 
+     "@tybys/wasm-util/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
+ 
+@@ -2481,6 +2496,8 @@
+ 
+     "expo-build-properties/semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
+ 
++    "expo-dev-launcher/ajv": ["ajv@8.11.0", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2", "uri-js": "^4.2.2" } }, "sha512-wGgprdCvMalC0BztXvitD2hC04YffAvtsUn93JbGXYLAtCUO4xd17mCCZQxUOItiBwZvJScWo8NIvQMQ71rdpg=="],
++
+     "expo-modules-autolinking/commander": ["commander@7.2.0", "", {}, "sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw=="],
+ 
+     "fast-glob/glob-parent": ["glob-parent@5.1.2", "", { "dependencies": { "is-glob": "^4.0.1" } }, "sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow=="],
+@@ -2769,6 +2786,8 @@
+ 
+     "expo-build-properties/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+ 
++    "expo-dev-launcher/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
++
+     "finalhandler/debug/ms": ["ms@2.0.0", "", {}, "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="],
+ 
+     "find-cache-dir/make-dir/semver": ["semver@5.7.2", "", { "bin": { "semver": "bin/semver" } }, "sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g=="],
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 9046642f..c63d16cb 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -30,15 +30,16 @@
+   "dependencies": {
+     "@expo-google-fonts/space-grotesk": "^0.2.2",
+     "@expo/metro-runtime": "~4.0.0",
+-    "@react-navigation/bottom-tabs": "^6.3.2",
+-    "@react-navigation/native": "^6.0.2",
+-    "@react-navigation/native-stack": "^6.0.2",
++    "@react-navigation/bottom-tabs": "^7.2.0",
++    "@react-navigation/native": "^7.0.14",
++    "@react-navigation/native-stack": "^7.2.0",
+     "@shopify/flash-list": "1.7.3",
+     "apisauce": "3.0.1",
+     "date-fns": "^4.1.0",
+     "expo": "~52.0.7",
+     "expo-application": "~6.0.1",
+     "expo-build-properties": "~0.13.1",
++    "expo-dev-client": "~5.0.1",
+     "expo-font": "~13.0.1",
+     "expo-linking": "~7.0.2",
+     "expo-localization": "~16.0.0",
+@@ -57,7 +58,7 @@
+     "react-native-drawer-layout": "^4.0.1",
+     "react-native-gesture-handler": "~2.20.2",
+     "react-native-keyboard-controller": "^1.12.7",
+-    "react-native-mmkv": "3.1.0",
++    "react-native-mmkv": "^2.12.2",
+     "react-native-reanimated": "~3.16.1",
+     "react-native-safe-area-context": "4.12.0",
+     "react-native-screens": "~4.4.0",
