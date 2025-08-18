@@ -1,0 +1,1024 @@
+diff --git a/IgniteDiffApp/.eslintrc.js b/IgniteDiffApp/.eslintrc.js
+index c3c2cb44..52451459 100644
+--- a/IgniteDiffApp/.eslintrc.js
++++ b/IgniteDiffApp/.eslintrc.js
+@@ -39,6 +39,16 @@ module.exports = {
+             importNames: ["default"],
+             message: "Import named exports from 'react' instead.",
+           },
++          {
++            name: "react-native",
++            importNames: ["SafeAreaView"],
++            message: "Use the SafeAreaView from 'react-native-safe-area-context' instead.",
++          },
++          {
++            name: "react-native",
++            importNames: ["Text", "Button", "TextInput"],
++            message: "Use the custom wrapper component from 'app/src/components'.",
++          },
+         ],
+       },
+     ],
+diff --git a/IgniteDiffApp/.gitignore b/IgniteDiffApp/.gitignore
+index 3a54480a..cb8b8049 100644
+--- a/IgniteDiffApp/.gitignore
++++ b/IgniteDiffApp/.gitignore
+@@ -90,3 +90,8 @@ web-build/
+ 
+ # Yarn
+ .yarn/*
++!.yarn/patches
++!.yarn/plugins
++!.yarn/releases
++!.yarn/sdks
++!.yarn/versions
+diff --git a/IgniteDiffApp/.maestro/Login.yaml b/IgniteDiffApp/.maestro/Login.yaml
+deleted file mode 100644
+index 4a0f0dd5..00000000
+--- a/IgniteDiffApp/.maestro/Login.yaml
++++ /dev/null
+@@ -1,19 +0,0 @@
+-#flow: Login
+-#intent:
+-# Open up our app and use the default credentials to login
+-# and navigate to the demo screen
+-
+-appId: com.ignitediffapp # the app id of the app we want to test
+-# You can find the appId of an Ignite app in the `app.json` file
+-# as the "package" under the "android" section and "bundleIdentifier" under the "ios" section
+----
+-- clearState # clears the state of our app (navigation and authentication)
+-- launchApp # launches the app
+-- assertVisible: "Log In"
+-- tapOn:
+-    text: "Tap to Log in!"
+-- assertVisible: "Your app, almost ready for launch!"
+-- tapOn:
+-    text: "Let's go!"
+-- assertVisible: "Components to jump start your project!"
+-
+diff --git a/IgniteDiffApp/.maestro/FavoritePodcast.yaml b/IgniteDiffApp/.maestro/flows/FavoritePodcast.yaml
+similarity index 89%
+rename from IgniteDiffApp/.maestro/FavoritePodcast.yaml
+rename to IgniteDiffApp/.maestro/flows/FavoritePodcast.yaml
+index 6b3231b6..7e79aa84 100644
+--- a/IgniteDiffApp/.maestro/FavoritePodcast.yaml
++++ b/IgniteDiffApp/.maestro/flows/FavoritePodcast.yaml
+@@ -1,11 +1,12 @@
+ # flow: run the login flow and then navigate to the demo podcast list screen, favorite a podcast, and then switch the list to only be favorites.
+ 
+-appId: com.ignitediffapp
++appId: ${MAESTRO_APP_ID}
+ env:
+   FAVORITES_TEXT: "Switch on to only show favorites"
+-
++onFlowStart:
++  - runFlow: ../shared/_OnFlowStart.yaml
+ ---
+-- runFlow: Login.yaml
++- runFlow: ../shared/_Login.yaml
+ - tapOn: "Podcast"
+ - assertVisible: "React Native Radio episodes"
+ - tapOn:
+diff --git a/IgniteDiffApp/.maestro/flows/Login.yaml b/IgniteDiffApp/.maestro/flows/Login.yaml
+new file mode 100644
+index 00000000..f094ba1d
+--- /dev/null
++++ b/IgniteDiffApp/.maestro/flows/Login.yaml
+@@ -0,0 +1,13 @@
++#flow: Login
++#intent:
++# Open up our app and use the default credentials to login
++# and navigate to the demo screen
++
++appId: ${MAESTRO_APP_ID} # the app id of the app we want to test
++# You can find the appId of an Ignite app in the `app.json` file
++# as the "package" under the "android" section and "bundleIdentifier" under the "ios" section
++onFlowStart:
++  - runFlow: ../shared/_OnFlowStart.yaml
++---
++- runFlow: ../shared/_Login.yaml
++
+diff --git a/IgniteDiffApp/.maestro/shared/_Login.yaml b/IgniteDiffApp/.maestro/shared/_Login.yaml
+new file mode 100644
+index 00000000..073eb589
+--- /dev/null
++++ b/IgniteDiffApp/.maestro/shared/_Login.yaml
+@@ -0,0 +1,12 @@
++#flow: Shared _Login
++#intent: shared login flow for any flow that needs to start with a log in.
++appId: ${MAESTRO_APP_ID} 
++---
++- assertVisible: "Log In"
++- tapOn:
++    text: "Tap to Log in!"
++- assertVisible: "Your app, almost ready for launch!"
++- tapOn:
++    text: "Let's go!"
++- assertVisible: "Components to jump start your project!"
++
+diff --git a/IgniteDiffApp/.maestro/shared/_OnFlowStart.yaml b/IgniteDiffApp/.maestro/shared/_OnFlowStart.yaml
+new file mode 100644
+index 00000000..6c0218bb
+--- /dev/null
++++ b/IgniteDiffApp/.maestro/shared/_OnFlowStart.yaml
+@@ -0,0 +1,13 @@
++# flow: run the login flow and then navigate to the demo podcast list screen, favorite a podcast, and then switch the list to only be favorites.
++
++appId: ${MAESTRO_APP_ID}
++---
++- runFlow:
++    when:
++      true: ${IS_DEV == "true"}
++    file: './_OpenWithDevClient.yaml'
++
++- runFlow:
++    when:
++      true: ${IS_DEV == "false"}
++    file: './_OpenAppClearStateAndKeychain.yaml'
+diff --git a/IgniteDiffApp/.maestro/shared/_OpenAppClearStateAndKeychain.yaml b/IgniteDiffApp/.maestro/shared/_OpenAppClearStateAndKeychain.yaml
+new file mode 100644
+index 00000000..c2f7ab68
+--- /dev/null
++++ b/IgniteDiffApp/.maestro/shared/_OpenAppClearStateAndKeychain.yaml
+@@ -0,0 +1,6 @@
++---
++appId: ${MAESTRO_APP_ID}
++---
++- launchApp:
++    clearState: true
++    clearKeychain: true
+diff --git a/IgniteDiffApp/.maestro/shared/_OpenWithDevClient.yaml b/IgniteDiffApp/.maestro/shared/_OpenWithDevClient.yaml
+new file mode 100644
+index 00000000..bacb7863
+--- /dev/null
++++ b/IgniteDiffApp/.maestro/shared/_OpenWithDevClient.yaml
+@@ -0,0 +1,28 @@
++# Common subflow for opening the app with a clear state, clear keychain, and getting past the Expo Dev Client prompts.
++# Use this for local development flows.
++---
++appId: ${MAESTRO_APP_ID}
++---
++- runFlow:
++    file: "./_OpenAppClearStateAndKeychain.yaml"
++
++# Wait for animation subflow
++- waitForAnimationToEnd
++
++# Connect to development server subflow
++- runFlow:
++    when:
++      platform: Android
++    commands:
++      - tapOn: ".*8081.*"
++- runFlow:
++    when:
++      platform: iOS
++    commands:
++      - tapOn: "http://localhost:8081"
++
++- waitForAnimationToEnd
++- extendedWaitUntil:
++    visible: "Continue"
++- swipe:
++    direction: DOWN
+diff --git a/IgniteDiffApp/app.config.ts b/IgniteDiffApp/app.config.ts
+index 7efb700f..d17a8e89 100644
+--- a/IgniteDiffApp/app.config.ts
++++ b/IgniteDiffApp/app.config.ts
+@@ -17,6 +17,23 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
+ 
+   return {
+     ...config,
++    ios: {
++      ...config.ios,
++      // This privacyManifests is to get you started.
++      // See Expo's guide on apple privacy manifests here:
++      // https://docs.expo.dev/guides/apple-privacy/
++      // You may need to add more privacy manifests depending on your app's usage of APIs.
++      // More details and a list of "required reason" APIs can be found in the Apple Developer Documentation.
++      // https://developer.apple.com/documentation/bundleresources/privacy-manifest-files
++      privacyManifests: {
++        NSPrivacyAccessedAPITypes: [
++          {
++            NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryUserDefaults",
++            NSPrivacyAccessedAPITypeReasons: ["CA92.1"], // CA92.1 = "Access info from same app, per documentation"
++          },
++        ],
++      },
++    },
+     plugins: [...existingPlugins, require("./plugins/withSplashScreen").withSplashScreen],
+   }
+ }
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 890cda7c..b7660cba 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -53,6 +53,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.2.0"
++    "version": "10.5.3"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/app.tsx b/IgniteDiffApp/app/app.tsx
+index 21a3635c..b1f990a3 100644
+--- a/IgniteDiffApp/app/app.tsx
++++ b/IgniteDiffApp/app/app.tsx
+@@ -18,7 +18,6 @@ if (__DEV__) {
+ }
+ import "./utils/gestureHandler"
+ import { initI18n } from "./i18n"
+-import "./utils/ignoreWarnings"
+ import { useFonts } from "expo-font"
+ import { useEffect, useState } from "react"
+ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
+@@ -26,10 +25,8 @@ import * as Linking from "expo-linking"
+ import * as SplashScreen from "expo-splash-screen"
+ import { useInitialRootStore } from "./models"
+ import { AppNavigator, useNavigationPersistence } from "./navigators"
+-import { ErrorBoundary } from "./screens/ErrorScreen/ErrorBoundary"
+ import * as storage from "./utils/storage"
+ import { customFontsToLoad } from "./theme"
+-import Config from "./config"
+ import { KeyboardProvider } from "react-native-keyboard-controller"
+ import { loadDateFnsLocale } from "./utils/formatDate"
+ 
+@@ -108,15 +105,13 @@ export function App() {
+   // otherwise, we're ready to render the app
+   return (
+     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+-      <ErrorBoundary catchErrors={Config.catchErrors}>
+-        <KeyboardProvider>
+-          <AppNavigator
+-            linking={linking}
+-            initialState={initialNavigationState}
+-            onStateChange={onNavigationStateChange}
+-          />
+-        </KeyboardProvider>
+-      </ErrorBoundary>
++      <KeyboardProvider>
++        <AppNavigator
++          linking={linking}
++          initialState={initialNavigationState}
++          onStateChange={onNavigationStateChange}
++        />
++      </KeyboardProvider>
+     </SafeAreaProvider>
+   )
+ }
+diff --git a/IgniteDiffApp/app/components/Button.tsx b/IgniteDiffApp/app/components/Button.tsx
+index 2c97647f..d2d9e264 100644
+--- a/IgniteDiffApp/app/components/Button.tsx
++++ b/IgniteDiffApp/app/components/Button.tsx
+@@ -239,7 +239,7 @@ const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
+   reversed: ({ colors }) => ({ backgroundColor: colors.palette.neutral700 }),
+ }
+ 
+-const $pressedTextPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
++const $pressedTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
+   default: () => ({ opacity: 0.9 }),
+   filled: () => ({ opacity: 0.9 }),
+   reversed: () => ({ opacity: 0.9 }),
+diff --git a/IgniteDiffApp/app/components/EmptyState.tsx b/IgniteDiffApp/app/components/EmptyState.tsx
+index df33d508..5e3a824d 100644
+--- a/IgniteDiffApp/app/components/EmptyState.tsx
++++ b/IgniteDiffApp/app/components/EmptyState.tsx
+@@ -196,7 +196,7 @@ export function EmptyState(props: EmptyStateProps) {
+           source={imageSource}
+           {...ImageProps}
+           style={$imageStyles}
+-          tintColor={theme.isDark ? theme.colors.palette.neutral900 : undefined}
++          tintColor={theme.colors.palette.neutral900}
+         />
+       )}
+ 
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index a81ede72..21713a72 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -10,7 +10,7 @@ import {
+ import { isRTL, translate } from "@/i18n"
+ import { $styles } from "../theme"
+ import { ExtendedEdge, useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+-import { Icon, IconTypes } from "./Icon"
++import { IconTypes, PressableIcon } from "./Icon"
+ import { Text, TextProps } from "./Text"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import type { ThemedStyle } from "@/theme"
+@@ -198,11 +198,11 @@ export function Header(props: HeaderProps) {
+         {!!titleContent && (
+           <View
+             style={[
++              $titleWrapperPointerEvents,
+               titleMode === "center" && themed($titleWrapperCenter),
+               titleMode === "flex" && $titleWrapperFlex,
+               $titleContainerStyleOverride,
+             ]}
+-            pointerEvents="none"
+           >
+             <Text
+               weight="medium"
+@@ -255,7 +255,7 @@ function HeaderAction(props: HeaderActionProps) {
+ 
+   if (icon) {
+     return (
+-      <Icon
++      <PressableIcon
+         size={24}
+         icon={icon}
+         color={iconColor}
+@@ -309,6 +309,10 @@ const $actionFillerContainer: ViewStyle = {
+   width: 16,
+ }
+ 
++const $titleWrapperPointerEvents: ViewStyle = {
++  pointerEvents: "none",
++}
++
+ const $titleWrapperCenter: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+   alignItems: "center",
+   justifyContent: "center",
+diff --git a/IgniteDiffApp/app/components/Icon.tsx b/IgniteDiffApp/app/components/Icon.tsx
+index e5324a3a..e562ebd6 100644
+--- a/IgniteDiffApp/app/components/Icon.tsx
++++ b/IgniteDiffApp/app/components/Icon.tsx
+@@ -1,4 +1,3 @@
+-import { ComponentType } from "react"
+ import {
+   Image,
+   ImageStyle,
+@@ -13,7 +12,7 @@ import { useAppTheme } from "@/utils/useAppTheme"
+ 
+ export type IconTypes = keyof typeof iconRegistry
+ 
+-interface IconProps extends TouchableOpacityProps {
++type BaseIconProps = {
+   /**
+    * The name of the icon
+    */
+@@ -38,16 +37,47 @@ interface IconProps extends TouchableOpacityProps {
+    * Style overrides for the icon container
+    */
+   containerStyle?: StyleProp<ViewStyle>
++}
+ 
+-  /**
+-   * An optional function to be called when the icon is pressed
+-   */
+-  onPress?: TouchableOpacityProps["onPress"]
++type PressableIconProps = Omit<TouchableOpacityProps, "style"> & BaseIconProps
++type IconProps = Omit<ViewProps, "style"> & BaseIconProps
++
++/**
++ * A component to render a registered icon.
++ * It is wrapped in a <TouchableOpacity />
++ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Icon/}
++ * @param {PressableIconProps} props - The props for the `PressableIcon` component.
++ * @returns {JSX.Element} The rendered `PressableIcon` component.
++ */
++export function PressableIcon(props: PressableIconProps) {
++  const {
++    icon,
++    color,
++    size,
++    style: $imageStyleOverride,
++    containerStyle: $containerStyleOverride,
++    ...pressableProps
++  } = props
++
++  const { theme } = useAppTheme()
++
++  const $imageStyle: StyleProp<ImageStyle> = [
++    $imageStyleBase,
++    { tintColor: color ?? theme.colors.text },
++    size !== undefined && { width: size, height: size },
++    $imageStyleOverride,
++  ]
++
++  return (
++    <TouchableOpacity {...pressableProps} style={$containerStyleOverride}>
++      <Image style={$imageStyle} source={iconRegistry[icon]} />
++    </TouchableOpacity>
++  )
+ }
+ 
+ /**
+  * A component to render a registered icon.
+- * It is wrapped in a <TouchableOpacity /> if `onPress` is provided, otherwise a <View />.
++ * It is wrapped in a <View />, use `PressableIcon` if you want to react to input
+  * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Icon/}
+  * @param {IconProps} props - The props for the `Icon` component.
+  * @returns {JSX.Element} The rendered `Icon` component.
+@@ -59,14 +89,9 @@ export function Icon(props: IconProps) {
+     size,
+     style: $imageStyleOverride,
+     containerStyle: $containerStyleOverride,
+-    ...WrapperProps
++    ...viewProps
+   } = props
+ 
+-  const isPressable = !!WrapperProps.onPress
+-  const Wrapper = (WrapperProps?.onPress ? TouchableOpacity : View) as ComponentType<
+-    TouchableOpacityProps | ViewProps
+-  >
+-
+   const { theme } = useAppTheme()
+ 
+   const $imageStyle: StyleProp<ImageStyle> = [
+@@ -77,13 +102,9 @@ export function Icon(props: IconProps) {
+   ]
+ 
+   return (
+-    <Wrapper
+-      accessibilityRole={isPressable ? "imagebutton" : undefined}
+-      {...WrapperProps}
+-      style={$containerStyleOverride}
+-    >
++    <View {...viewProps} style={$containerStyleOverride}>
+       <Image style={$imageStyle} source={iconRegistry[icon]} />
+-    </Wrapper>
++    </View>
+   )
+ }
+ 
+diff --git a/IgniteDiffApp/app/components/ListItem.tsx b/IgniteDiffApp/app/components/ListItem.tsx
+index 5a21a636..17803a20 100644
+--- a/IgniteDiffApp/app/components/ListItem.tsx
++++ b/IgniteDiffApp/app/components/ListItem.tsx
+@@ -1,4 +1,4 @@
+-import { forwardRef, ReactElement } from "react"
++import { forwardRef, ReactElement, ComponentType } from "react"
+ import {
+   StyleProp,
+   TextStyle,
+@@ -130,6 +130,12 @@ export const ListItem = forwardRef<View, ListItemProps>(function ListItem(
+   } = props
+   const { themed } = useAppTheme()
+ 
++  const isTouchable =
++    TouchableOpacityProps.onPress !== undefined ||
++    TouchableOpacityProps.onPressIn !== undefined ||
++    TouchableOpacityProps.onPressOut !== undefined ||
++    TouchableOpacityProps.onLongPress !== undefined
++
+   const $textStyles = [$textStyle, $textStyleOverride, TextProps?.style]
+ 
+   const $containerStyles = [
+@@ -140,9 +146,11 @@ export const ListItem = forwardRef<View, ListItemProps>(function ListItem(
+ 
+   const $touchableStyles = [$styles.row, $touchableStyle, { minHeight: height }, style]
+ 
++  const Wrapper: ComponentType<TouchableOpacityProps> = isTouchable ? TouchableOpacity : View
++
+   return (
+     <View ref={ref} style={themed($containerStyles)}>
+-      <TouchableOpacity {...TouchableOpacityProps} style={$touchableStyles}>
++      <Wrapper {...TouchableOpacityProps} style={$touchableStyles}>
+         <ListItemAction
+           side="left"
+           size={height}
+@@ -162,7 +170,7 @@ export const ListItem = forwardRef<View, ListItemProps>(function ListItem(
+           iconColor={rightIconColor}
+           Component={RightComponent}
+         />
+-      </TouchableOpacity>
++      </Wrapper>
+     </View>
+   )
+ })
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index 6349649b..dd46947c 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -1,4 +1,5 @@
+ import { TOptions } from "i18next"
++// eslint-disable-next-line no-restricted-imports
+ import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from "react-native"
+ import { isRTL, translate, TxKeyPath } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+diff --git a/IgniteDiffApp/app/components/TextField.tsx b/IgniteDiffApp/app/components/TextField.tsx
+index 6e26f69b..6d49f526 100644
+--- a/IgniteDiffApp/app/components/TextField.tsx
++++ b/IgniteDiffApp/app/components/TextField.tsx
+@@ -2,6 +2,7 @@ import { ComponentType, forwardRef, Ref, useImperativeHandle, useRef } from "rea
+ import {
+   ImageStyle,
+   StyleProp,
++  // eslint-disable-next-line no-restricted-imports
+   TextInput,
+   TextInputProps,
+   TextStyle,
+diff --git a/IgniteDiffApp/app/config/config.prod.ts b/IgniteDiffApp/app/config/config.prod.ts
+index 3acfe0a9..852e99ff 100644
+--- a/IgniteDiffApp/app/config/config.prod.ts
++++ b/IgniteDiffApp/app/config/config.prod.ts
+@@ -6,5 +6,5 @@
+  * https://reactnative.dev/docs/security#storing-sensitive-info
+  */
+ export default {
+-  API_URL: "CHANGEME",
++  API_URL: "https://api.rss2json.com/v1/",
+ }
+diff --git a/IgniteDiffApp/app/i18n/translate.ts b/IgniteDiffApp/app/i18n/translate.ts
+index 22f99984..30951db4 100644
+--- a/IgniteDiffApp/app/i18n/translate.ts
++++ b/IgniteDiffApp/app/i18n/translate.ts
+@@ -20,7 +20,7 @@ import { TxKeyPath } from "./i18n"
+  * ```ts
+  * import { translate } from "./i18n"
+  *
+- * translate("common:ok", { name: "world" })
++ * translate("hello", { name: "world" })
+  * // => "Hello world!"
+  * ```
+  */
+diff --git a/IgniteDiffApp/app/navigators/AppNavigator.tsx b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+index ce8dbc25..794bea44 100644
+--- a/IgniteDiffApp/app/navigators/AppNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+@@ -100,7 +100,9 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
+   return (
+     <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+       <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
+-        <AppStack />
++        <Screens.ErrorBoundary catchErrors={Config.catchErrors}>
++          <AppStack />
++        </Screens.ErrorBoundary>
+       </NavigationContainer>
+     </ThemeProvider>
+   )
+diff --git a/IgniteDiffApp/app/screens/LoginScreen.tsx b/IgniteDiffApp/app/screens/LoginScreen.tsx
+index 0f4ba4bf..54626eb1 100644
+--- a/IgniteDiffApp/app/screens/LoginScreen.tsx
++++ b/IgniteDiffApp/app/screens/LoginScreen.tsx
+@@ -1,7 +1,15 @@
+ import { observer } from "mobx-react-lite"
+ import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
++// eslint-disable-next-line no-restricted-imports
+ import { TextInput, TextStyle, ViewStyle } from "react-native"
+-import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
++import {
++  Button,
++  PressableIcon,
++  Screen,
++  Text,
++  TextField,
++  TextFieldAccessoryProps,
++} from "../components"
+ import { useStores } from "../models"
+ import { AppStackScreenProps } from "../navigators"
+ import type { ThemedStyle } from "@/theme"
+@@ -60,7 +68,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
+     () =>
+       function PasswordRightAccessory(props: TextFieldAccessoryProps) {
+         return (
+-          <Icon
++          <PressableIcon
+             icon={isAuthPasswordHidden ? "view" : "hidden"}
+             color={colors.palette.neutral800}
+             containerStyle={props.style}
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index f3619269..27416994 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -52,7 +52,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
+           style={$welcomeFace}
+           source={welcomeFace}
+           resizeMode="contain"
+-          tintColor={theme.isDark ? theme.colors.palette.neutral900 : undefined}
++          tintColor={theme.colors.palette.neutral900}
+         />
+       </View>
+ 
+diff --git a/IgniteDiffApp/app/utils/ignoreWarnings.ts b/IgniteDiffApp/app/utils/ignoreWarnings.ts
+deleted file mode 100644
+index 552058ac..00000000
+--- a/IgniteDiffApp/app/utils/ignoreWarnings.ts
++++ /dev/null
+@@ -1,11 +0,0 @@
+-/**
+- * Ignore some yellowbox warnings. Some of these are for deprecated functions
+- * that we haven't gotten around to replacing yet.
+- */
+-import { LogBox } from "react-native"
+-
+-// prettier-ignore
+-LogBox.ignoreLogs([
+-  "Require cycle:",
+-  "Overriding previous layout animation with new one before the first began:",
+-])
+diff --git a/IgniteDiffApp/bun.lock b/IgniteDiffApp/bun.lock
+index 4ca3178d..b592387a 100644
+--- a/IgniteDiffApp/bun.lock
++++ b/IgniteDiffApp/bun.lock
+@@ -12,7 +12,7 @@
+         "@shopify/flash-list": "1.7.3",
+         "apisauce": "3.0.1",
+         "date-fns": "^4.1.0",
+-        "expo": "~52.0.7",
++        "expo": "^52.0.44",
+         "expo-application": "~6.0.1",
+         "expo-build-properties": "~0.13.1",
+         "expo-dev-client": "~5.0.1",
+@@ -56,8 +56,6 @@
+         "eslint-plugin-reactotron": "^0.1.2",
+         "jest": "^29.2.1",
+         "jest-expo": "~52.0.1",
+-        "patch-package": "^8.0.0",
+-        "postinstall-prepare": "1.0.1",
+         "prettier": "^3.3.3",
+         "react-test-renderer": "18.2.0",
+         "reactotron-core-client": "^2.9.4",
+@@ -702,8 +700,6 @@
+ 
+     "@xtuc/long": ["@xtuc/long@4.2.2", "", {}, "sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ=="],
+ 
+-    "@yarnpkg/lockfile": ["@yarnpkg/lockfile@1.1.0", "", {}, "sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ=="],
+-
+     "abab": ["abab@2.0.6", "", {}, "sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA=="],
+ 
+     "abort-controller": ["abort-controller@3.0.0", "", { "dependencies": { "event-target-shim": "^5.0.0" } }, "sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg=="],
+@@ -1202,8 +1198,6 @@
+ 
+     "find-up": ["find-up@5.0.0", "", { "dependencies": { "locate-path": "^6.0.0", "path-exists": "^4.0.0" } }, "sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng=="],
+ 
+-    "find-yarn-workspace-root": ["find-yarn-workspace-root@2.0.0", "", { "dependencies": { "micromatch": "^4.0.2" } }, "sha512-1IMnbjt4KzsQfnhnzNd8wUEgXZ44IzZaZmnLYx7D5FZlaHt2gW20Cri8Q+E/t5tIj4+epTBub+2Zxu/vNILzqQ=="],
+-
+     "flat-cache": ["flat-cache@3.2.0", "", { "dependencies": { "flatted": "^3.2.9", "keyv": "^4.5.3", "rimraf": "^3.0.2" } }, "sha512-CYcENa+FtcUKLmhhqyctpclsq7QF38pKjZHsGNiSQF5r4FtoKDWabFDl3hzaEQMvT1LHEysw5twgLvpYYb4vbw=="],
+ 
+     "flatted": ["flatted@3.3.3", "", {}, "sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg=="],
+@@ -1226,7 +1220,7 @@
+ 
+     "fresh": ["fresh@0.5.2", "", {}, "sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q=="],
+ 
+-    "fs-extra": ["fs-extra@9.1.0", "", { "dependencies": { "at-least-node": "^1.0.0", "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ=="],
++    "fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
+ 
+     "fs-minipass": ["fs-minipass@3.0.3", "", { "dependencies": { "minipass": "^7.0.3" } }, "sha512-XUBA9XClHbnJWSfBzjkm6RvPsyg3sryZt06BEQoXcF7EK/xpGaQYJgQKDJSUH5SGZ76Y7pFx1QBnXz09rU5Fbw=="],
+ 
+@@ -1536,15 +1530,11 @@
+ 
+     "json-schema-traverse": ["json-schema-traverse@0.4.1", "", {}, "sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg=="],
+ 
+-    "json-stable-stringify": ["json-stable-stringify@1.3.0", "", { "dependencies": { "call-bind": "^1.0.8", "call-bound": "^1.0.4", "isarray": "^2.0.5", "jsonify": "^0.0.1", "object-keys": "^1.1.1" } }, "sha512-qtYiSSFlwot9XHtF9bD9c7rwKjr+RecWT//ZnPvSmEjpV5mmPOCN4j8UjY5hbjNkOwZ/jQv3J6R1/pL7RwgMsg=="],
+-
+     "json-stable-stringify-without-jsonify": ["json-stable-stringify-without-jsonify@1.0.1", "", {}, "sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw=="],
+ 
+     "json5": ["json5@2.2.3", "", { "bin": { "json5": "lib/cli.js" } }, "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="],
+ 
+-    "jsonfile": ["jsonfile@6.2.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg=="],
+-
+-    "jsonify": ["jsonify@0.0.1", "", {}, "sha512-2/Ki0GcmuqSrgFyelQq9M05y7PS0mEwuIzrf3f1fPqkVDVRvZrPZtVSMHxdgo8Aq0sxAOb/cr2aqqA3LeWHVPg=="],
++    "jsonfile": ["jsonfile@4.0.0", "", { "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg=="],
+ 
+     "jsx-ast-utils": ["jsx-ast-utils@3.3.5", "", { "dependencies": { "array-includes": "^3.1.6", "array.prototype.flat": "^1.3.1", "object.assign": "^4.1.4", "object.values": "^1.1.6" } }, "sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ=="],
+ 
+@@ -1552,8 +1542,6 @@
+ 
+     "kind-of": ["kind-of@6.0.3", "", {}, "sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw=="],
+ 
+-    "klaw-sync": ["klaw-sync@6.0.0", "", { "dependencies": { "graceful-fs": "^4.1.11" } }, "sha512-nIeuVSzdCCs6TDPTqI8w1Yre34sSq7AkZ4B3sfOBbI2CgVSB4Du4aLQijFU2+lhAFCwt9+42Hel6lQNIv6AntQ=="],
+-
+     "kleur": ["kleur@3.0.3", "", {}, "sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w=="],
+ 
+     "leven": ["leven@3.1.0", "", {}, "sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A=="],
+@@ -1760,8 +1748,6 @@
+ 
+     "ora": ["ora@3.4.0", "", { "dependencies": { "chalk": "^2.4.2", "cli-cursor": "^2.1.0", "cli-spinners": "^2.0.0", "log-symbols": "^2.2.0", "strip-ansi": "^5.2.0", "wcwidth": "^1.0.1" } }, "sha512-eNwHudNbO1folBP3JsZ19v9azXWtQZjICdr3Q0TDPIaeBQ3mXLrh54wM+er0+hSp+dWKf+Z8KM58CYzEyIYxYg=="],
+ 
+-    "os-tmpdir": ["os-tmpdir@1.0.2", "", {}, "sha512-D2FR03Vir7FIu45XBY20mTb+/ZSWB00sjU9jdQXt83gDrI4Ztz5Fs7/yy74g2N5SVQY4xY1qDr4rNddwYRVX0g=="],
+-
+     "own-keys": ["own-keys@1.0.1", "", { "dependencies": { "get-intrinsic": "^1.2.6", "object-keys": "^1.1.1", "safe-push-apply": "^1.0.0" } }, "sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg=="],
+ 
+     "p-finally": ["p-finally@1.0.0", "", {}, "sha512-LICb2p9CB7FS+0eR1oqWnHhp0FljGLZCWBE9aix0Uye9W8LTQPwMTYVGWQWIw9RdQiDg4+epXQODwIYJtSJaow=="],
+@@ -1786,8 +1772,6 @@
+ 
+     "parseurl": ["parseurl@1.3.3", "", {}, "sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ=="],
+ 
+-    "patch-package": ["patch-package@8.0.0", "", { "dependencies": { "@yarnpkg/lockfile": "^1.1.0", "chalk": "^4.1.2", "ci-info": "^3.7.0", "cross-spawn": "^7.0.3", "find-yarn-workspace-root": "^2.0.0", "fs-extra": "^9.0.0", "json-stable-stringify": "^1.0.2", "klaw-sync": "^6.0.0", "minimist": "^1.2.6", "open": "^7.4.2", "rimraf": "^2.6.3", "semver": "^7.5.3", "slash": "^2.0.0", "tmp": "^0.0.33", "yaml": "^2.2.2" }, "bin": { "patch-package": "index.js" } }, "sha512-da8BVIhzjtgScwDJ2TtKsfT5JFWz1hYoBl9rUQ1f38MC2HwnEIkK8VN3dKMKcP7P7bvvgzNDbfNHtx3MsQb5vA=="],
+-
+     "path-exists": ["path-exists@4.0.0", "", {}, "sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w=="],
+ 
+     "path-is-absolute": ["path-is-absolute@1.0.1", "", {}, "sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg=="],
+@@ -1802,7 +1786,7 @@
+ 
+     "picocolors": ["picocolors@1.1.1", "", {}, "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="],
+ 
+-    "picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
++    "picomatch": ["picomatch@3.0.1", "", {}, "sha512-I3EurrIQMlRc9IaAZnqRR044Phh2DXY+55o7uJ0V+hYZAcQYSuFWsc9q5PvyDHUSCe1Qxn/iBz+78s86zWnGag=="],
+ 
+     "pify": ["pify@4.0.1", "", {}, "sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g=="],
+ 
+@@ -1820,8 +1804,6 @@
+ 
+     "postcss-value-parser": ["postcss-value-parser@4.2.0", "", {}, "sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ=="],
+ 
+-    "postinstall-prepare": ["postinstall-prepare@1.0.1", "", {}, "sha512-4zxO4DjrV0XfD+ABUFEP0MiQmhKOGBnov5LfLsra/XVOUcQ5gMLLMcV3b8K8wJUfNDv1ozleGblYb06gPbjVUQ=="],
+-
+     "prelude-ls": ["prelude-ls@1.2.1", "", {}, "sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g=="],
+ 
+     "prettier": ["prettier@3.6.2", "", { "bin": { "prettier": "bin/prettier.cjs" } }, "sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ=="],
+@@ -1972,7 +1954,7 @@
+ 
+     "reusify": ["reusify@1.1.0", "", {}, "sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw=="],
+ 
+-    "rimraf": ["rimraf@2.7.1", "", { "dependencies": { "glob": "^7.1.3" }, "bin": { "rimraf": "./bin.js" } }, "sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w=="],
++    "rimraf": ["rimraf@3.0.2", "", { "dependencies": { "glob": "^7.1.3" }, "bin": { "rimraf": "bin.js" } }, "sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA=="],
+ 
+     "rtl-detect": ["rtl-detect@1.1.2", "", {}, "sha512-PGMBq03+TTG/p/cRB7HCLKJ1MgDIi07+QU1faSjiYRfmY5UsAttV9Hs08jDAHVwcOwmVLcSJkpwyfXszVjWfIQ=="],
+ 
+@@ -2156,8 +2138,6 @@
+ 
+     "tinyglobby": ["tinyglobby@0.2.14", "", { "dependencies": { "fdir": "^6.4.4", "picomatch": "^4.0.2" } }, "sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ=="],
+ 
+-    "tmp": ["tmp@0.0.33", "", { "dependencies": { "os-tmpdir": "~1.0.2" } }, "sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw=="],
+-
+     "tmpl": ["tmpl@1.0.5", "", {}, "sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw=="],
+ 
+     "to-regex-range": ["to-regex-range@5.0.1", "", { "dependencies": { "is-number": "^7.0.0" } }, "sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ=="],
+@@ -2222,7 +2202,7 @@
+ 
+     "unique-string": ["unique-string@2.0.0", "", { "dependencies": { "crypto-random-string": "^2.0.0" } }, "sha512-uNaeirEPvpZWSgzwsPGtU2zVSTrn/8L5q/IexZmH0eH6SA73CmAA5U4GwORTxQAZs95TAXLNqeLoPPNO5gZfWg=="],
+ 
+-    "universalify": ["universalify@2.0.1", "", {}, "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw=="],
++    "universalify": ["universalify@0.1.2", "", {}, "sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg=="],
+ 
+     "unpipe": ["unpipe@1.0.0", "", {}, "sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ=="],
+ 
+@@ -2322,8 +2302,6 @@
+ 
+     "yallist": ["yallist@3.1.1", "", {}, "sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g=="],
+ 
+-    "yaml": ["yaml@2.8.1", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw=="],
+-
+     "yargs": ["yargs@17.7.2", "", { "dependencies": { "cliui": "^8.0.1", "escalade": "^3.1.1", "get-caller-file": "^2.0.5", "require-directory": "^2.1.1", "string-width": "^4.2.3", "y18n": "^5.0.5", "yargs-parser": "^21.1.1" } }, "sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w=="],
+ 
+     "yargs-parser": ["yargs-parser@21.1.1", "", {}, "sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw=="],
+@@ -2340,22 +2318,12 @@
+ 
+     "@cspotcode/source-map-support/@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.9", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.0.3", "@jridgewell/sourcemap-codec": "^1.4.10" } }, "sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ=="],
+ 
+-    "@emnapi/core/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
+-
+-    "@emnapi/runtime/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
+-
+-    "@emnapi/wasi-threads/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
+-
+     "@expo/cli/arg": ["arg@5.0.2", "", {}, "sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg=="],
+ 
+     "@expo/cli/form-data": ["form-data@3.0.4", "", { "dependencies": { "asynckit": "^0.4.0", "combined-stream": "^1.0.8", "es-set-tostringtag": "^2.1.0", "hasown": "^2.0.2", "mime-types": "^2.1.35" } }, "sha512-f0cRzm6dkyVYV3nPoooP8XlccPQukegwhAnpoLcXy+X+A8KfpGOoXwDr9FLZd3wzgLaBGQBE3lY93Zm/i1JvIQ=="],
+ 
+-    "@expo/cli/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
+-
+     "@expo/cli/glob": ["glob@10.4.5", "", { "dependencies": { "foreground-child": "^3.1.0", "jackspeak": "^3.1.2", "minimatch": "^9.0.4", "minipass": "^7.1.2", "package-json-from-dist": "^1.0.0", "path-scurry": "^1.11.1" }, "bin": { "glob": "dist/esm/bin.mjs" } }, "sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg=="],
+ 
+-    "@expo/cli/picomatch": ["picomatch@3.0.1", "", {}, "sha512-I3EurrIQMlRc9IaAZnqRR044Phh2DXY+55o7uJ0V+hYZAcQYSuFWsc9q5PvyDHUSCe1Qxn/iBz+78s86zWnGag=="],
+-
+     "@expo/cli/resolve": ["resolve@1.22.10", "", { "dependencies": { "is-core-module": "^2.16.0", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w=="],
+ 
+     "@expo/cli/semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
+@@ -2390,10 +2358,14 @@
+ 
+     "@expo/metro-config/@expo/json-file": ["@expo/json-file@9.0.2", "", { "dependencies": { "@babel/code-frame": "~7.10.4", "json5": "^2.2.3", "write-file-atomic": "^2.3.0" } }, "sha512-yAznIUrybOIWp3Uax7yRflB0xsEpvIwIEqIjao9SGi2Gaa+N0OamWfe0fnXBSWF+2zzF4VvqwT4W5zwelchfgw=="],
+ 
++    "@expo/metro-config/fs-extra": ["fs-extra@9.1.0", "", { "dependencies": { "at-least-node": "^1.0.0", "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ=="],
++
+     "@expo/metro-config/glob": ["glob@10.4.5", "", { "dependencies": { "foreground-child": "^3.1.0", "jackspeak": "^3.1.2", "minimatch": "^9.0.4", "minipass": "^7.1.2", "package-json-from-dist": "^1.0.0", "path-scurry": "^1.11.1" }, "bin": { "glob": "dist/esm/bin.mjs" } }, "sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg=="],
+ 
+     "@expo/prebuild-config/@react-native/normalize-colors": ["@react-native/normalize-colors@0.76.9", "", {}, "sha512-TUdMG2JGk72M9d8DYbubdOlrzTYjw+YMe/xOnLU4viDgWRHsCbtRS9x0IAxRjs3amj/7zmK3Atm8jUPvdAc8qw=="],
+ 
++    "@expo/prebuild-config/fs-extra": ["fs-extra@9.1.0", "", { "dependencies": { "at-least-node": "^1.0.0", "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ=="],
++
+     "@expo/prebuild-config/semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
+ 
+     "@expo/xcpretty/@babel/code-frame": ["@babel/code-frame@7.10.4", "", { "dependencies": { "@babel/highlight": "^7.10.4" } }, "sha512-vG6SvB6oYEhvgisZNFRmRCUkLz11c7rp+tbNTynGqc6mS1d5ATd/sGyV6W0KZZnXRKMTzZDRgQT3Ou9jhpAfUg=="],
+@@ -2424,8 +2396,6 @@
+ 
+     "@react-navigation/core/react-is": ["react-is@19.1.1", "", {}, "sha512-tr41fA15Vn8p4X9ntI+yCyeGSf1TlYaY5vlTZfQmeLBrFo3psOPX6HhTDnFNL9uj3EhP0KAQ80cugCl4b4BERA=="],
+ 
+-    "@tybys/wasm-util/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
+-
+     "@typescript-eslint/eslint-plugin/ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
+ 
+     "@typescript-eslint/typescript-estree/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+@@ -2440,7 +2410,7 @@
+ 
+     "ansi-escapes/type-fest": ["type-fest@0.21.3", "", {}, "sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w=="],
+ 
+-    "ast-types/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
++    "anymatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
+ 
+     "better-opn/open": ["open@8.4.2", "", { "dependencies": { "define-lazy-prop": "^2.0.0", "is-docker": "^2.1.1", "is-wsl": "^2.2.0" } }, "sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ=="],
+ 
+@@ -2454,8 +2424,6 @@
+ 
+     "chromium-edge-launcher/mkdirp": ["mkdirp@1.0.4", "", { "bin": { "mkdirp": "bin/cmd.js" } }, "sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw=="],
+ 
+-    "chromium-edge-launcher/rimraf": ["rimraf@3.0.2", "", { "dependencies": { "glob": "^7.1.3" }, "bin": { "rimraf": "bin.js" } }, "sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA=="],
+-
+     "compression/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+ 
+     "compression/negotiator": ["negotiator@0.6.4", "", {}, "sha512-myRT3DiWPHqho5PrJaIRyaMv2kgYf0mUVgBNOYMuCH5Ki1yEiQaf/ZJuQ62nvpc44wL5WDbTX7yGJi1Neevw8w=="],
+@@ -2472,8 +2440,6 @@
+ 
+     "default-gateway/execa": ["execa@1.0.0", "", { "dependencies": { "cross-spawn": "^6.0.0", "get-stream": "^4.0.0", "is-stream": "^1.1.0", "npm-run-path": "^2.0.0", "p-finally": "^1.0.0", "signal-exit": "^3.0.0", "strip-eof": "^1.0.0" } }, "sha512-adbxcyWV46qiHyvSp50TKt05tB4tK3HcmF7/nxfAdhnox83seTDbwnaqKO4sXRy7roHAIFqJP/Rw/AuEbX61LA=="],
+ 
+-    "del/rimraf": ["rimraf@3.0.2", "", { "dependencies": { "glob": "^7.1.3" }, "bin": { "rimraf": "bin.js" } }, "sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA=="],
+-
+     "domexception/webidl-conversions": ["webidl-conversions@7.0.0", "", {}, "sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g=="],
+ 
+     "error-ex/is-arrayish": ["is-arrayish@0.2.1", "", {}, "sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg=="],
+@@ -2500,12 +2466,12 @@
+ 
+     "expo-modules-autolinking/commander": ["commander@7.2.0", "", {}, "sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw=="],
+ 
++    "expo-modules-autolinking/fs-extra": ["fs-extra@9.1.0", "", { "dependencies": { "at-least-node": "^1.0.0", "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ=="],
++
+     "fast-glob/glob-parent": ["glob-parent@5.1.2", "", { "dependencies": { "is-glob": "^4.0.1" } }, "sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow=="],
+ 
+     "fbjs/promise": ["promise@7.3.1", "", { "dependencies": { "asap": "~2.0.3" } }, "sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg=="],
+ 
+-    "fdir/picomatch": ["picomatch@3.0.1", "", {}, "sha512-I3EurrIQMlRc9IaAZnqRR044Phh2DXY+55o7uJ0V+hYZAcQYSuFWsc9q5PvyDHUSCe1Qxn/iBz+78s86zWnGag=="],
+-
+     "finalhandler/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+ 
+     "finalhandler/encodeurl": ["encodeurl@1.0.2", "", {}, "sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w=="],
+@@ -2518,8 +2484,6 @@
+ 
+     "find-cache-dir/pkg-dir": ["pkg-dir@3.0.0", "", { "dependencies": { "find-up": "^3.0.0" } }, "sha512-/E57AYkoeQ25qkxMj5PBOVgF8Kiu/h7cYS30Z5+R7WaiCCBfLq58ZI/dSeaEKb9WVJV5n/03QwrN3IeWIFllvw=="],
+ 
+-    "flat-cache/rimraf": ["rimraf@3.0.2", "", { "dependencies": { "glob": "^7.1.3" }, "bin": { "rimraf": "bin.js" } }, "sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA=="],
+-
+     "foreground-child/signal-exit": ["signal-exit@4.1.0", "", {}, "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="],
+ 
+     "globals/type-fest": ["type-fest@0.20.2", "", {}, "sha512-Ne+eE4r0/iWnpAxD852z3A+N0Bt5RN//NjJwRd2VFHEmrywxf5vsZlh4R6lixl6B+wz/8d+maTSAkN1FIkI3LQ=="],
+@@ -2542,6 +2506,8 @@
+ 
+     "jest-snapshot/semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
+ 
++    "jest-util/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
++
+     "jest-validate/camelcase": ["camelcase@6.3.0", "", {}, "sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA=="],
+ 
+     "jest-watch-select-projects/chalk": ["chalk@3.0.0", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-4D3B6Wf41KOYRFdszmDqMCGq5VV/uMAB273JILmO+3jAlh8X4qDtdtgCR3fxtbLEMzSx22QdhnDcJvu2u1fVwg=="],
+@@ -2586,6 +2552,8 @@
+ 
+     "metro-symbolicate/source-map": ["source-map@0.5.7", "", {}, "sha512-LbrmJOMUSdEVxIKvdcJzQC+nQhe8FUZQTXQy6+I75skNgn3OoQ0DZA8YnFa7gp8tqtL3KPf1kmo0R5DoApeSGQ=="],
+ 
++    "micromatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
++
+     "minipass-flush/minipass": ["minipass@3.3.6", "", { "dependencies": { "yallist": "^4.0.0" } }, "sha512-DxiNidxSEK+tHG6zOIklvNOwm3hvCrbUrdtzY74U6HKTJxvIDfOUL5W5P2Ghd3DTkhhKPYGqeNUIh5qcM4YBfw=="],
+ 
+     "minipass-pipeline/minipass": ["minipass@3.3.6", "", { "dependencies": { "yallist": "^4.0.0" } }, "sha512-DxiNidxSEK+tHG6zOIklvNOwm3hvCrbUrdtzY74U6HKTJxvIDfOUL5W5P2Ghd3DTkhhKPYGqeNUIh5qcM4YBfw=="],
+@@ -2602,10 +2570,6 @@
+ 
+     "ora/strip-ansi": ["strip-ansi@5.2.0", "", { "dependencies": { "ansi-regex": "^4.1.0" } }, "sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA=="],
+ 
+-    "patch-package/semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
+-
+-    "patch-package/slash": ["slash@2.0.0", "", {}, "sha512-ZYKh3Wh2z1PpEXWr0MpSBZ0V6mZHAQfYevttO11c51CaWjGTaadiKZ+wVt1PbMlDV5qhMFslpZCemhwOK7C89A=="],
+-
+     "path-scurry/lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
+ 
+     "pkg-dir/find-up": ["find-up@4.1.0", "", { "dependencies": { "locate-path": "^5.0.0", "path-exists": "^4.0.0" } }, "sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw=="],
+@@ -2632,8 +2596,6 @@
+ 
+     "reactotron-react-js/stacktrace-js": ["stacktrace-js@2.0.1", "", { "dependencies": { "error-stack-parser": "^2.0.4", "stack-generator": "^2.0.4", "stacktrace-gps": "^3.0.3" } }, "sha512-13oDNgBSeWtdGa4/2BycNyKqe+VktCoJ8VLx4pDoJkwGGJVtiHdfMOAj3aW9xTi8oR2v34z9IcvfCvT6XNdNAw=="],
+ 
+-    "recast/tslib": ["tslib@2.6.3", "", {}, "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ=="],
+-
+     "regjsparser/jsesc": ["jsesc@3.0.2", "", { "bin": { "jsesc": "bin/jsesc" } }, "sha512-xKqzzWXDttJuOcawBt4KnKHHIf5oQ/Cxax+0PWFG+DFDgHNAdi+TXECADI+RYiFUMmx8792xsMbbgXj4CwnP4g=="],
+ 
+     "requireg/resolve": ["resolve@1.7.1", "", { "dependencies": { "path-parse": "^1.0.5" } }, "sha512-c7rwLofp8g1U+h1KNyHL/jicrKg1Ek4q+Lr33AL65uZTinUZHe30D5HlyN5V9NW0JX1D5dXQ4jqW5l7Sy/kGfw=="],
+@@ -2706,10 +2668,6 @@
+ 
+     "@babel/register/make-dir/semver": ["semver@5.7.2", "", { "bin": { "semver": "bin/semver" } }, "sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g=="],
+ 
+-    "@expo/cli/fs-extra/jsonfile": ["jsonfile@4.0.0", "", { "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg=="],
+-
+-    "@expo/cli/fs-extra/universalify": ["universalify@0.1.2", "", {}, "sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg=="],
+-
+     "@expo/cli/glob/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+ 
+     "@expo/config-plugins/@expo/json-file/@babel/code-frame": ["@babel/code-frame@7.10.4", "", { "dependencies": { "@babel/highlight": "^7.10.4" } }, "sha512-vG6SvB6oYEhvgisZNFRmRCUkLz11c7rp+tbNTynGqc6mS1d5ATd/sGyV6W0KZZnXRKMTzZDRgQT3Ou9jhpAfUg=="],
+@@ -2722,14 +2680,24 @@
+ 
+     "@expo/devcert/glob/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+ 
++    "@expo/image-utils/fs-extra/jsonfile": ["jsonfile@6.2.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg=="],
++
+     "@expo/image-utils/fs-extra/universalify": ["universalify@1.0.0", "", {}, "sha512-rb6X1W158d7pRQBg5gkR8uPaSfiids68LTJQYOtEUhoJUWBdaQHsuT/EUduxXYxcrt4r5PJ4fuHW1MHT6p0qug=="],
+ 
+     "@expo/metro-config/@expo/json-file/@babel/code-frame": ["@babel/code-frame@7.10.4", "", { "dependencies": { "@babel/highlight": "^7.10.4" } }, "sha512-vG6SvB6oYEhvgisZNFRmRCUkLz11c7rp+tbNTynGqc6mS1d5ATd/sGyV6W0KZZnXRKMTzZDRgQT3Ou9jhpAfUg=="],
+ 
+     "@expo/metro-config/@expo/json-file/write-file-atomic": ["write-file-atomic@2.4.3", "", { "dependencies": { "graceful-fs": "^4.1.11", "imurmurhash": "^0.1.4", "signal-exit": "^3.0.2" } }, "sha512-GaETH5wwsX+GcnzhPgKcKjJ6M2Cq3/iZp1WyY/X1CSqrW+jVNM9Y7D8EC2sM4ZG/V8wZlSniJnCKWPmBYAucRQ=="],
+ 
++    "@expo/metro-config/fs-extra/jsonfile": ["jsonfile@6.2.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg=="],
++
++    "@expo/metro-config/fs-extra/universalify": ["universalify@2.0.1", "", {}, "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw=="],
++
+     "@expo/metro-config/glob/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+ 
++    "@expo/prebuild-config/fs-extra/jsonfile": ["jsonfile@6.2.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg=="],
++
++    "@expo/prebuild-config/fs-extra/universalify": ["universalify@2.0.1", "", {}, "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw=="],
++
+     "@isaacs/cliui/string-width/emoji-regex": ["emoji-regex@9.2.2", "", {}, "sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg=="],
+ 
+     "@isaacs/cliui/strip-ansi/ansi-regex": ["ansi-regex@6.2.0", "", {}, "sha512-TKY5pyBkHyADOPYlRT9Lx6F544mPl0vS5Ew7BJ45hA08Q+t3GjbueLliBWN3sMICk6+y7HdyxSzC4bWS8baBdg=="],
+@@ -2788,6 +2756,10 @@
+ 
+     "expo-dev-launcher/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+ 
++    "expo-modules-autolinking/fs-extra/jsonfile": ["jsonfile@6.2.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg=="],
++
++    "expo-modules-autolinking/fs-extra/universalify": ["universalify@2.0.1", "", {}, "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw=="],
++
+     "finalhandler/debug/ms": ["ms@2.0.0", "", {}, "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="],
+ 
+     "find-cache-dir/make-dir/semver": ["semver@5.7.2", "", { "bin": { "semver": "bin/semver" } }, "sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g=="],
+@@ -2866,6 +2838,8 @@
+ 
+     "@expo/devcert/glob/minimatch/brace-expansion": ["brace-expansion@2.0.2", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ=="],
+ 
++    "@expo/image-utils/fs-extra/jsonfile/universalify": ["universalify@2.0.1", "", {}, "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw=="],
++
+     "@expo/metro-config/glob/minimatch/brace-expansion": ["brace-expansion@2.0.2", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ=="],
+ 
+     "@istanbuljs/load-nyc-config/find-up/locate-path/p-locate": ["p-locate@4.1.0", "", { "dependencies": { "p-limit": "^2.2.0" } }, "sha512-R79ZZ/0wAxKGu3oYMlz8jy/kbhsNrS7SKZ7PxEHBgJ5+F2mtFW2fK2cOtBh1cHYkQsbzFV7I+EoRKe6Yt0oK7A=="],
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index c63d16cb..e21c41e1 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -7,17 +7,18 @@
+     "compile": "tsc --noEmit -p . --pretty",
+     "lint": "eslint . --fix",
+     "lint:check": "eslint .",
+-    "patch": "patch-package",
+     "test": "jest",
+     "test:watch": "jest --watch",
+-    "test:maestro": "maestro test .maestro/FavoritePodcast.yaml",
++    "test:maestro": "maestro test -e MAESTRO_APP_ID=com.ignitediffapp -e IS_DEV=true .maestro/flows",
++    "test:maestro:ci": "maestro test -e MAESTRO_APP_ID=com.ignitediffapp -e IS_DEV=false .maestro/flows",
+     "adb": "adb reverse tcp:9090 tcp:9090 && adb reverse tcp:3000 tcp:3000 && adb reverse tcp:9001 tcp:9001 && adb reverse tcp:8081 tcp:8081",
+-    "postinstall": "patch-package",
+     "build:ios:sim": "eas build --profile development --platform ios --local",
+     "build:ios:dev": "eas build --profile development:device --platform ios --local",
++    "build:ios:preview": "eas build --profile preview --platform ios --local",
+     "build:ios:prod": "eas build --profile production --platform ios --local",
+     "build:android:sim": "eas build --profile development --platform android --local",
+     "build:android:dev": "eas build --profile development:device --platform android --local",
++    "build:android:preview": "eas build --profile preview --platform android --local",
+     "build:android:prod": "eas build --profile production --platform android --local",
+     "start": "expo start --dev-client",
+     "android": "expo run:android",
+@@ -36,7 +37,7 @@
+     "@shopify/flash-list": "1.7.3",
+     "apisauce": "3.0.1",
+     "date-fns": "^4.1.0",
+-    "expo": "~52.0.7",
++    "expo": "^52.0.44",
+     "expo-application": "~6.0.1",
+     "expo-build-properties": "~0.13.1",
+     "expo-dev-client": "~5.0.1",
+@@ -80,8 +81,6 @@
+     "eslint-plugin-reactotron": "^0.1.2",
+     "jest": "^29.2.1",
+     "jest-expo": "~52.0.1",
+-    "patch-package": "^8.0.0",
+-    "postinstall-prepare": "1.0.1",
+     "prettier": "^3.3.3",
+     "react-test-renderer": "18.2.0",
+     "reactotron-core-client": "^2.9.4",
+diff --git a/IgniteDiffApp/test/i18n.test.ts b/IgniteDiffApp/test/i18n.test.ts
+index acee7ec2..8ed7b2d9 100644
+--- a/IgniteDiffApp/test/i18n.test.ts
++++ b/IgniteDiffApp/test/i18n.test.ts
+@@ -5,6 +5,14 @@ import { exec } from "child_process"
+ // don't hold your test suite hostage by always failing.
+ const EXCEPTIONS: string[] = [
+   // "welcomeScreen:readyForLaunch",
++
++  /**
++   * This translation key actually shows up in a comment describing the usage of the translate
++   * function in the app/i18n/translate.ts file. Because the grep command in the i18n test below
++   * doesn't account for commented out code, we must manually exclude it so tests don't fail
++   * because of a comment.
++   */
++  "hello",
+ ]
+ 
+ function iterate(obj, stack, array) {
+diff --git a/IgniteDiffApp/test/setup.ts b/IgniteDiffApp/test/setup.ts
+index 968f73f9..63ab62a4 100644
+--- a/IgniteDiffApp/test/setup.ts
++++ b/IgniteDiffApp/test/setup.ts
+@@ -1,4 +1,5 @@
+ // we always make sure 'react-native' gets included first
++// eslint-disable-next-line no-restricted-imports
+ import * as ReactNative from "react-native"
+ import mockFile from "./mockFile"
+ 

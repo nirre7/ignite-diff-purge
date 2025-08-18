@@ -1,0 +1,52 @@
+diff --git a/IgniteDiffApp/.gitignore b/IgniteDiffApp/.gitignore
+index 3a54480a..cb8b8049 100644
+--- a/IgniteDiffApp/.gitignore
++++ b/IgniteDiffApp/.gitignore
+@@ -90,3 +90,8 @@ web-build/
+ 
+ # Yarn
+ .yarn/*
++!.yarn/patches
++!.yarn/plugins
++!.yarn/releases
++!.yarn/sdks
++!.yarn/versions
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 3fb2caba..b7660cba 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -53,6 +53,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.5.1"
++    "version": "10.5.3"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/EmptyState.tsx b/IgniteDiffApp/app/components/EmptyState.tsx
+index df33d508..5e3a824d 100644
+--- a/IgniteDiffApp/app/components/EmptyState.tsx
++++ b/IgniteDiffApp/app/components/EmptyState.tsx
+@@ -196,7 +196,7 @@ export function EmptyState(props: EmptyStateProps) {
+           source={imageSource}
+           {...ImageProps}
+           style={$imageStyles}
+-          tintColor={theme.isDark ? theme.colors.palette.neutral900 : undefined}
++          tintColor={theme.colors.palette.neutral900}
+         />
+       )}
+ 
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index f3619269..27416994 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -52,7 +52,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
+           style={$welcomeFace}
+           source={welcomeFace}
+           resizeMode="contain"
+-          tintColor={theme.isDark ? theme.colors.palette.neutral900 : undefined}
++          tintColor={theme.colors.palette.neutral900}
+         />
+       </View>
+ 
