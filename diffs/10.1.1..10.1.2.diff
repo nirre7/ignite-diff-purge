@@ -1,0 +1,45 @@
+diff --git a/IgniteDiffApp/App.tsx b/IgniteDiffApp/App.tsx
+index 5b7bcbbf..e6ad5a79 100644
+--- a/IgniteDiffApp/App.tsx
++++ b/IgniteDiffApp/App.tsx
+@@ -1,4 +1,5 @@
+ import "@expo/metro-runtime"
++import { registerRootComponent } from "expo"
+ import * as SplashScreen from "expo-splash-screen"
+ import App from "@/app"
+ 
+@@ -8,4 +9,7 @@ function IgniteApp() {
+   return <App hideSplashScreen={SplashScreen.hideAsync} />
+ }
+ 
+-export default IgniteApp
++// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
++// It also ensures that whether you load the app in Expo Go or in a native build,
++// the environment is set up appropriately
++registerRootComponent(IgniteApp)
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index e5cc8d62..db56b176 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -52,6 +52,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.1"
++    "version": "10.1.2"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 8c6fc042..3bdb1e43 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -2,7 +2,7 @@
+   "name": "ignite-diff-app",
+   "version": "0.0.1",
+   "private": true,
+-  "main": "expo/AppEntry.js",
++  "main": "App.tsx",
+   "scripts": {
+     "compile": "tsc --noEmit -p . --pretty",
+     "format": "eslint . --fix",
