@@ -10,7 +10,8 @@
     "markdown-table": "^1.1.2",
     "markdown-to-html": "^0.0.13",
     "ramda": "^0.26.1",
-    "semver": "^6.0.0"
+    "semver": "^6.0.0",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
     "escape-string-regexp": "^2.0.0",
