@@ -1,0 +1,49 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 34e7f011..cee12089 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -53,6 +53,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.9"
++    "version": "10.1.8"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index 6349649b..dbe0b41e 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -4,7 +4,7 @@ import { isRTL, translate, TxKeyPath } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import { typography } from "@/theme/typography"
+-import { ReactNode, forwardRef, ForwardedRef } from "react"
++import { ReactNode } from "react"
+ 
+ type Sizes = keyof typeof $sizeStyles
+ type Weights = keyof typeof typography.primary
+@@ -53,7 +53,7 @@ export interface TextProps extends RNTextProps {
+  * @param {TextProps} props - The props for the `Text` component.
+  * @returns {JSX.Element} The rendered `Text` component.
+  */
+-export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
++export function Text(props: TextProps) {
+   const { weight, size, tx, txOptions, text, children, style: $styleOverride, ...rest } = props
+   const { themed } = useAppTheme()
+ 
+@@ -70,11 +70,11 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
+   ]
+ 
+   return (
+-    <RNText {...rest} style={$styles} ref={ref}>
++    <RNText {...rest} style={$styles}>
+       {content}
+     </RNText>
+   )
+-})
++}
+ 
+ const $sizeStyles = {
+   xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,

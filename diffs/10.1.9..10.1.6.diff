@@ -1,0 +1,97 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 34e7f011..acb98cae 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -23,8 +23,7 @@
+       "adaptiveIcon": {
+         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
+-      },
+-      "allowBackup": false
++      }
+     },
+     "ios": {
+       "icon": "./assets/images/app-icon-ios.png",
+@@ -53,6 +52,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.9"
++    "version": "10.1.6"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/Text.test.tsx b/IgniteDiffApp/app/components/Text.test.tsx
+index b89d098e..c8be8f58 100644
+--- a/IgniteDiffApp/app/components/Text.test.tsx
++++ b/IgniteDiffApp/app/components/Text.test.tsx
+@@ -1,4 +1,4 @@
+-import { render, screen } from "@testing-library/react-native"
++import { render } from "@testing-library/react-native"
+ import { Text } from "./Text"
+ 
+ /* This is an example component test using react-native-testing-library. For more
+@@ -8,7 +8,7 @@ const testText = "Test string"
+ 
+ describe("Text", () => {
+   it("should render the component", () => {
+-    render(<Text text={testText} />)
+-    expect(screen.getByText(testText)).toBeDefined()
++    const { getByText } = render(<Text text={testText} />)
++    expect(getByText(testText)).toBeDefined()
+   })
+ })
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index 6349649b..dbe0b41e 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -4,7 +4,7 @@ import { isRTL, translate, TxKeyPath } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import { typography } from "@/theme/typography"
+-import { ReactNode, forwardRef, ForwardedRef } from "react"
++import { ReactNode } from "react"
+ 
+ type Sizes = keyof typeof $sizeStyles
+ type Weights = keyof typeof typography.primary
+@@ -53,7 +53,7 @@ export interface TextProps extends RNTextProps {
+  * @param {TextProps} props - The props for the `Text` component.
+  * @returns {JSX.Element} The rendered `Text` component.
+  */
+-export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
++export function Text(props: TextProps) {
+   const { weight, size, tx, txOptions, text, children, style: $styleOverride, ...rest } = props
+   const { themed } = useAppTheme()
+ 
+@@ -70,11 +70,11 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
+   ]
+ 
+   return (
+-    <RNText {...rest} style={$styles} ref={ref}>
++    <RNText {...rest} style={$styles}>
+       {content}
+     </RNText>
+   )
+-})
++}
+ 
+ const $sizeStyles = {
+   xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,
+diff --git a/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs b/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
+index 070081ab..006ced05 100644
+--- a/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
++++ b/IgniteDiffApp/ignite/templates/model/NAME.test.ts.ejs
+@@ -9,4 +9,3 @@ test("can be created", () => {
+   expect(instance).toBeTruthy()
+ })
+ 
+-
+diff --git a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+index e7228184..8a0b80a7 100644
+--- a/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
++++ b/IgniteDiffApp/ignite/templates/model/NAME.ts.ejs
+@@ -31,4 +31,3 @@ export interface <%= props.pascalCaseName %>SnapshotOut extends SnapshotOut<type
+ export interface <%= props.pascalCaseName %>SnapshotIn extends SnapshotIn<typeof <%= props.pascalCaseName %>Model> {}
+ export const create<%= props.pascalCaseName %>DefaultModel = () => types.optional(<%= props.pascalCaseName %>Model, {})
+ 
+-
