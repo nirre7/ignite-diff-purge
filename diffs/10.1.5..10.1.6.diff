@@ -1,0 +1,171 @@
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 78992884..acb98cae 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -52,6 +52,6 @@
+     }
+   },
+   "ignite": {
+-    "version": "10.1.5"
++    "version": "10.1.6"
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/components/EmptyState.tsx b/IgniteDiffApp/app/components/EmptyState.tsx
+index f6a187a0..df33d508 100644
+--- a/IgniteDiffApp/app/components/EmptyState.tsx
++++ b/IgniteDiffApp/app/components/EmptyState.tsx
+@@ -1,9 +1,10 @@
+ import { Image, ImageProps, ImageStyle, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+-import { translate } from "../i18n"
++
+ import { Button, ButtonProps } from "./Button"
+ import { Text, TextProps } from "./Text"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import type { ThemedStyle } from "@/theme"
++import { translate } from "@/i18n/translate"
+ 
+ const sadFace = require("../../assets/images/sad-face.png")
+ 
+diff --git a/IgniteDiffApp/app/components/Header.tsx b/IgniteDiffApp/app/components/Header.tsx
+index b272aa23..a81ede72 100644
+--- a/IgniteDiffApp/app/components/Header.tsx
++++ b/IgniteDiffApp/app/components/Header.tsx
+@@ -7,7 +7,7 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import { isRTL, translate } from "../i18n"
++import { isRTL, translate } from "@/i18n"
+ import { $styles } from "../theme"
+ import { ExtendedEdge, useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+ import { Icon, IconTypes } from "./Icon"
+diff --git a/IgniteDiffApp/app/components/Text.tsx b/IgniteDiffApp/app/components/Text.tsx
+index 86e57505..dbe0b41e 100644
+--- a/IgniteDiffApp/app/components/Text.tsx
++++ b/IgniteDiffApp/app/components/Text.tsx
+@@ -1,6 +1,6 @@
+ import { TOptions } from "i18next"
+ import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from "react-native"
+-import { isRTL, translate, TxKeyPath } from "../i18n"
++import { isRTL, translate, TxKeyPath } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ import { typography } from "@/theme/typography"
+diff --git a/IgniteDiffApp/app/components/TextField.tsx b/IgniteDiffApp/app/components/TextField.tsx
+index bdb361fc..6e26f69b 100644
+--- a/IgniteDiffApp/app/components/TextField.tsx
++++ b/IgniteDiffApp/app/components/TextField.tsx
+@@ -9,7 +9,7 @@ import {
+   View,
+   ViewStyle,
+ } from "react-native"
+-import { isRTL, translate } from "../i18n"
++import { isRTL, translate } from "@/i18n"
+ import type { ThemedStyle, ThemedStyleArray } from "@/theme"
+ import { $styles } from "../theme"
+ import { Text, TextProps } from "./Text"
+diff --git a/IgniteDiffApp/app/models/Episode.ts b/IgniteDiffApp/app/models/Episode.ts
+index 3f4b7ad8..285a33af 100644
+--- a/IgniteDiffApp/app/models/Episode.ts
++++ b/IgniteDiffApp/app/models/Episode.ts
+@@ -1,7 +1,7 @@
+ import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+ import { withSetPropAction } from "./helpers/withSetPropAction"
+ import { formatDate } from "../utils/formatDate"
+-import { translate } from "../i18n"
++import { translate } from "@/i18n"
+ 
+ interface Enclosure {
+   link: string
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 7c6afc5e..f4783337 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -3,7 +3,7 @@ import { CompositeScreenProps } from "@react-navigation/native"
+ import { TextStyle, ViewStyle } from "react-native"
+ import { useSafeAreaInsets } from "react-native-safe-area-context"
+ import { Icon } from "../components"
+-import { translate } from "../i18n"
++import { translate } from "@/i18n"
+ import { DemoCommunityScreen, DemoShowroomScreen, DemoDebugScreen } from "../screens"
+ import { DemoPodcastListScreen } from "../screens/DemoPodcastListScreen"
+ import type { ThemedStyle } from "@/theme"
+diff --git a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+index e2a02187..d957038c 100644
+--- a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+@@ -4,7 +4,7 @@ import { ListItem, Screen, Text } from "../components"
+ import { DemoTabScreenProps } from "../navigators/DemoNavigator"
+ import { $styles } from "../theme"
+ import { openLinkInBrowser } from "../utils/openLinkInBrowser"
+-import { isRTL } from "../i18n"
++import { isRTL } from "@/i18n"
+ import type { ThemedStyle } from "@/theme"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+index c217c8d9..50af4762 100644
+--- a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+@@ -13,7 +13,7 @@ import { Button, ListItem, Screen, Text } from "../components"
+ import { DemoTabScreenProps } from "../navigators/DemoNavigator"
+ import type { ThemedStyle } from "@/theme"
+ import { $styles } from "../theme"
+-import { isRTL } from "../i18n"
++import { isRTL } from "@/i18n"
+ import { useStores } from "../models"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 3e981ba9..d28a17ba 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -31,7 +31,7 @@ import {
+   Switch,
+   Text,
+ } from "@/components"
+-import { isRTL, translate } from "../i18n"
++import { isRTL, translate } from "@/i18n"
+ import { useStores } from "../models"
+ import { Episode } from "../models/Episode"
+ import { DemoTabScreenProps } from "../navigators/DemoNavigator"
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index 9867e312..dc6e7310 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -4,7 +4,7 @@ import { Image, ImageStyle, Platform, SectionList, TextStyle, View, ViewStyle }
+ import { Drawer } from "react-native-drawer-layout"
+ import { type ContentStyle } from "@shopify/flash-list"
+ import { ListItem, ListView, ListViewRef, Screen, Text } from "../../components"
+-import { TxKeyPath, isRTL, translate } from "../../i18n"
++import { TxKeyPath, isRTL, translate } from "@/i18n"
+ import { DemoTabParamList, DemoTabScreenProps } from "../../navigators/DemoNavigator"
+ import type { Theme, ThemedStyle } from "@/theme"
+ import { $styles } from "@/theme"
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+index 72a4c041..e0ab41c3 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DrawerIconButton.tsx
+@@ -1,7 +1,7 @@
+ import { Pressable, PressableProps, ViewStyle, Platform } from "react-native"
+ import Animated, { interpolate, interpolateColor, useAnimatedStyle } from "react-native-reanimated"
+ import { useDrawerProgress } from "react-native-drawer-layout"
+-import { isRTL } from "../../i18n"
++import { isRTL } from "@/i18n"
+ import { useAppTheme } from "@/utils/useAppTheme"
+ 
+ interface DrawerIconButtonProps extends PressableProps {}
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index c72a5f81..f3619269 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
+ import { FC } from "react"
+ import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+ import { Button, Text, Screen } from "@/components"
+-import { isRTL } from "../i18n"
++import { isRTL } from "@/i18n"
+ import { useStores } from "../models"
+ import { AppStackScreenProps } from "../navigators"
+ import { $styles, type ThemedStyle } from "@/theme"
