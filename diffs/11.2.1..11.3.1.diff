@@ -1,0 +1,1443 @@
+diff --git a/IgniteDiffApp/.dependency-cruiser.js b/IgniteDiffApp/.dependency-cruiser.js
+new file mode 100644
+index 00000000..7313a0bd
+--- /dev/null
++++ b/IgniteDiffApp/.dependency-cruiser.js
+@@ -0,0 +1,195 @@
++const metroConfig = require("./metro.config.js")
++
++const platforms = ["ios", "android", "web", "native"]
++const extensions = metroConfig?.resolver?.sourceExts.flatMap((pExt) =>
++  platforms.map((platform) => `.${platform}.${pExt}`).concat(`.${pExt}`),
++)
++
++/** @type {import('dependency-cruiser').IConfiguration} */
++module.exports = {
++  forbidden: [
++    {
++      name: "no-circular",
++      severity: "warn",
++      comment:
++        "This dependency is part of a circular relationship. You might want to revise " +
++        "your solution (i.e. use dependency inversion, make sure the modules have a single responsibility) ",
++      from: {},
++      to: {
++        circular: true,
++      },
++    },
++    {
++      name: "no-orphans",
++      comment:
++        "This is an orphan module - it's likely not used (anymore?). Either use it or " +
++        "remove it. If it's logical this module is an orphan (i.e. it's a config file), " +
++        "add an exception for it in your dependency-cruiser configuration. By default " +
++        "this rule does not scrutinize dot-files (e.g. .eslintrc.js), TypeScript declaration " +
++        "files (.d.ts), tsconfig.json and some of the babel and webpack configs.",
++      severity: "warn",
++      from: {
++        orphan: true,
++        pathNot: [
++          "(^|/)\\.[^/]+\\.(js|cjs|mjs|ts|json)$",
++          "\\.d\\.ts$",
++          "(^|/)tsconfig\\.json$",
++          "(^|/)(babel|webpack)\\.config\\.(js|cjs|mjs|ts|json)$",
++          "crashReporting\\.ts$", // Boilerplate file for future crash reporting setup
++          "utils/delay\\.ts$", // Utility function for delaying execution
++        ],
++      },
++      to: {},
++    },
++    {
++      name: "no-deprecated-core",
++      comment:
++        "A module depends on a node core module that has been deprecated. Find an alternative - these are " +
++        "bound to exist - node doesn't deprecate lightly.",
++      severity: "warn",
++      from: {},
++      to: {
++        dependencyTypes: ["core"],
++        path: ["^(punycode)$", "^(domain)$", "^(constants)$", "^(sys)$"],
++      },
++    },
++    {
++      name: "not-to-deprecated",
++      comment:
++        "This module uses a (version of an) npm module that has been deprecated. Either upgrade to a later " +
++        "version of that module, or find an alternative. Deprecated modules are a security risk.",
++      severity: "warn",
++      from: {},
++      to: {
++        dependencyTypes: ["deprecated"],
++      },
++    },
++    {
++      name: "no-non-package-json",
++      severity: "error",
++      comment:
++        "This module depends on an npm package that isn't in the 'dependencies' section of your package.json. " +
++        "That's problematic as the package either (1) won't be available on live (2) will be " +
++        "available on live with an non-guaranteed version. Fix it by adding the package to the dependencies " +
++        "in your package.json.",
++      from: {},
++      to: {
++        dependencyTypes: ["npm-no-pkg", "npm-unknown"],
++      },
++    },
++    {
++      name: "not-to-unresolvable",
++      comment:
++        "This module depends on a module that cannot be found ('resolved to disk'). If it's an npm " +
++        "module: add it to your package.json. In all other cases you likely already know what to do.",
++      severity: "error",
++      from: {},
++      to: {
++        couldNotResolve: true,
++      },
++    },
++    {
++      name: "no-duplicate-dep-types",
++      comment:
++        "Likely this module depends on an external ('npm') package that occurs more than once " +
++        "in your package.json i.e. bot as a devDependencies and in dependencies. This will cause " +
++        "maintenance problems later on.",
++      severity: "warn",
++      from: {},
++      to: {
++        moreThanOneDependencyType: true,
++        dependencyTypesNot: ["type-only"],
++      },
++    },
++    {
++      name: "not-to-spec",
++      comment:
++        "This module depends on a spec (test) file. The sole responsibility of a spec file is to test code. " +
++        "If there's something in a spec that's of use to other modules, it doesn't have that single " +
++        "responsibility anymore. Factor it out into (e.g.) a separate utility/ helper or a mock.",
++      severity: "error",
++      from: {
++        pathNot: "\\.(spec|test)\\.(js|mjs|cjs|ts|tsx)$",
++      },
++      to: {
++        path: "\\.(spec|test)\\.(js|mjs|cjs|ts|tsx)$",
++      },
++    },
++    {
++      name: "not-to-dev-dep",
++      severity: "error",
++      comment:
++        "This module depends on an npm package from the 'devDependencies' section of your " +
++        "package.json. It looks like something that ships to production, though. To prevent problems " +
++        "with npm packages that aren't there on production declare it (only!) in the 'dependencies'" +
++        "section of your package.json. If this module is development only - add it to the " +
++        "from.pathNot re of the not-to-dev-dep rule in the dependency-cruiser configuration",
++      from: {
++        path: "^(app|src)",
++        pathNot: "\\.(spec|test)\\.(js|mjs|cjs|ts|tsx)$",
++      },
++      to: {
++        dependencyTypes: ["npm-dev"],
++        pathNot: ["node_modules/@types/"],
++        exoticRequireNot: [
++          "react-native/Libraries/Utilities/codegenNativeComponent",
++          "react-native/Libraries/Utilities/codegenNativeCommands",
++        ],
++      },
++    },
++    {
++      name: "optional-deps-used",
++      severity: "info",
++      comment:
++        "This module depends on an npm package that is declared as an optional dependency " +
++        "in your package.json. As this makes sense in limited situations only, it's flagged here. " +
++        "If you're using an optional dependency here by design - add an exception to your" +
++        "dependency-cruiser configuration.",
++      from: {},
++      to: {
++        dependencyTypes: ["npm-optional"],
++      },
++    },
++    {
++      name: "peer-deps-used",
++      comment:
++        "This module depends on an npm package that is declared as a peer dependency " +
++        "in your package.json. This makes sense if your package is e.g. a plugin, but in " +
++        "other cases - maybe not so much. If the use of a peer dependency is intentional " +
++        "add an exception to your dependency-cruiser configuration.",
++      severity: "warn",
++      from: {},
++      to: {
++        dependencyTypes: ["npm-peer"],
++      },
++    },
++  ],
++  options: {
++    doNotFollow: {
++      path: "node_modules",
++    },
++    tsPreCompilationDeps: true,
++    tsConfig: {
++      fileName: "tsconfig.json",
++    },
++    enhancedResolveOptions: {
++      exportsFields: ["exports"],
++      conditionNames: ["import", "require", "node", "default"],
++      // React Native / Metro bundler support for platform-specific extensions
++      // See: https://reactnative.dev/docs/platform-specific-code
++      // See: https://github.com/sverweij/dependency-cruiser/issues/511
++      extensions,
++    },
++    reporterOptions: {
++      dot: {
++        collapsePattern: "node_modules/(@[^/]+/[^/]+|[^/]+)",
++      },
++      archi: {
++        collapsePattern: "^(app|src|test)/[^/]+",
++      },
++      text: {
++        highlightFocused: true,
++      },
++    },
++  },
++}
+diff --git a/IgniteDiffApp/.gitignore b/IgniteDiffApp/.gitignore
+index cb8b8049..e418c8b3 100644
+--- a/IgniteDiffApp/.gitignore
++++ b/IgniteDiffApp/.gitignore
+@@ -95,3 +95,7 @@ web-build/
+ !.yarn/releases
+ !.yarn/sdks
+ !.yarn/versions
++
++# Dependency Graph Visualizations
++app-dependency-graph.svg
++app-dependency-graph.png
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app.config.ts b/IgniteDiffApp/app.config.ts
+index d17a8e89..ffc90346 100644
+--- a/IgniteDiffApp/app.config.ts
++++ b/IgniteDiffApp/app.config.ts
+@@ -1,10 +1,12 @@
+ import { ExpoConfig, ConfigContext } from "@expo/config"
+ 
+ /**
+- * Use ts-node here so we can use TypeScript for our Config Plugins
+- * and not have to compile them to JavaScript
++ * Use tsx/cjs here so we can use TypeScript for our Config Plugins
++ * and not have to compile them to JavaScript.
++ *
++ * See https://docs.expo.dev/config-plugins/plugins/#add-typescript-support-and-convert-to-dynamic-app-config
+  */
+-require("ts-node/register")
++import "tsx/cjs"
+ 
+ /**
+  * @param config ExpoConfig coming from the static config app.json if it exists
+@@ -34,6 +36,6 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
+         ],
+       },
+     },
+-    plugins: [...existingPlugins, require("./plugins/withSplashScreen").withSplashScreen],
++    plugins: [...existingPlugins],
+   }
+ }
+diff --git a/IgniteDiffApp/app.json b/IgniteDiffApp/app.json
+index 0aeb461a..7609dd68 100644
+--- a/IgniteDiffApp/app.json
++++ b/IgniteDiffApp/app.json
+@@ -61,7 +61,7 @@
+   },
+   "extra": {
+     "ignite": {
+-      "version": "11.2.1"
++      "version": "11.3.1"
+     }
+   }
+ }
+\ No newline at end of file
+diff --git a/IgniteDiffApp/app/navigators/AppNavigator.tsx b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+index a4b3ca0d..42652266 100644
+--- a/IgniteDiffApp/app/navigators/AppNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/AppNavigator.tsx
+@@ -4,9 +4,8 @@
+  * Generally speaking, it will contain an auth flow (registration, login, forgot password)
+  * and a "main" flow which the user will use once logged in.
+  */
+-import { ComponentProps } from "react"
+-import { NavigationContainer, NavigatorScreenParams } from "@react-navigation/native"
+-import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
++import { NavigationContainer } from "@react-navigation/native"
++import { createNativeStackNavigator } from "@react-navigation/native-stack"
+ 
+ import Config from "@/config"
+ import { useAuth } from "@/context/AuthContext"
+@@ -15,37 +14,16 @@ import { LoginScreen } from "@/screens/LoginScreen"
+ import { WelcomeScreen } from "@/screens/WelcomeScreen"
+ import { useAppTheme } from "@/theme/context"
+ 
+-import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
++import { DemoNavigator } from "./DemoNavigator"
++import type { AppStackParamList, NavigationProps } from "./navigationTypes"
+ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
+ 
+-/**
+- * This type allows TypeScript to know what routes are defined in this navigator
+- * as well as what properties (if any) they might take when navigating to them.
+- *
+- * For more information, see this documentation:
+- *   https://reactnavigation.org/docs/params/
+- *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
+- *   https://reactnavigation.org/docs/typescript/#organizing-types
+- */
+-export type AppStackParamList = {
+-  Welcome: undefined
+-  Login: undefined
+-  Demo: NavigatorScreenParams<DemoTabParamList>
+-  // 🔥 Your screens go here
+-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+-}
+-
+ /**
+  * This is a list of all the route names that will exit the app if the back button
+  * is pressed while in that screen. Only affects Android.
+  */
+ const exitRoutes = Config.exitRoutes
+ 
+-export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<
+-  AppStackParamList,
+-  T
+->
+-
+ // Documentation: https://reactnavigation.org/docs/stack-navigator/
+ const Stack = createNativeStackNavigator<AppStackParamList>()
+ 
+@@ -85,10 +63,6 @@ const AppStack = () => {
+   )
+ }
+ 
+-export interface NavigationProps extends Partial<
+-  ComponentProps<typeof NavigationContainer<AppStackParamList>>
+-> {}
+-
+ export const AppNavigator = (props: NavigationProps) => {
+   const { navigationTheme } = useAppTheme()
+ 
+diff --git a/IgniteDiffApp/app/navigators/DemoNavigator.tsx b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+index 81959034..f697905b 100644
+--- a/IgniteDiffApp/app/navigators/DemoNavigator.tsx
++++ b/IgniteDiffApp/app/navigators/DemoNavigator.tsx
+@@ -1,6 +1,5 @@
+ import { TextStyle, ViewStyle } from "react-native"
+-import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+-import { CompositeScreenProps } from "@react-navigation/native"
++import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+ import { useSafeAreaInsets } from "react-native-safe-area-context"
+ 
+ import { Icon } from "@/components/Icon"
+@@ -13,24 +12,7 @@ import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScr
+ import { useAppTheme } from "@/theme/context"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+-import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
+-
+-export type DemoTabParamList = {
+-  DemoCommunity: undefined
+-  DemoShowroom: { queryIndex?: string; itemIndex?: string }
+-  DemoDebug: undefined
+-  DemoPodcastList: undefined
+-}
+-
+-/**
+- * Helper for automatically generating navigation prop types for each route.
+- *
+- * More info: https://reactnavigation.org/docs/typescript/#organizing-types
+- */
+-export type DemoTabScreenProps<T extends keyof DemoTabParamList> = CompositeScreenProps<
+-  BottomTabScreenProps<DemoTabParamList, T>,
+-  AppStackScreenProps<keyof AppStackParamList>
+->
++import type { DemoTabParamList } from "./navigationTypes"
+ 
+ const Tab = createBottomTabNavigator<DemoTabParamList>()
+ 
+diff --git a/IgniteDiffApp/app/navigators/navigationTypes.ts b/IgniteDiffApp/app/navigators/navigationTypes.ts
+new file mode 100644
+index 00000000..1de94471
+--- /dev/null
++++ b/IgniteDiffApp/app/navigators/navigationTypes.ts
+@@ -0,0 +1,39 @@
++import { ComponentProps } from "react"
++import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
++import {
++  CompositeScreenProps,
++  NavigationContainer,
++  NavigatorScreenParams,
++} from "@react-navigation/native"
++import { NativeStackScreenProps } from "@react-navigation/native-stack"
++
++// Demo Tab Navigator types
++export type DemoTabParamList = {
++  DemoCommunity: undefined
++  DemoShowroom: { queryIndex?: string; itemIndex?: string }
++  DemoDebug: undefined
++  DemoPodcastList: undefined
++}
++
++// App Stack Navigator types
++export type AppStackParamList = {
++  Welcome: undefined
++  Login: undefined
++  Demo: NavigatorScreenParams<DemoTabParamList>
++  // 🔥 Your screens go here
++  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
++}
++
++export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<
++  AppStackParamList,
++  T
++>
++
++export type DemoTabScreenProps<T extends keyof DemoTabParamList> = CompositeScreenProps<
++  BottomTabScreenProps<DemoTabParamList, T>,
++  AppStackScreenProps<keyof AppStackParamList>
++>
++
++export interface NavigationProps extends Partial<
++  ComponentProps<typeof NavigationContainer<AppStackParamList>>
++> {}
+diff --git a/IgniteDiffApp/app/navigators/navigationUtilities.ts b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+index bc74cf54..08b64c6e 100644
+--- a/IgniteDiffApp/app/navigators/navigationUtilities.ts
++++ b/IgniteDiffApp/app/navigators/navigationUtilities.ts
+@@ -11,7 +11,7 @@ import type { PersistNavigationConfig } from "@/config/config.base"
+ import * as storage from "@/utils/storage"
+ import { useIsMounted } from "@/utils/useIsMounted"
+ 
+-import type { AppStackParamList, NavigationProps } from "./AppNavigator"
++import type { AppStackParamList, NavigationProps } from "./navigationTypes"
+ 
+ type Storage = typeof storage
+ 
+diff --git a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+index 88452c28..9ce6e697 100644
+--- a/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoCommunityScreen.tsx
+@@ -5,7 +5,7 @@ import { ListItem } from "@/components/ListItem"
+ import { Screen } from "@/components/Screen"
+ import { Text } from "@/components/Text"
+ import { isRTL } from "@/i18n"
+-import { DemoTabScreenProps } from "@/navigators/DemoNavigator"
++import { DemoTabScreenProps } from "@/navigators/navigationTypes"
+ import { useAppTheme } from "@/theme/context"
+ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+diff --git a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+index 0c171f30..bf569ec2 100644
+--- a/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoDebugScreen.tsx
+@@ -16,7 +16,7 @@ import { Screen } from "@/components/Screen"
+ import { Text } from "@/components/Text"
+ import { useAuth } from "@/context/AuthContext"
+ import { isRTL } from "@/i18n"
+-import { DemoTabScreenProps } from "@/navigators/DemoNavigator"
++import { DemoTabScreenProps } from "@/navigators/navigationTypes"
+ import { useAppTheme } from "@/theme/context"
+ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+diff --git a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+index 0dd9ef9b..f37de151 100644
+--- a/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoPodcastListScreen.tsx
+@@ -30,7 +30,7 @@ import { Switch } from "@/components/Toggle/Switch"
+ import { useEpisodes, useEpisode } from "@/context/EpisodeContext"
+ import { isRTL } from "@/i18n"
+ import { translate } from "@/i18n/translate"
+-import { DemoTabScreenProps } from "@/navigators/DemoNavigator"
++import { DemoTabScreenProps } from "@/navigators/navigationTypes"
+ import type { EpisodeItem } from "@/services/api/types"
+ import { useAppTheme } from "@/theme/context"
+ import { $styles } from "@/theme/styles"
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+index da44e44d..4cb5c97d 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/DemoShowroomScreen.tsx
+@@ -17,11 +17,10 @@ import { Screen } from "@/components/Screen"
+ import { Text } from "@/components/Text"
+ import { TxKeyPath, isRTL } from "@/i18n"
+ import { translate } from "@/i18n/translate"
+-import { DemoTabParamList, DemoTabScreenProps } from "@/navigators/DemoNavigator"
++import { DemoTabParamList, DemoTabScreenProps } from "@/navigators/navigationTypes"
+ import { useAppTheme } from "@/theme/context"
+ import { $styles } from "@/theme/styles"
+-import type { Theme, ThemedStyle } from "@/theme/types"
+-import { hasValidStringProp } from "@/utils/hasValidStringProp"
++import type { ThemedStyle } from "@/theme/types"
+ import { useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
+ 
+ import * as Demos from "./demos"
+@@ -30,12 +29,6 @@ import SectionListWithKeyboardAwareScrollView from "./SectionListWithKeyboardAwa
+ 
+ const logo = require("@assets/images/logo.png")
+ 
+-export interface Demo {
+-  name: string
+-  description: TxKeyPath
+-  data: ({ themed, theme }: { themed: any; theme: Theme }) => ReactElement[]
+-}
+-
+ interface DemoListItem {
+   item: { name: string; useCases: string[] }
+   sectionIndex: number
+@@ -50,6 +43,23 @@ const slugify = (str: string) =>
+     .replace(/[\s_-]+/g, "-")
+     .replace(/^-+|-+$/g, "")
+ 
++/**
++ * Type-safe utility to check if an unknown object has a valid string property.
++ * This is particularly useful in React 19 where props are typed as unknown by default.
++ * The function safely narrows down the type by checking both property existence and type.
++ * @param props - The unknown props to check.
++ * @param propName - The name of the property to check.
++ * @returns Whether the property is a valid string.
++ */
++function hasValidStringProp(props: unknown, propName: string): boolean {
++  return (
++    props !== null &&
++    typeof props === "object" &&
++    propName in props &&
++    typeof (props as Record<string, unknown>)[propName] === "string"
++  )
++}
++
+ const WebListItem: FC<DemoListItem> = ({ item, sectionIndex }) => {
+   const sectionSlug = item.name.toLowerCase()
+   const { themed } = useAppTheme()
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+index 3c1895fb..7c423c78 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoAutoImage.tsx
+@@ -8,7 +8,7 @@ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const $imageContainer: ViewStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx
+index 0de1cd58..83006a8b 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoButton.tsx
+@@ -8,7 +8,7 @@ import { translate } from "@/i18n/translate"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const $iconStyle: ImageStyle = { width: 30, height: 30 }
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+index 382907b9..751e03c0 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoCard.tsx
+@@ -5,7 +5,7 @@ import { Card } from "@/components/Card"
+ import { Icon } from "@/components/Icon"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ export const DemoCard: Demo = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx
+index ebbad6b6..bc655660 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoEmptyState.tsx
+@@ -2,7 +2,7 @@
+ import { EmptyState } from "@/components/EmptyState"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ export const DemoEmptyState: Demo = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+index c5c1ebde..94be9679 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoHeader.tsx
+@@ -7,7 +7,7 @@ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const $rightAlignTitle: TextStyle = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+index 8d9a24ef..442168a4 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoIcon.tsx
+@@ -6,7 +6,7 @@ import { Text } from "@/components/Text"
+ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const $demoIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+index dbc50414..8fb6945d 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoListItem.tsx
+@@ -10,7 +10,7 @@ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const listData =
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx
+index 3c496ec6..3099ba2a 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoText.tsx
+@@ -3,7 +3,7 @@ import { Text } from "@/components/Text"
+ import { translate } from "@/i18n/translate"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ export const DemoText: Demo = {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+index fee808b5..71db2b56 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoTextField.tsx
+@@ -6,7 +6,7 @@ import { TextField } from "@/components/TextField"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ const $customInputStyle: ThemedStyle<TextStyle> = ({ colors }) => ({
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+index 9f2fbff2..10bf3ea1 100644
+--- a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/DemoToggle.tsx
+@@ -11,7 +11,7 @@ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+ import { DemoDivider } from "../DemoDivider"
+-import { Demo } from "../DemoShowroomScreen"
++import { Demo } from "./types"
+ import { DemoUseCase } from "../DemoUseCase"
+ 
+ function ControlledCheckbox(props: CheckboxToggleProps) {
+diff --git a/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/types.ts b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/types.ts
+new file mode 100644
+index 00000000..760631c3
+--- /dev/null
++++ b/IgniteDiffApp/app/screens/DemoShowroomScreen/demos/types.ts
+@@ -0,0 +1,10 @@
++import { ReactElement } from "react"
++
++import { TxKeyPath } from "@/i18n"
++import type { Theme } from "@/theme/types"
++
++export interface Demo {
++  name: string
++  description: TxKeyPath
++  data: ({ themed, theme }: { themed: any; theme: Theme }) => ReactElement[]
++}
+diff --git a/IgniteDiffApp/app/screens/LoginScreen.tsx b/IgniteDiffApp/app/screens/LoginScreen.tsx
+index 179e8789..d7ddc7af 100644
+--- a/IgniteDiffApp/app/screens/LoginScreen.tsx
++++ b/IgniteDiffApp/app/screens/LoginScreen.tsx
+@@ -8,7 +8,7 @@ import { Screen } from "@/components/Screen"
+ import { Text } from "@/components/Text"
+ import { TextField, type TextFieldAccessoryProps } from "@/components/TextField"
+ import { useAuth } from "@/context/AuthContext"
+-import type { AppStackScreenProps } from "@/navigators/AppNavigator"
++import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+ import { useAppTheme } from "@/theme/context"
+ import type { ThemedStyle } from "@/theme/types"
+ 
+diff --git a/IgniteDiffApp/app/screens/WelcomeScreen.tsx b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+index 0a856cfb..a1ad7f92 100644
+--- a/IgniteDiffApp/app/screens/WelcomeScreen.tsx
++++ b/IgniteDiffApp/app/screens/WelcomeScreen.tsx
+@@ -6,7 +6,7 @@ import { Screen } from "@/components/Screen"
+ import { Text } from "@/components/Text"
+ import { useAuth } from "@/context/AuthContext"
+ import { isRTL } from "@/i18n"
+-import type { AppStackScreenProps } from "@/navigators/AppNavigator"
++import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+ import { useAppTheme } from "@/theme/context"
+ import { $styles } from "@/theme/styles"
+ import type { ThemedStyle } from "@/theme/types"
+diff --git a/IgniteDiffApp/app/utils/hasValidStringProp.ts b/IgniteDiffApp/app/utils/hasValidStringProp.ts
+deleted file mode 100644
+index 30306e24..00000000
+--- a/IgniteDiffApp/app/utils/hasValidStringProp.ts
++++ /dev/null
+@@ -1,11 +0,0 @@
+-// Type-safe utility to check if an unknown object has a valid string property.
+-// This is particularly useful in React 19 where props are typed as unknown by default.
+-// The function safely narrows down the type by checking both property existence and type.
+-export function hasValidStringProp(props: unknown, propName: string): boolean {
+-  return (
+-    props !== null &&
+-    typeof props === "object" &&
+-    propName in props &&
+-    typeof (props as Record<string, unknown>)[propName] === "string"
+-  )
+-}
+diff --git a/IgniteDiffApp/bun.lock b/IgniteDiffApp/bun.lock
+index 2c77b9a8..a4e3ee34 100644
+--- a/IgniteDiffApp/bun.lock
++++ b/IgniteDiffApp/bun.lock
+@@ -36,6 +36,7 @@
+         "react-native-screens": "~4.16.0",
+         "react-native-web": "~0.21.0",
+         "react-native-worklets": "0.7.0-nightly-20251001-14eca5b4c",
++        "setimmediate": "^1.0.5",
+       },
+       "devDependencies": {
+         "@babel/core": "^7.20.0",
+@@ -45,6 +46,7 @@
+         "@types/jest": "^29.5.14",
+         "@types/react": "~19.1.10",
+         "babel-jest": "^29.2.1",
++        "dependency-cruiser": "^17.0.2",
+         "eslint": "^8.57.0",
+         "eslint-config-expo": "~10.0.0",
+         "eslint-config-prettier": "^9.1.0",
+@@ -60,7 +62,7 @@
+         "reactotron-react-native": "^5.0.5",
+         "reactotron-react-native-mmkv": "^0.2.6",
+         "ts-jest": "^29.1.1",
+-        "ts-node": "^10.9.2",
++        "tsx": "^4.20.3",
+         "typescript": "~5.9.2",
+       },
+     },
+@@ -320,8 +322,6 @@
+ 
+     "@bcoe/v8-coverage": ["@bcoe/v8-coverage@0.2.3", "", {}, "sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw=="],
+ 
+-    "@cspotcode/source-map-support": ["@cspotcode/source-map-support@0.8.1", "", { "dependencies": { "@jridgewell/trace-mapping": "0.3.9" } }, "sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw=="],
+-
+     "@egjs/hammerjs": ["@egjs/hammerjs@2.0.17", "", { "dependencies": { "@types/hammerjs": "^2.0.36" } }, "sha512-XQsZgjm2EcVUiZQf11UBJQfmZeEmOW8DpI1gsFeln6w0ae0ii4dMQEQ0kjl6DspdWX1aGY1/loyXnP0JS06e/A=="],
+ 
+     "@emnapi/core": ["@emnapi/core@1.7.1", "", { "dependencies": { "@emnapi/wasi-threads": "1.1.0", "tslib": "^2.4.0" } }, "sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg=="],
+@@ -330,6 +330,58 @@
+ 
+     "@emnapi/wasi-threads": ["@emnapi/wasi-threads@1.1.0", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ=="],
+ 
++    "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.27.0", "", { "os": "aix", "cpu": "ppc64" }, "sha512-KuZrd2hRjz01y5JK9mEBSD3Vj3mbCvemhT466rSuJYeE/hjuBrHfjjcjMdTm/sz7au+++sdbJZJmuBwQLuw68A=="],
++
++    "@esbuild/android-arm": ["@esbuild/android-arm@0.27.0", "", { "os": "android", "cpu": "arm" }, "sha512-j67aezrPNYWJEOHUNLPj9maeJte7uSMM6gMoxfPC9hOg8N02JuQi/T7ewumf4tNvJadFkvLZMlAq73b9uwdMyQ=="],
++
++    "@esbuild/android-arm64": ["@esbuild/android-arm64@0.27.0", "", { "os": "android", "cpu": "arm64" }, "sha512-CC3vt4+1xZrs97/PKDkl0yN7w8edvU2vZvAFGD16n9F0Cvniy5qvzRXjfO1l94efczkkQE6g1x0i73Qf5uthOQ=="],
++
++    "@esbuild/android-x64": ["@esbuild/android-x64@0.27.0", "", { "os": "android", "cpu": "x64" }, "sha512-wurMkF1nmQajBO1+0CJmcN17U4BP6GqNSROP8t0X/Jiw2ltYGLHpEksp9MpoBqkrFR3kv2/te6Sha26k3+yZ9Q=="],
++
++    "@esbuild/darwin-arm64": ["@esbuild/darwin-arm64@0.27.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-uJOQKYCcHhg07DL7i8MzjvS2LaP7W7Pn/7uA0B5S1EnqAirJtbyw4yC5jQ5qcFjHK9l6o/MX9QisBg12kNkdHg=="],
++
++    "@esbuild/darwin-x64": ["@esbuild/darwin-x64@0.27.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-8mG6arH3yB/4ZXiEnXof5MK72dE6zM9cDvUcPtxhUZsDjESl9JipZYW60C3JGreKCEP+p8P/72r69m4AZGJd5g=="],
++
++    "@esbuild/freebsd-arm64": ["@esbuild/freebsd-arm64@0.27.0", "", { "os": "freebsd", "cpu": "arm64" }, "sha512-9FHtyO988CwNMMOE3YIeci+UV+x5Zy8fI2qHNpsEtSF83YPBmE8UWmfYAQg6Ux7Gsmd4FejZqnEUZCMGaNQHQw=="],
++
++    "@esbuild/freebsd-x64": ["@esbuild/freebsd-x64@0.27.0", "", { "os": "freebsd", "cpu": "x64" }, "sha512-zCMeMXI4HS/tXvJz8vWGexpZj2YVtRAihHLk1imZj4efx1BQzN76YFeKqlDr3bUWI26wHwLWPd3rwh6pe4EV7g=="],
++
++    "@esbuild/linux-arm": ["@esbuild/linux-arm@0.27.0", "", { "os": "linux", "cpu": "arm" }, "sha512-t76XLQDpxgmq2cNXKTVEB7O7YMb42atj2Re2Haf45HkaUpjM2J0UuJZDuaGbPbamzZ7bawyGFUkodL+zcE+jvQ=="],
++
++    "@esbuild/linux-arm64": ["@esbuild/linux-arm64@0.27.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-AS18v0V+vZiLJyi/4LphvBE+OIX682Pu7ZYNsdUHyUKSoRwdnOsMf6FDekwoAFKej14WAkOef3zAORJgAtXnlQ=="],
++
++    "@esbuild/linux-ia32": ["@esbuild/linux-ia32@0.27.0", "", { "os": "linux", "cpu": "ia32" }, "sha512-Mz1jxqm/kfgKkc/KLHC5qIujMvnnarD9ra1cEcrs7qshTUSksPihGrWHVG5+osAIQ68577Zpww7SGapmzSt4Nw=="],
++
++    "@esbuild/linux-loong64": ["@esbuild/linux-loong64@0.27.0", "", { "os": "linux", "cpu": "none" }, "sha512-QbEREjdJeIreIAbdG2hLU1yXm1uu+LTdzoq1KCo4G4pFOLlvIspBm36QrQOar9LFduavoWX2msNFAAAY9j4BDg=="],
++
++    "@esbuild/linux-mips64el": ["@esbuild/linux-mips64el@0.27.0", "", { "os": "linux", "cpu": "none" }, "sha512-sJz3zRNe4tO2wxvDpH/HYJilb6+2YJxo/ZNbVdtFiKDufzWq4JmKAiHy9iGoLjAV7r/W32VgaHGkk35cUXlNOg=="],
++
++    "@esbuild/linux-ppc64": ["@esbuild/linux-ppc64@0.27.0", "", { "os": "linux", "cpu": "ppc64" }, "sha512-z9N10FBD0DCS2dmSABDBb5TLAyF1/ydVb+N4pi88T45efQ/w4ohr/F/QYCkxDPnkhkp6AIpIcQKQ8F0ANoA2JA=="],
++
++    "@esbuild/linux-riscv64": ["@esbuild/linux-riscv64@0.27.0", "", { "os": "linux", "cpu": "none" }, "sha512-pQdyAIZ0BWIC5GyvVFn5awDiO14TkT/19FTmFcPdDec94KJ1uZcmFs21Fo8auMXzD4Tt+diXu1LW1gHus9fhFQ=="],
++
++    "@esbuild/linux-s390x": ["@esbuild/linux-s390x@0.27.0", "", { "os": "linux", "cpu": "s390x" }, "sha512-hPlRWR4eIDDEci953RI1BLZitgi5uqcsjKMxwYfmi4LcwyWo2IcRP+lThVnKjNtk90pLS8nKdroXYOqW+QQH+w=="],
++
++    "@esbuild/linux-x64": ["@esbuild/linux-x64@0.27.0", "", { "os": "linux", "cpu": "x64" }, "sha512-1hBWx4OUJE2cab++aVZ7pObD6s+DK4mPGpemtnAORBvb5l/g5xFGk0vc0PjSkrDs0XaXj9yyob3d14XqvnQ4gw=="],
++
++    "@esbuild/netbsd-arm64": ["@esbuild/netbsd-arm64@0.27.0", "", { "os": "none", "cpu": "arm64" }, "sha512-6m0sfQfxfQfy1qRuecMkJlf1cIzTOgyaeXaiVaaki8/v+WB+U4hc6ik15ZW6TAllRlg/WuQXxWj1jx6C+dfy3w=="],
++
++    "@esbuild/netbsd-x64": ["@esbuild/netbsd-x64@0.27.0", "", { "os": "none", "cpu": "x64" }, "sha512-xbbOdfn06FtcJ9d0ShxxvSn2iUsGd/lgPIO2V3VZIPDbEaIj1/3nBBe1AwuEZKXVXkMmpr6LUAgMkLD/4D2PPA=="],
++
++    "@esbuild/openbsd-arm64": ["@esbuild/openbsd-arm64@0.27.0", "", { "os": "openbsd", "cpu": "arm64" }, "sha512-fWgqR8uNbCQ/GGv0yhzttj6sU/9Z5/Sv/VGU3F5OuXK6J6SlriONKrQ7tNlwBrJZXRYk5jUhuWvF7GYzGguBZQ=="],
++
++    "@esbuild/openbsd-x64": ["@esbuild/openbsd-x64@0.27.0", "", { "os": "openbsd", "cpu": "x64" }, "sha512-aCwlRdSNMNxkGGqQajMUza6uXzR/U0dIl1QmLjPtRbLOx3Gy3otfFu/VjATy4yQzo9yFDGTxYDo1FfAD9oRD2A=="],
++
++    "@esbuild/openharmony-arm64": ["@esbuild/openharmony-arm64@0.27.0", "", { "os": "none", "cpu": "arm64" }, "sha512-nyvsBccxNAsNYz2jVFYwEGuRRomqZ149A39SHWk4hV0jWxKM0hjBPm3AmdxcbHiFLbBSwG6SbpIcUbXjgyECfA=="],
++
++    "@esbuild/sunos-x64": ["@esbuild/sunos-x64@0.27.0", "", { "os": "sunos", "cpu": "x64" }, "sha512-Q1KY1iJafM+UX6CFEL+F4HRTgygmEW568YMqDA5UV97AuZSm21b7SXIrRJDwXWPzr8MGr75fUZPV67FdtMHlHA=="],
++
++    "@esbuild/win32-arm64": ["@esbuild/win32-arm64@0.27.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-W1eyGNi6d+8kOmZIwi/EDjrL9nxQIQ0MiGqe/AWc6+IaHloxHSGoeRgDRKHFISThLmsewZ5nHFvGFWdBYlgKPg=="],
++
++    "@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.27.0", "", { "os": "win32", "cpu": "ia32" }, "sha512-30z1aKL9h22kQhilnYkORFYt+3wp7yZsHWus+wSKAJR8JtdfI76LJ4SBdMsCopTR3z/ORqVu5L1vtnHZWVj4cQ=="],
++
++    "@esbuild/win32-x64": ["@esbuild/win32-x64@0.27.0", "", { "os": "win32", "cpu": "x64" }, "sha512-aIitBcjQeyOhMTImhLZmtxfdOcuNRpwlPNmlFKPcHQYPhEssw75Cl1TSXJXpMkzaua9FUetx/4OQKq7eJul5Cg=="],
++
+     "@eslint-community/eslint-utils": ["@eslint-community/eslint-utils@4.9.0", "", { "dependencies": { "eslint-visitor-keys": "^3.4.3" }, "peerDependencies": { "eslint": "^6.0.0 || ^7.0.0 || >=8.0.0" } }, "sha512-ayVFHdtZ+hsq1t2Dy24wCmGXGe4q9Gu3smhLYALJrr473ZH27MsnSL+LKUlimp4BWJqMDMLmPpx/Q9R3OAlL4g=="],
+ 
+     "@eslint-community/regexpp": ["@eslint-community/regexpp@4.12.2", "", {}, "sha512-EriSTlt5OC9/7SXkRSCAhfSxxoSUgBm33OH+IkwbdpgoqsSsUg7y3uh+IICI/Qg4BBWr3U2i39RpmycbxMq4ew=="],
+@@ -530,14 +582,6 @@
+ 
+     "@tootallnate/once": ["@tootallnate/once@2.0.0", "", {}, "sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A=="],
+ 
+-    "@tsconfig/node10": ["@tsconfig/node10@1.0.12", "", {}, "sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ=="],
+-
+-    "@tsconfig/node12": ["@tsconfig/node12@1.0.11", "", {}, "sha512-cqefuRsh12pWyGsIoBKJA9luFu3mRxCA+ORZvA4ktLSzIuCUtWVxGIuXigEwO5/ywWFMZ2QEGKWvkZG1zDMTag=="],
+-
+-    "@tsconfig/node14": ["@tsconfig/node14@1.0.3", "", {}, "sha512-ysT8mhdixWK6Hw3i1V2AeRqZ5WfXg1G43mqoYlM2nc6388Fq5jcXyr5mRsqViLx/GJYdoL0bfXD8nmF+Zn/Iow=="],
+-
+-    "@tsconfig/node16": ["@tsconfig/node16@1.0.4", "", {}, "sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA=="],
+-
+     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
+ 
+     "@types/babel__core": ["@types/babel__core@7.20.5", "", { "dependencies": { "@babel/parser": "^7.20.7", "@babel/types": "^7.20.7", "@types/babel__generator": "*", "@types/babel__template": "*", "@types/babel__traverse": "*" } }, "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA=="],
+@@ -698,13 +742,15 @@
+ 
+     "acorn-jsx": ["acorn-jsx@5.3.2", "", { "peerDependencies": { "acorn": "^6.0.0 || ^7.0.0 || ^8.0.0" } }, "sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ=="],
+ 
++    "acorn-jsx-walk": ["acorn-jsx-walk@2.0.0", "", {}, "sha512-uuo6iJj4D4ygkdzd6jPtcxs8vZgDX9YFIkqczGImoypX2fQ4dVImmu3UzA4ynixCIMTrEOWW+95M2HuBaCEOVA=="],
++
+     "acorn-loose": ["acorn-loose@8.5.2", "", { "dependencies": { "acorn": "^8.15.0" } }, "sha512-PPvV6g8UGMGgjrMu+n/f9E/tCSkNQ2Y97eFvuVdJfG11+xdIeDcLyNdC8SHcrHbRqkfwLASdplyR6B6sKM1U4A=="],
+ 
+     "acorn-walk": ["acorn-walk@8.3.4", "", { "dependencies": { "acorn": "^8.11.0" } }, "sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g=="],
+ 
+     "agent-base": ["agent-base@6.0.2", "", { "dependencies": { "debug": "4" } }, "sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ=="],
+ 
+-    "ajv": ["ajv@6.12.6", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "fast-json-stable-stringify": "^2.0.0", "json-schema-traverse": "^0.4.1", "uri-js": "^4.2.2" } }, "sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g=="],
++    "ajv": ["ajv@8.17.1", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g=="],
+ 
+     "ajv-formats": ["ajv-formats@2.1.1", "", { "dependencies": { "ajv": "^8.0.0" } }, "sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA=="],
+ 
+@@ -724,7 +770,7 @@
+ 
+     "apisauce": ["apisauce@3.1.1", "", { "dependencies": { "axios": "^1.7.7" } }, "sha512-DQnF/5oNQaNLWrrs1zyI2E6ja8JrpwFH25ywevbu+nQdQKlWfeUSlT3Q2XTFwWcQkWVHfwQ1K+8R6ufM3xpPGA=="],
+ 
+-    "arg": ["arg@4.1.3", "", {}, "sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA=="],
++    "arg": ["arg@5.0.2", "", {}, "sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg=="],
+ 
+     "argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
+ 
+@@ -862,7 +908,7 @@
+ 
+     "combined-stream": ["combined-stream@1.0.8", "", { "dependencies": { "delayed-stream": "~1.0.0" } }, "sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg=="],
+ 
+-    "commander": ["commander@12.1.0", "", {}, "sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA=="],
++    "commander": ["commander@14.0.2", "", {}, "sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ=="],
+ 
+     "compressible": ["compressible@2.0.18", "", { "dependencies": { "mime-db": ">= 1.43.0 < 2" } }, "sha512-AF3r7P5dWxL8MxyITRMlORQNaOA2IkAFaTr4k7BUumjPtRpGDTZpl0Pb1XCO6JeDCBdp126Cgs9sMxqSjgYyRg=="],
+ 
+@@ -878,8 +924,6 @@
+ 
+     "create-jest": ["create-jest@29.7.0", "", { "dependencies": { "@jest/types": "^29.6.3", "chalk": "^4.0.0", "exit": "^0.1.2", "graceful-fs": "^4.2.9", "jest-config": "^29.7.0", "jest-util": "^29.7.0", "prompts": "^2.0.1" }, "bin": { "create-jest": "bin/create-jest.js" } }, "sha512-Adz2bdH0Vq3F53KEMJOoftQFutWCukm6J24wbPWRO4k1kMY7gS7ds/uoJkNuV8wDCtWWnuwGcJwpWcih+zEW1Q=="],
+ 
+-    "create-require": ["create-require@1.1.1", "", {}, "sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ=="],
+-
+     "cross-fetch": ["cross-fetch@3.2.0", "", { "dependencies": { "node-fetch": "^2.7.0" } }, "sha512-Q+xVJLoGOeIMXZmbUK4HYk+69cQH6LudR0Vu/pRm2YlU/hDV9CiS0gKUMaWY5f2NeUH9C1nV3bsTlCo0FsTV1Q=="],
+ 
+     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
+@@ -930,14 +974,14 @@
+ 
+     "depd": ["depd@2.0.0", "", {}, "sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw=="],
+ 
++    "dependency-cruiser": ["dependency-cruiser@17.3.2", "", { "dependencies": { "acorn": "8.15.0", "acorn-jsx": "5.3.2", "acorn-jsx-walk": "2.0.0", "acorn-loose": "8.5.2", "acorn-walk": "8.3.4", "ajv": "8.17.1", "commander": "14.0.2", "enhanced-resolve": "5.18.3", "ignore": "7.0.5", "interpret": "3.1.1", "is-installed-globally": "1.0.0", "json5": "2.2.3", "memoize": "10.2.0", "picomatch": "4.0.3", "prompts": "2.4.2", "rechoir": "0.8.0", "safe-regex": "2.1.1", "semver": "7.7.3", "tsconfig-paths-webpack-plugin": "4.2.0", "watskeburt": "5.0.0" }, "bin": { "depcruise": "bin/dependency-cruise.mjs", "depcruise-fmt": "bin/depcruise-fmt.mjs", "dependency-cruise": "bin/dependency-cruise.mjs", "depcruise-baseline": "bin/depcruise-baseline.mjs", "dependency-cruiser": "bin/dependency-cruise.mjs", "depcruise-wrap-stream-in-html": "bin/wrap-stream-in-html.mjs" } }, "sha512-1xx1Q1i7WuW85W1x1cLFcl4L5bjW5bT+qBm6kwnAdIHDA87x/gU7NWKknpBWMilX2lQphxtB1VeU3GVOj3wYqw=="],
++
+     "destroy": ["destroy@1.2.0", "", {}, "sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg=="],
+ 
+     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
+ 
+     "detect-newline": ["detect-newline@3.1.0", "", {}, "sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA=="],
+ 
+-    "diff": ["diff@4.0.2", "", {}, "sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A=="],
+-
+     "diff-sequences": ["diff-sequences@29.6.3", "", {}, "sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q=="],
+ 
+     "doctrine": ["doctrine@3.0.0", "", { "dependencies": { "esutils": "^2.0.2" } }, "sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w=="],
+@@ -990,6 +1034,8 @@
+ 
+     "es-to-primitive": ["es-to-primitive@1.3.0", "", { "dependencies": { "is-callable": "^1.2.7", "is-date-object": "^1.0.5", "is-symbol": "^1.0.4" } }, "sha512-w+5mJ3GuFL+NjVtJlvydShqE1eN3h3PbI7/5LAsYJP/2qtuMXjfL2LpHSRqo4b4eSF5K/DH1JXKUAHSB2UW50g=="],
+ 
++    "esbuild": ["esbuild@0.27.0", "", { "optionalDependencies": { "@esbuild/aix-ppc64": "0.27.0", "@esbuild/android-arm": "0.27.0", "@esbuild/android-arm64": "0.27.0", "@esbuild/android-x64": "0.27.0", "@esbuild/darwin-arm64": "0.27.0", "@esbuild/darwin-x64": "0.27.0", "@esbuild/freebsd-arm64": "0.27.0", "@esbuild/freebsd-x64": "0.27.0", "@esbuild/linux-arm": "0.27.0", "@esbuild/linux-arm64": "0.27.0", "@esbuild/linux-ia32": "0.27.0", "@esbuild/linux-loong64": "0.27.0", "@esbuild/linux-mips64el": "0.27.0", "@esbuild/linux-ppc64": "0.27.0", "@esbuild/linux-riscv64": "0.27.0", "@esbuild/linux-s390x": "0.27.0", "@esbuild/linux-x64": "0.27.0", "@esbuild/netbsd-arm64": "0.27.0", "@esbuild/netbsd-x64": "0.27.0", "@esbuild/openbsd-arm64": "0.27.0", "@esbuild/openbsd-x64": "0.27.0", "@esbuild/openharmony-arm64": "0.27.0", "@esbuild/sunos-x64": "0.27.0", "@esbuild/win32-arm64": "0.27.0", "@esbuild/win32-ia32": "0.27.0", "@esbuild/win32-x64": "0.27.0" }, "bin": { "esbuild": "bin/esbuild" } }, "sha512-jd0f4NHbD6cALCyGElNpGAOtWxSq46l9X/sWB0Nzd5er4Kz2YTm+Vl0qKFT9KUJvD8+fiO8AvoHhFvEatfVixA=="],
++
+     "escalade": ["escalade@3.2.0", "", {}, "sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA=="],
+ 
+     "escape-html": ["escape-html@1.0.3", "", {}, "sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow=="],
+@@ -1188,6 +1234,8 @@
+ 
+     "glob-to-regexp": ["glob-to-regexp@0.4.1", "", {}, "sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw=="],
+ 
++    "global-directory": ["global-directory@4.0.1", "", { "dependencies": { "ini": "4.1.1" } }, "sha512-wHTUcDUoZ1H5/0iVqEudYW4/kAlN5cZ3j/bXn0Dpbizl9iaUVeWSHqiOjsgk6OW2bkLclbBjzewBz6weQ1zA2Q=="],
++
+     "global-dirs": ["global-dirs@0.1.1", "", { "dependencies": { "ini": "^1.3.4" } }, "sha512-NknMLn7F2J7aflwFOlGdNIuCDpN3VGoSoB+aap3KABFWbHVn1TCgFC+np23J8W2BiZbjfEw3BFBycSMv1AFblg=="],
+ 
+     "globals": ["globals@13.24.0", "", { "dependencies": { "type-fest": "^0.20.2" } }, "sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ=="],
+@@ -1246,7 +1294,7 @@
+ 
+     "ieee754": ["ieee754@1.2.1", "", {}, "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="],
+ 
+-    "ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
++    "ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
+ 
+     "image-size": ["image-size@1.2.1", "", { "dependencies": { "queue": "6.0.2" }, "bin": { "image-size": "bin/image-size.js" } }, "sha512-rH+46sQJ2dlwfjfhCyNx5thzrv+dtmBIhPHk0zgRUukHzZ/kRueTJXoYYsclBaKcSMBWuGbOFXtioLpzTb5euw=="],
+ 
+@@ -1262,12 +1310,14 @@
+ 
+     "inherits": ["inherits@2.0.4", "", {}, "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="],
+ 
+-    "ini": ["ini@1.3.8", "", {}, "sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew=="],
++    "ini": ["ini@4.1.1", "", {}, "sha512-QQnnxNyfvmHFIsj7gkPcYymR8Jdw/o7mp5ZFihxn6h8Ci6fh3Dx4E1gPjpQEpIuPo9XVNY/ZUwh4BPMjGyL01g=="],
+ 
+     "inline-style-prefixer": ["inline-style-prefixer@7.0.1", "", { "dependencies": { "css-in-js-utils": "^3.1.0" } }, "sha512-lhYo5qNTQp3EvSSp3sRvXMbVQTLrvGV6DycRMJ5dm2BLMiJ30wpXKdDdgX+GmJZ5uQMucwRKHamXSst3Sj/Giw=="],
+ 
+     "internal-slot": ["internal-slot@1.1.0", "", { "dependencies": { "es-errors": "^1.3.0", "hasown": "^2.0.2", "side-channel": "^1.1.0" } }, "sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw=="],
+ 
++    "interpret": ["interpret@3.1.1", "", {}, "sha512-6xwYfHbajpoF0xLW+iwLkhwgvLoZDfjYfoFNu8ftMoXINzwuymNLd9u/KmwtdT2GbR+/Cz66otEGEVVUHX9QLQ=="],
++
+     "intl-pluralrules": ["intl-pluralrules@2.0.1", "", {}, "sha512-astxTLzIdXPeN0K9Rumi6LfMpm3rvNO0iJE+h/k8Kr/is+wPbRe4ikyDjlLr6VTh/mEfNv8RjN+gu3KwDiuhqg=="],
+ 
+     "invariant": ["invariant@2.2.4", "", { "dependencies": { "loose-envify": "^1.0.0" } }, "sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA=="],
+@@ -1306,6 +1356,8 @@
+ 
+     "is-glob": ["is-glob@4.0.3", "", { "dependencies": { "is-extglob": "^2.1.1" } }, "sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg=="],
+ 
++    "is-installed-globally": ["is-installed-globally@1.0.0", "", { "dependencies": { "global-directory": "^4.0.1", "is-path-inside": "^4.0.0" } }, "sha512-K55T22lfpQ63N4KEN57jZUAaAYqYHEe8veb/TycJRk9DdSCLLcovXz/mL6mOnhQaZsQGwPhuFopdQIlqGSEjiQ=="],
++
+     "is-map": ["is-map@2.0.3", "", {}, "sha512-1Qed0/Hr2m+YqxnM09CjA2d/i6YZNfF6R2oRAOj36eUdS6qIV/huPJNSEpKbupewFs+ZsJlxsjjPbc0/afW6Lw=="],
+ 
+     "is-negative-zero": ["is-negative-zero@2.0.3", "", {}, "sha512-5KoIu2Ngpyek75jXodFvnafB6DJgr3u8uuK0LEZJjrU19DrMD3EVERaR8sjz8CCGgpZvxPl9SuE1GMVPFHx1mw=="],
+@@ -1434,7 +1486,7 @@
+ 
+     "json-parse-even-better-errors": ["json-parse-even-better-errors@2.3.1", "", {}, "sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w=="],
+ 
+-    "json-schema-traverse": ["json-schema-traverse@0.4.1", "", {}, "sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg=="],
++    "json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+ 
+     "json-stable-stringify-without-jsonify": ["json-stable-stringify-without-jsonify@1.0.1", "", {}, "sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw=="],
+ 
+@@ -1510,6 +1562,8 @@
+ 
+     "math-intrinsics": ["math-intrinsics@1.1.0", "", {}, "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g=="],
+ 
++    "memoize": ["memoize@10.2.0", "", { "dependencies": { "mimic-function": "^5.0.1" } }, "sha512-DeC6b7QBrZsRs3Y02A6A7lQyzFbsQbqgjI6UW0GigGWV+u1s25TycMr0XHZE4cJce7rY/vyw2ctMQqfDkIhUEA=="],
++
+     "memoize-one": ["memoize-one@5.2.1", "", {}, "sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q=="],
+ 
+     "merge-stream": ["merge-stream@2.0.0", "", {}, "sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w=="],
+@@ -1552,6 +1606,8 @@
+ 
+     "mimic-fn": ["mimic-fn@2.1.0", "", {}, "sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg=="],
+ 
++    "mimic-function": ["mimic-function@5.0.1", "", {}, "sha512-VP79XUPxV2CigYP3jWwAUFSku2aKqBH7uTAapFWCBqutsbmDo96KY5o8uh6U+/YSIn5OxJnXp73beVkpqMIGhA=="],
++
+     "min-indent": ["min-indent@1.0.1", "", {}, "sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg=="],
+ 
+     "minimatch": ["minimatch@3.1.2", "", { "dependencies": { "brace-expansion": "^1.1.7" } }, "sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw=="],
+@@ -1664,7 +1720,7 @@
+ 
+     "picocolors": ["picocolors@1.1.1", "", {}, "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="],
+ 
+-    "picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
++    "picomatch": ["picomatch@4.0.3", "", {}, "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q=="],
+ 
+     "pirates": ["pirates@4.0.7", "", {}, "sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA=="],
+ 
+@@ -1776,6 +1832,8 @@
+ 
+     "reactotron-react-native-mmkv": ["reactotron-react-native-mmkv@0.2.9", "", { "peerDependencies": { "react-native-mmkv": "*", "reactotron-core-client": "*" } }, "sha512-zOEDEao+gA27IrZYHAHFPYmmSGGvuEKy6wv37WUzA1NdbQDFqPpVNQkDgL9kG5xOXlnUnp39JhHLaAJ63dz9cQ=="],
+ 
++    "rechoir": ["rechoir@0.8.0", "", { "dependencies": { "resolve": "^1.20.0" } }, "sha512-/vxpCXddiX8NGfGO/mTafwjq4aFa/71pvamip0++IQk3zG8cbCj0fifNPrjjF1XMXUne91jL9OoxmdykoEtifQ=="],
++
+     "redent": ["redent@3.0.0", "", { "dependencies": { "indent-string": "^4.0.0", "strip-indent": "^3.0.0" } }, "sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg=="],
+ 
+     "reflect.getprototypeof": ["reflect.getprototypeof@1.0.10", "", { "dependencies": { "call-bind": "^1.0.8", "define-properties": "^1.2.1", "es-abstract": "^1.23.9", "es-errors": "^1.3.0", "es-object-atoms": "^1.0.0", "get-intrinsic": "^1.2.7", "get-proto": "^1.0.1", "which-builtin-type": "^1.2.1" } }, "sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw=="],
+@@ -1786,6 +1844,8 @@
+ 
+     "regenerator-runtime": ["regenerator-runtime@0.13.11", "", {}, "sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg=="],
+ 
++    "regexp-tree": ["regexp-tree@0.1.27", "", { "bin": { "regexp-tree": "bin/regexp-tree" } }, "sha512-iETxpjK6YoRWJG5o6hXLwvjYAoW+FEZn9os0PD/b6AP6xQwsa/Y7lCVgIixBbUPMfhu+i2LtdeAqVTgGlQarfA=="],
++
+     "regexp.prototype.flags": ["regexp.prototype.flags@1.5.4", "", { "dependencies": { "call-bind": "^1.0.8", "define-properties": "^1.2.1", "es-errors": "^1.3.0", "get-proto": "^1.0.1", "gopd": "^1.2.0", "set-function-name": "^2.0.2" } }, "sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA=="],
+ 
+     "regexpu-core": ["regexpu-core@6.4.0", "", { "dependencies": { "regenerate": "^1.4.2", "regenerate-unicode-properties": "^10.2.2", "regjsgen": "^0.8.0", "regjsparser": "^0.13.0", "unicode-match-property-ecmascript": "^2.0.0", "unicode-match-property-value-ecmascript": "^2.2.1" } }, "sha512-0ghuzq67LI9bLXpOX/ISfve/Mq33a4aFRzoQYhnnok1JOFpmE/A2TBGkNVenOGEeSBCjIiWcc6MVOG5HEQv0sA=="],
+@@ -1802,7 +1862,7 @@
+ 
+     "requires-port": ["requires-port@1.0.0", "", {}, "sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ=="],
+ 
+-    "resolve": ["resolve@2.0.0-next.5", "", { "dependencies": { "is-core-module": "^2.13.0", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-U7WjGVG9sH8tvjW5SmGbQuui75FiyjAX72HX15DwBBwF9dNiQZRQAg9nnPhYy+TUnE0+VcrttuvNI8oSxZcocA=="],
++    "resolve": ["resolve@1.22.11", "", { "dependencies": { "is-core-module": "^2.16.1", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-RfqAvLnMl313r7c9oclB1HhUEAezcpLjz95wFH4LVuhk9JF/r22qmVP9AMmOU4vMX7Q8pN8jwNg/CSpdFnMjTQ=="],
+ 
+     "resolve-cwd": ["resolve-cwd@3.0.0", "", { "dependencies": { "resolve-from": "^5.0.0" } }, "sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg=="],
+ 
+@@ -1832,6 +1892,8 @@
+ 
+     "safe-push-apply": ["safe-push-apply@1.0.0", "", { "dependencies": { "es-errors": "^1.3.0", "isarray": "^2.0.5" } }, "sha512-iKE9w/Z7xCzUMIZqdBsp6pEQvwuEebH4vdpjcDWnyzaI6yl6O9FHvVpmGelvEHNsoY6wGblkxR6Zty/h00WiSA=="],
+ 
++    "safe-regex": ["safe-regex@2.1.1", "", { "dependencies": { "regexp-tree": "~0.1.1" } }, "sha512-rx+x8AMzKb5Q5lQ95Zoi6ZbJqwCLkqi3XuJXp5P3rT8OEc6sZCJG5AE5dU3lsgRr/F4Bs31jSlVN+j5KrsGu9A=="],
++
+     "safe-regex-test": ["safe-regex-test@1.1.0", "", { "dependencies": { "call-bound": "^1.0.2", "es-errors": "^1.3.0", "is-regex": "^1.2.1" } }, "sha512-x/+Cz4YrimQxQccJf5mKEbIa1NzeCRNI5Ecl/ekmlYaampdNLPalVyIcCZNNH3MvmqBugV5TMYZXv0ljslUlaw=="],
+ 
+     "safer-buffer": ["safer-buffer@2.1.2", "", {}, "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg=="],
+@@ -2010,12 +2072,14 @@
+ 
+     "ts-jest": ["ts-jest@29.4.6", "", { "dependencies": { "bs-logger": "^0.2.6", "fast-json-stable-stringify": "^2.1.0", "handlebars": "^4.7.8", "json5": "^2.2.3", "lodash.memoize": "^4.1.2", "make-error": "^1.3.6", "semver": "^7.7.3", "type-fest": "^4.41.0", "yargs-parser": "^21.1.1" }, "peerDependencies": { "@babel/core": ">=7.0.0-beta.0 <8", "@jest/transform": "^29.0.0 || ^30.0.0", "@jest/types": "^29.0.0 || ^30.0.0", "babel-jest": "^29.0.0 || ^30.0.0", "jest": "^29.0.0 || ^30.0.0", "jest-util": "^29.0.0 || ^30.0.0", "typescript": ">=4.3 <6" }, "optionalPeers": ["@babel/core", "@jest/transform", "@jest/types", "babel-jest", "jest-util"], "bin": { "ts-jest": "cli.js" } }, "sha512-fSpWtOO/1AjSNQguk43hb/JCo16oJDnMJf3CdEGNkqsEX3t0KX96xvyX1D7PfLCpVoKu4MfVrqUkFyblYoY4lA=="],
+ 
+-    "ts-node": ["ts-node@10.9.2", "", { "dependencies": { "@cspotcode/source-map-support": "^0.8.0", "@tsconfig/node10": "^1.0.7", "@tsconfig/node12": "^1.0.7", "@tsconfig/node14": "^1.0.0", "@tsconfig/node16": "^1.0.2", "acorn": "^8.4.1", "acorn-walk": "^8.1.1", "arg": "^4.1.0", "create-require": "^1.1.0", "diff": "^4.0.1", "make-error": "^1.1.1", "v8-compile-cache-lib": "^3.0.1", "yn": "3.1.1" }, "peerDependencies": { "@swc/core": ">=1.2.50", "@swc/wasm": ">=1.2.50", "@types/node": "*", "typescript": ">=2.7" }, "optionalPeers": ["@swc/core", "@swc/wasm"], "bin": { "ts-node": "dist/bin.js", "ts-script": "dist/bin-script-deprecated.js", "ts-node-cwd": "dist/bin-cwd.js", "ts-node-esm": "dist/bin-esm.js", "ts-node-script": "dist/bin-script.js", "ts-node-transpile-only": "dist/bin-transpile.js" } }, "sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ=="],
++    "tsconfig-paths": ["tsconfig-paths@4.2.0", "", { "dependencies": { "json5": "^2.2.2", "minimist": "^1.2.6", "strip-bom": "^3.0.0" } }, "sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg=="],
+ 
+-    "tsconfig-paths": ["tsconfig-paths@3.15.0", "", { "dependencies": { "@types/json5": "^0.0.29", "json5": "^1.0.2", "minimist": "^1.2.6", "strip-bom": "^3.0.0" } }, "sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg=="],
++    "tsconfig-paths-webpack-plugin": ["tsconfig-paths-webpack-plugin@4.2.0", "", { "dependencies": { "chalk": "^4.1.0", "enhanced-resolve": "^5.7.0", "tapable": "^2.2.1", "tsconfig-paths": "^4.1.2" } }, "sha512-zbem3rfRS8BgeNK50Zz5SIQgXzLafiHjOwUAvk/38/o1jHn/V5QAgVUcz884or7WYcPaH3N2CIfUc2u0ul7UcA=="],
+ 
+     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
+ 
++    "tsx": ["tsx@4.21.0", "", { "dependencies": { "esbuild": "~0.27.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw=="],
++
+     "type-check": ["type-check@0.4.0", "", { "dependencies": { "prelude-ls": "^1.2.1" } }, "sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew=="],
+ 
+     "type-detect": ["type-detect@4.0.8", "", {}, "sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g=="],
+@@ -2072,8 +2136,6 @@
+ 
+     "uuid": ["uuid@7.0.3", "", { "bin": { "uuid": "dist/bin/uuid" } }, "sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg=="],
+ 
+-    "v8-compile-cache-lib": ["v8-compile-cache-lib@3.0.1", "", {}, "sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg=="],
+-
+     "v8-to-istanbul": ["v8-to-istanbul@9.3.0", "", { "dependencies": { "@jridgewell/trace-mapping": "^0.3.12", "@types/istanbul-lib-coverage": "^2.0.1", "convert-source-map": "^2.0.0" } }, "sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA=="],
+ 
+     "validate-npm-package-name": ["validate-npm-package-name@5.0.1", "", {}, "sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ=="],
+@@ -2092,6 +2154,8 @@
+ 
+     "watchpack": ["watchpack@2.4.4", "", { "dependencies": { "glob-to-regexp": "^0.4.1", "graceful-fs": "^4.1.2" } }, "sha512-c5EGNOiyxxV5qmTtAB7rbiXxi1ooX1pQKMLX/MIabJjRA0SJBQOjKF+KSVfHkr9U1cADPon0mRiVe/riyaiDUA=="],
+ 
++    "watskeburt": ["watskeburt@5.0.0", "", { "bin": { "watskeburt": "dist/run-cli.js" } }, "sha512-fEMhfIzu9WOuAJdDcTT+aPjn0JHI2+UeJ+zWSEs/tgMvc+MFDZVmhlZ8C1uJWXax1ETYc4trUnHFHyx2DrG0jQ=="],
++
+     "wcwidth": ["wcwidth@1.0.1", "", { "dependencies": { "defaults": "^1.0.3" } }, "sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg=="],
+ 
+     "webidl-conversions": ["webidl-conversions@5.0.0", "", {}, "sha512-VlZwKPCkYKxQgeSbH5EyngOmRp7Ww7I9rQLERETtf5ofd9pGeswWiOtogpEO850jziPRarreGxn5QIiTqpb2wA=="],
+@@ -2156,21 +2220,17 @@
+ 
+     "yargs-parser": ["yargs-parser@21.1.1", "", {}, "sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw=="],
+ 
+-    "yn": ["yn@3.1.1", "", {}, "sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q=="],
+-
+     "yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
+ 
+     "zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
+ 
+     "zod-to-json-schema": ["zod-to-json-schema@3.25.0", "", { "peerDependencies": { "zod": "^3.25 || ^4" } }, "sha512-HvWtU2UG41LALjajJrML6uQejQhNJx+JBO9IflpSja4R03iNWfKXrj6W2h7ljuLyc1nKS+9yDyL/9tD1U/yBnQ=="],
+ 
+-    "@babel/helper-define-polyfill-provider/resolve": ["resolve@1.22.11", "", { "dependencies": { "is-core-module": "^2.16.1", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-RfqAvLnMl313r7c9oclB1HhUEAezcpLjz95wFH4LVuhk9JF/r22qmVP9AMmOU4vMX7Q8pN8jwNg/CSpdFnMjTQ=="],
+-
+     "@babel/highlight/chalk": ["chalk@2.4.2", "", { "dependencies": { "ansi-styles": "^3.2.1", "escape-string-regexp": "^1.0.5", "supports-color": "^5.3.0" } }, "sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ=="],
+ 
+-    "@cspotcode/source-map-support/@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.9", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.0.3", "@jridgewell/sourcemap-codec": "^1.4.10" } }, "sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ=="],
++    "@eslint/eslintrc/ajv": ["ajv@6.12.6", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "fast-json-stable-stringify": "^2.0.0", "json-schema-traverse": "^0.4.1", "uri-js": "^4.2.2" } }, "sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g=="],
+ 
+-    "@expo/cli/arg": ["arg@5.0.2", "", {}, "sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg=="],
++    "@eslint/eslintrc/ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
+ 
+     "@expo/cli/glob": ["glob@10.5.0", "", { "dependencies": { "foreground-child": "^3.1.0", "jackspeak": "^3.1.2", "minimatch": "^9.0.4", "minipass": "^7.1.2", "package-json-from-dist": "^1.0.0", "path-scurry": "^1.11.1" }, "bin": { "glob": "dist/esm/bin.mjs" } }, "sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg=="],
+ 
+@@ -2180,8 +2240,6 @@
+ 
+     "@expo/cli/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+ 
+-    "@expo/cli/resolve": ["resolve@1.22.11", "", { "dependencies": { "is-core-module": "^2.16.1", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-RfqAvLnMl313r7c9oclB1HhUEAezcpLjz95wFH4LVuhk9JF/r22qmVP9AMmOU4vMX7Q8pN8jwNg/CSpdFnMjTQ=="],
+-
+     "@expo/cli/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+ 
+     "@expo/cli/ws": ["ws@8.18.3", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg=="],
+@@ -2200,10 +2258,10 @@
+ 
+     "@expo/devcert/glob": ["glob@10.5.0", "", { "dependencies": { "foreground-child": "^3.1.0", "jackspeak": "^3.1.2", "minimatch": "^9.0.4", "minipass": "^7.1.2", "package-json-from-dist": "^1.0.0", "path-scurry": "^1.11.1" }, "bin": { "glob": "dist/esm/bin.mjs" } }, "sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg=="],
+ 
+-    "@expo/fingerprint/arg": ["arg@5.0.2", "", {}, "sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg=="],
+-
+     "@expo/fingerprint/glob": ["glob@10.5.0", "", { "dependencies": { "foreground-child": "^3.1.0", "jackspeak": "^3.1.2", "minimatch": "^9.0.4", "minipass": "^7.1.2", "package-json-from-dist": "^1.0.0", "path-scurry": "^1.11.1" }, "bin": { "glob": "dist/esm/bin.mjs" } }, "sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg=="],
+ 
++    "@expo/fingerprint/ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
++
+     "@expo/fingerprint/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+ 
+     "@expo/fingerprint/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+@@ -2256,26 +2314,20 @@
+ 
+     "@types/jest/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+ 
+-    "@typescript-eslint/eslint-plugin/ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
+-
+     "@typescript-eslint/typescript-estree/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+ 
+     "@typescript-eslint/typescript-estree/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+ 
+     "@typescript-eslint/visitor-keys/eslint-visitor-keys": ["eslint-visitor-keys@4.2.1", "", {}, "sha512-Uhdk5sfqcee/9H/rCOJikYz67o0a2Tw2hGRPOG2Y1R2dg7brRe1uG0yaNQDHu+TO/uQPF/5eCapvYSmHUjt7JQ=="],
+ 
+-    "ajv-formats/ajv": ["ajv@8.17.1", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g=="],
+-
+-    "ajv-keywords/ajv": ["ajv@8.17.1", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g=="],
+-
+     "ansi-escapes/type-fest": ["type-fest@0.21.3", "", {}, "sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w=="],
+ 
++    "anymatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
++
+     "better-opn/open": ["open@8.4.2", "", { "dependencies": { "define-lazy-prop": "^2.0.0", "is-docker": "^2.1.1", "is-wsl": "^2.2.0" } }, "sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ=="],
+ 
+     "chalk/ansi-styles": ["ansi-styles@4.3.0", "", { "dependencies": { "color-convert": "^2.0.1" } }, "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="],
+ 
+-    "compressible/mime-db": ["mime-db@1.54.0", "", {}, "sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ=="],
+-
+     "compression/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+ 
+     "compression/negotiator": ["negotiator@0.6.4", "", {}, "sha512-myRT3DiWPHqho5PrJaIRyaMv2kgYf0mUVgBNOYMuCH5Ki1yEiQaf/ZJuQ62nvpc44wL5WDbTX7yGJi1Neevw8w=="],
+@@ -2284,16 +2336,20 @@
+ 
+     "cssstyle/cssom": ["cssom@0.3.8", "", {}, "sha512-b0tGHbfegbhPJpxpiBPU2sCkigAqtM9O121le6bbOlgyV+NyGyCmVfJ6QW9eRjz8CpNfWEOYBIMIGRYkLwsIYg=="],
+ 
++    "dependency-cruiser/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
++
+     "domexception/webidl-conversions": ["webidl-conversions@7.0.0", "", {}, "sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g=="],
+ 
+     "error-ex/is-arrayish": ["is-arrayish@0.2.1", "", {}, "sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg=="],
+ 
++    "eslint/ajv": ["ajv@6.12.6", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "fast-json-stable-stringify": "^2.0.0", "json-schema-traverse": "^0.4.1", "uri-js": "^4.2.2" } }, "sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g=="],
++
++    "eslint/ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
++
+     "eslint-config-expo/globals": ["globals@16.5.0", "", {}, "sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ=="],
+ 
+     "eslint-import-resolver-node/debug": ["debug@3.2.7", "", { "dependencies": { "ms": "^2.1.1" } }, "sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ=="],
+ 
+-    "eslint-import-resolver-node/resolve": ["resolve@1.22.11", "", { "dependencies": { "is-core-module": "^2.16.1", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-RfqAvLnMl313r7c9oclB1HhUEAezcpLjz95wFH4LVuhk9JF/r22qmVP9AMmOU4vMX7Q8pN8jwNg/CSpdFnMjTQ=="],
+-
+     "eslint-module-utils/debug": ["debug@3.2.7", "", { "dependencies": { "ms": "^2.1.1" } }, "sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ=="],
+ 
+     "eslint-plugin-expo/eslint": ["eslint@9.39.1", "", { "dependencies": { "@eslint-community/eslint-utils": "^4.8.0", "@eslint-community/regexpp": "^4.12.1", "@eslint/config-array": "^0.21.1", "@eslint/config-helpers": "^0.4.2", "@eslint/core": "^0.17.0", "@eslint/eslintrc": "^3.3.1", "@eslint/js": "9.39.1", "@eslint/plugin-kit": "^0.4.1", "@humanfs/node": "^0.16.6", "@humanwhocodes/module-importer": "^1.0.1", "@humanwhocodes/retry": "^0.4.2", "@types/estree": "^1.0.6", "ajv": "^6.12.4", "chalk": "^4.0.0", "cross-spawn": "^7.0.6", "debug": "^4.3.2", "escape-string-regexp": "^4.0.0", "eslint-scope": "^8.4.0", "eslint-visitor-keys": "^4.2.1", "espree": "^10.4.0", "esquery": "^1.5.0", "esutils": "^2.0.2", "fast-deep-equal": "^3.1.3", "file-entry-cache": "^8.0.0", "find-up": "^5.0.0", "glob-parent": "^6.0.2", "ignore": "^5.2.0", "imurmurhash": "^0.1.4", "is-glob": "^4.0.0", "json-stable-stringify-without-jsonify": "^1.0.1", "lodash.merge": "^4.6.2", "minimatch": "^3.1.2", "natural-compare": "^1.4.0", "optionator": "^0.9.3" }, "peerDependencies": { "jiti": "*" }, "optionalPeers": ["jiti"], "bin": { "eslint": "bin/eslint.js" } }, "sha512-BhHmn2yNOFA9H9JmmIVKJmd288g9hrVRDkdoIgRCRuSySRUHH7r/DI6aAXW9T1WwUuY3DFgrcaqB+deURBLR5g=="],
+@@ -2302,22 +2358,22 @@
+ 
+     "eslint-plugin-import/doctrine": ["doctrine@2.1.0", "", { "dependencies": { "esutils": "^2.0.2" } }, "sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw=="],
+ 
++    "eslint-plugin-import/tsconfig-paths": ["tsconfig-paths@3.15.0", "", { "dependencies": { "@types/json5": "^0.0.29", "json5": "^1.0.2", "minimist": "^1.2.6", "strip-bom": "^3.0.0" } }, "sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg=="],
++
+     "eslint-plugin-react/doctrine": ["doctrine@2.1.0", "", { "dependencies": { "esutils": "^2.0.2" } }, "sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw=="],
+ 
++    "eslint-plugin-react/resolve": ["resolve@2.0.0-next.5", "", { "dependencies": { "is-core-module": "^2.13.0", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-U7WjGVG9sH8tvjW5SmGbQuui75FiyjAX72HX15DwBBwF9dNiQZRQAg9nnPhYy+TUnE0+VcrttuvNI8oSxZcocA=="],
++
+     "expect/jest-matcher-utils": ["jest-matcher-utils@29.7.0", "", { "dependencies": { "chalk": "^4.0.0", "jest-diff": "^29.7.0", "jest-get-type": "^29.6.3", "pretty-format": "^29.7.0" } }, "sha512-sBkD+Xi9DtcChsI3L3u0+N0opgPYnCRPtGcQYrgXmR+hmt/fYfWAL0xRXYU8eWOdfuLgBe0YCW3AFtnRLagq/g=="],
+ 
+     "expo/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+ 
+-    "expo-build-properties/ajv": ["ajv@8.17.1", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g=="],
+-
+     "expo-build-properties/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+ 
+     "expo-modules-autolinking/commander": ["commander@7.2.0", "", {}, "sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw=="],
+ 
+     "fbjs/promise": ["promise@7.3.1", "", { "dependencies": { "asap": "~2.0.3" } }, "sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg=="],
+ 
+-    "fdir/picomatch": ["picomatch@3.0.1", "", {}, "sha512-I3EurrIQMlRc9IaAZnqRR044Phh2DXY+55o7uJ0V+hYZAcQYSuFWsc9q5PvyDHUSCe1Qxn/iBz+78s86zWnGag=="],
+-
+     "finalhandler/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+ 
+     "finalhandler/encodeurl": ["encodeurl@1.0.2", "", {}, "sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w=="],
+@@ -2328,6 +2384,8 @@
+ 
+     "foreground-child/signal-exit": ["signal-exit@4.1.0", "", {}, "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="],
+ 
++    "global-dirs/ini": ["ini@1.3.8", "", {}, "sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew=="],
++
+     "globals/type-fest": ["type-fest@0.20.2", "", {}, "sha512-Ne+eE4r0/iWnpAxD852z3A+N0Bt5RN//NjJwRd2VFHEmrywxf5vsZlh4R6lixl6B+wz/8d+maTSAkN1FIkI3LQ=="],
+ 
+     "hoist-non-react-statics/react-is": ["react-is@16.13.1", "", {}, "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="],
+@@ -2338,6 +2396,8 @@
+ 
+     "is-bun-module/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+ 
++    "is-installed-globally/is-path-inside": ["is-path-inside@4.0.0", "", {}, "sha512-lJJV/5dYS+RcL8uQdBDW9c9uWFLLBNRyFhnAKXw5tVqLlKZ4RMGZKv+YQ/IA3OhD+RpbJa1LLFM1FQPGyIXvOA=="],
++
+     "jest-circus/jest-matcher-utils": ["jest-matcher-utils@29.7.0", "", { "dependencies": { "chalk": "^4.0.0", "jest-diff": "^29.7.0", "jest-get-type": "^29.6.3", "pretty-format": "^29.7.0" } }, "sha512-sBkD+Xi9DtcChsI3L3u0+N0opgPYnCRPtGcQYrgXmR+hmt/fYfWAL0xRXYU8eWOdfuLgBe0YCW3AFtnRLagq/g=="],
+ 
+     "jest-circus/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+@@ -2350,8 +2410,6 @@
+ 
+     "jest-message-util/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+ 
+-    "jest-resolve/resolve": ["resolve@1.22.11", "", { "dependencies": { "is-core-module": "^2.16.1", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-RfqAvLnMl313r7c9oclB1HhUEAezcpLjz95wFH4LVuhk9JF/r22qmVP9AMmOU4vMX7Q8pN8jwNg/CSpdFnMjTQ=="],
+-
+     "jest-runner/source-map-support": ["source-map-support@0.5.13", "", { "dependencies": { "buffer-from": "^1.0.0", "source-map": "^0.6.0" } }, "sha512-SHSKFHadjVA5oR4PPqhtAVdcBWwRYVd6g6cAXnIbRiIwc2EhPrTuKUBdSLvlEKyIP3GCf89fltvcZiP9MMFA1w=="],
+ 
+     "jest-runtime/strip-bom": ["strip-bom@4.0.0", "", {}, "sha512-3xurFv5tEgii33Zi8Jtp55wEIILR9eh34FAW00PZf+JnSsTmV/ioewSgQl97JHvgjoRGwPShsWm+IdrxB35d0w=="],
+@@ -2364,6 +2422,8 @@
+ 
+     "jest-snapshot/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+ 
++    "jest-util/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
++
+     "jest-validate/camelcase": ["camelcase@6.3.0", "", {}, "sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA=="],
+ 
+     "jest-validate/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+@@ -2416,6 +2476,8 @@
+ 
+     "metro-transform-worker/metro-source-map": ["metro-source-map@0.83.2", "", { "dependencies": { "@babel/traverse": "^7.25.3", "@babel/traverse--for-generate-function-map": "npm:@babel/traverse@^7.25.3", "@babel/types": "^7.25.2", "flow-enums-runtime": "^0.0.6", "invariant": "^2.2.4", "metro-symbolicate": "0.83.2", "nullthrows": "^1.1.1", "ob1": "0.83.2", "source-map": "^0.5.6", "vlq": "^1.0.0" } }, "sha512-5FL/6BSQvshIKjXOennt9upFngq2lFvDakZn5LfauIVq8+L4sxXewIlSTcxAtzbtjAIaXeOSVMtCJ5DdfCt9AA=="],
+ 
++    "micromatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
++
+     "node-fetch/whatwg-url": ["whatwg-url@5.0.0", "", { "dependencies": { "tr46": "~0.0.3", "webidl-conversions": "^3.0.0" } }, "sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw=="],
+ 
+     "npm-package-arg/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+@@ -2432,10 +2494,14 @@
+ 
+     "prop-types/react-is": ["react-is@16.13.1", "", {}, "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="],
+ 
++    "rc/ini": ["ini@1.3.8", "", {}, "sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew=="],
++
+     "rc/strip-json-comments": ["strip-json-comments@2.0.1", "", {}, "sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ=="],
+ 
+     "react-devtools-core/ws": ["ws@7.5.10", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": "^5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ=="],
+ 
++    "react-native/commander": ["commander@12.1.0", "", {}, "sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA=="],
++
+     "react-native/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+ 
+     "react-native/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+@@ -2456,8 +2522,6 @@
+ 
+     "restore-cursor/onetime": ["onetime@2.0.1", "", { "dependencies": { "mimic-fn": "^1.0.0" } }, "sha512-oyyPpiMaKARvvcgip+JV+7zci5L8D1W9RZIz2l1o08AM3pfspitVWnPt3mzHcBPp12oYMTy0pqrFs/C+m3EwsQ=="],
+ 
+-    "schema-utils/ajv": ["ajv@8.17.1", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g=="],
+-
+     "send/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+ 
+     "serve-static/send": ["send@0.19.0", "", { "dependencies": { "debug": "2.6.9", "depd": "2.0.0", "destroy": "1.2.0", "encodeurl": "~1.0.2", "escape-html": "~1.0.3", "etag": "~1.8.1", "fresh": "0.5.2", "http-errors": "2.0.0", "mime": "1.6.0", "ms": "2.1.3", "on-finished": "2.4.1", "range-parser": "~1.2.1", "statuses": "2.0.1" } }, "sha512-dW41u5VfLXu8SJh5bwRmyYUbAoSB3c9uQh6L8h/KtsFREPWpbX1lrljJo186Jc4nmci/sGUZ9a0a0J2zgfq2hw=="],
+@@ -2482,12 +2546,8 @@
+ 
+     "terser-webpack-plugin/jest-worker": ["jest-worker@27.5.1", "", { "dependencies": { "@types/node": "*", "merge-stream": "^2.0.0", "supports-color": "^8.0.0" } }, "sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg=="],
+ 
+-    "tinyglobby/picomatch": ["picomatch@4.0.3", "", {}, "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q=="],
+-
+     "ts-jest/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+ 
+-    "tsconfig-paths/json5": ["json5@1.0.2", "", { "dependencies": { "minimist": "^1.2.0" }, "bin": { "json5": "lib/cli.js" } }, "sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA=="],
+-
+     "webpack/eslint-scope": ["eslint-scope@5.1.1", "", { "dependencies": { "esrecurse": "^4.3.0", "estraverse": "^4.1.1" } }, "sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw=="],
+ 
+     "whatwg-url/webidl-conversions": ["webidl-conversions@7.0.0", "", {}, "sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g=="],
+@@ -2504,6 +2564,8 @@
+ 
+     "@babel/highlight/chalk/supports-color": ["supports-color@5.5.0", "", { "dependencies": { "has-flag": "^3.0.0" } }, "sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow=="],
+ 
++    "@eslint/eslintrc/ajv/json-schema-traverse": ["json-schema-traverse@0.4.1", "", {}, "sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg=="],
++
+     "@expo/cli/minimatch/brace-expansion": ["brace-expansion@2.0.2", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ=="],
+ 
+     "@expo/cli/pretty-format/@jest/schemas": ["@jest/schemas@29.6.3", "", { "dependencies": { "@sinclair/typebox": "^0.27.8" } }, "sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA=="],
+@@ -2582,10 +2644,6 @@
+ 
+     "@typescript-eslint/typescript-estree/minimatch/brace-expansion": ["brace-expansion@2.0.2", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ=="],
+ 
+-    "ajv-formats/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+-
+-    "ajv-keywords/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+-
+     "compression/debug/ms": ["ms@2.0.0", "", {}, "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="],
+ 
+     "connect/debug/ms": ["ms@2.0.0", "", {}, "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="],
+@@ -2594,6 +2652,8 @@
+ 
+     "eslint-plugin-expo/eslint/@eslint/js": ["@eslint/js@9.39.1", "", {}, "sha512-S26Stp4zCy88tH94QbBv3XCuzRQiZ9yXofEILmglYTh/Ug/a9/umqvgFtYBAo3Lp0nsI/5/qH1CCrbdK3AP1Tw=="],
+ 
++    "eslint-plugin-expo/eslint/ajv": ["ajv@6.12.6", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "fast-json-stable-stringify": "^2.0.0", "json-schema-traverse": "^0.4.1", "uri-js": "^4.2.2" } }, "sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g=="],
++
+     "eslint-plugin-expo/eslint/eslint-scope": ["eslint-scope@8.4.0", "", { "dependencies": { "esrecurse": "^4.3.0", "estraverse": "^5.2.0" } }, "sha512-sNXOfKCn74rt8RICKMvJS7XKV/Xk9kA7DyJr8mJik3S7Cwgy3qlkkmyS2uQB3jiJg6VNdZd/pDBJu0nvG2NlTg=="],
+ 
+     "eslint-plugin-expo/eslint/eslint-visitor-keys": ["eslint-visitor-keys@4.2.1", "", {}, "sha512-Uhdk5sfqcee/9H/rCOJikYz67o0a2Tw2hGRPOG2Y1R2dg7brRe1uG0yaNQDHu+TO/uQPF/5eCapvYSmHUjt7JQ=="],
+@@ -2602,12 +2662,16 @@
+ 
+     "eslint-plugin-expo/eslint/file-entry-cache": ["file-entry-cache@8.0.0", "", { "dependencies": { "flat-cache": "^4.0.0" } }, "sha512-XXTUwCvisa5oacNGRP9SfNtYBNAMi+RPwBFmblZEF7N7swHYQS6/Zfk7SRwx4D5j3CH211YNRco1DEMNVfZCnQ=="],
+ 
++    "eslint-plugin-expo/eslint/ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
++
++    "eslint-plugin-import/tsconfig-paths/json5": ["json5@1.0.2", "", { "dependencies": { "minimist": "^1.2.0" }, "bin": { "json5": "lib/cli.js" } }, "sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA=="],
++
++    "eslint/ajv/json-schema-traverse": ["json-schema-traverse@0.4.1", "", {}, "sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg=="],
++
+     "expect/jest-matcher-utils/jest-diff": ["jest-diff@29.7.0", "", { "dependencies": { "chalk": "^4.0.0", "diff-sequences": "^29.6.3", "jest-get-type": "^29.6.3", "pretty-format": "^29.7.0" } }, "sha512-LMIgiIrhigmPrs03JHpxUh2yISK3vLFPkAodPeo0+BuF7wA2FoQbkEg1u8gBYBThncu7e1oEDUfIXVuTqLRUjw=="],
+ 
+     "expect/jest-matcher-utils/pretty-format": ["pretty-format@29.7.0", "", { "dependencies": { "@jest/schemas": "^29.6.3", "ansi-styles": "^5.0.0", "react-is": "^18.0.0" } }, "sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ=="],
+ 
+-    "expo-build-properties/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+-
+     "expo/pretty-format/@jest/schemas": ["@jest/schemas@29.6.3", "", { "dependencies": { "@sinclair/typebox": "^0.27.8" } }, "sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA=="],
+ 
+     "expo/pretty-format/react-is": ["react-is@18.3.1", "", {}, "sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg=="],
+@@ -2694,8 +2758,6 @@
+ 
+     "restore-cursor/onetime/mimic-fn": ["mimic-fn@1.2.0", "", {}, "sha512-jf84uxzwiuiIVKiOLpfYk7N46TSy8ubTonmneY9vrpHNAnp0QBt2BxWV9dO3/j+BoVAb+a5G6YDPW3M5HOdMWQ=="],
+ 
+-    "schema-utils/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
+-
+     "send/debug/ms": ["ms@2.0.0", "", {}, "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="],
+ 
+     "serve-static/send/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+@@ -2740,6 +2802,8 @@
+ 
+     "eslint-plugin-expo/eslint/@eslint/eslintrc/globals": ["globals@14.0.0", "", {}, "sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ=="],
+ 
++    "eslint-plugin-expo/eslint/ajv/json-schema-traverse": ["json-schema-traverse@0.4.1", "", {}, "sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg=="],
++
+     "eslint-plugin-expo/eslint/file-entry-cache/flat-cache": ["flat-cache@4.0.1", "", { "dependencies": { "flatted": "^3.2.9", "keyv": "^4.5.4" } }, "sha512-f7ccFPK3SXFHpx15UIGyRJ/FJQctuKZ0zVuN3frBo4HnK3cay9VEW0R6yPYFHC0AgqhukPzKjq22t5DmAyqGyw=="],
+ 
+     "expect/jest-matcher-utils/pretty-format/@jest/schemas": ["@jest/schemas@29.6.3", "", { "dependencies": { "@sinclair/typebox": "^0.27.8" } }, "sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA=="],
+diff --git a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+index 5d551978..aac1645c 100644
+--- a/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
++++ b/IgniteDiffApp/ignite/templates/screen/NAMEScreen.tsx.ejs
+@@ -1,13 +1,13 @@
+ ---
+ destinationDir: app/screens
+ patches:
+-- path: "app/navigators/AppNavigator.tsx"
++- path: "app/navigators/navigationTypes.ts"
+   replace: "// IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST"
+-  insert: "<%= props.pascalCaseName %>: undefined\n\t// IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST"
++  insert: "<%= props.pascalCaseName %>: undefined\n  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST"
+ ---
+ import { FC } from "react"
+ import { ViewStyle } from "react-native"
+-import type { AppStackScreenProps } from "@/navigators/AppNavigator"
++import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+ import { Screen } from "@/components/Screen"
+ import { Text } from "@/components/Text"
+ // import { useNavigation } from "@react-navigation/native"
+diff --git a/IgniteDiffApp/package.json b/IgniteDiffApp/package.json
+index 84c57a98..a76117a2 100644
+--- a/IgniteDiffApp/package.json
++++ b/IgniteDiffApp/package.json
+@@ -14,6 +14,8 @@
+     "compile": "tsc --noEmit -p . --pretty",
+     "lint": "eslint . --fix",
+     "lint:check": "eslint .",
++    "depcruise": "depcruise app --config .dependency-cruiser.js",
++    "depcruise:graph": "depcruise app --include-only \"^app\" --config .dependency-cruiser.js --output-type dot > app-dependency-graph.dot && dot -T svg app-dependency-graph.dot -o app-dependency-graph.svg && dot -T png app-dependency-graph.dot -o app-dependency-graph.png && rm app-dependency-graph.dot",
+     "align-deps": "npx expo install --fix",
+     "test": "jest",
+     "test:watch": "jest --watch",
+@@ -60,7 +62,8 @@
+     "react-native-safe-area-context": "5.6.0",
+     "react-native-screens": "~4.16.0",
+     "react-native-web": "~0.21.0",
+-    "react-native-worklets": "0.7.0-nightly-20251001-14eca5b4c"
++    "react-native-worklets": "0.7.0-nightly-20251001-14eca5b4c",
++    "setimmediate": "^1.0.5"
+   },
+   "devDependencies": {
+     "@babel/core": "^7.20.0",
+@@ -70,6 +73,7 @@
+     "@types/jest": "^29.5.14",
+     "@types/react": "~19.1.10",
+     "babel-jest": "^29.2.1",
++    "dependency-cruiser": "^17.0.2",
+     "eslint": "^8.57.0",
+     "eslint-config-expo": "~10.0.0",
+     "eslint-config-prettier": "^9.1.0",
+@@ -85,7 +89,7 @@
+     "reactotron-react-native": "^5.0.5",
+     "reactotron-react-native-mmkv": "^0.2.6",
+     "ts-jest": "^29.1.1",
+-    "ts-node": "^10.9.2",
++    "tsx": "^4.20.3",
+     "typescript": "~5.9.2"
+   },
+   "engines": {
+diff --git a/IgniteDiffApp/plugins/withSplashScreen.ts b/IgniteDiffApp/plugins/withSplashScreen.ts
+deleted file mode 100644
+index 85c004ed..00000000
+--- a/IgniteDiffApp/plugins/withSplashScreen.ts
++++ /dev/null
+@@ -1,69 +0,0 @@
+-import { ConfigPlugin, withStringsXml, AndroidConfig, withAndroidStyles } from "expo/config-plugins"
+-
+-/**
+- *
+- * Expo Config Plugin to help address the double splash screen issue with `expo-splash-screen`
+- * See more information about this issue here: https://github.com/expo/expo/issues/16084
+- *
+- * How it works:
+- *   1) Replace the default splash screen with a transparent screen
+- *   2) Set the splash screen status bar to translucent
+- */
+-export const withSplashScreen: ConfigPlugin = (config) => {
+-  config = withAndroidSplashScreen(config)
+-  return config
+-}
+-
+-/**
+- * Android implementation of the config plugin - the only platform needed for this plugin.
+- * However, it is good practice to break up your config plugins from the exported
+- * function into parts by platform. For example, if it was needed, we would also
+- * add `withIosSplashScreen` for the iOS implementation.
+- */
+-const withAndroidSplashScreen: ConfigPlugin = (config) => {
+-  config = withCustomStylesXml(config)
+-  config = withCustomStringsXml(config)
+-  return config
+-}
+-
+-/**
+- * Modifies the `android/app/src/main/res/values/strings.xml` file to add the following string:
+- *
+- * <string name="expo_splash_screen_status_bar_translucent" translatable="false">true</string>
+- */
+-const withCustomStringsXml: ConfigPlugin = (config) =>
+-  withStringsXml(config, (modConfig) => {
+-    modConfig.modResults = AndroidConfig.Strings.setStringItem(
+-      [
+-        {
+-          _: "true",
+-          $: {
+-            name: "expo_splash_screen_status_bar_translucent",
+-            translatable: "false",
+-          },
+-        },
+-      ],
+-      modConfig.modResults,
+-    )
+-    return modConfig
+-  })
+-
+-/**
+- * Modifies the `android/app/src/main/res/values/styles.xml` file to append the
+- * the following to the Theme.App.SplashScreen style:
+- *
+- * <item name="android:windowIsTranslucent">true</item>
+- */
+-const withCustomStylesXml: ConfigPlugin = (config) =>
+-  withAndroidStyles(config, async (modConfig) => {
+-    modConfig.modResults = AndroidConfig.Styles.assignStylesValue(modConfig.modResults, {
+-      add: true,
+-      name: "android:windowIsTranslucent",
+-      value: "true",
+-      parent: {
+-        name: "Theme.App.SplashScreen",
+-        parent: "AppTheme",
+-      },
+-    })
+-    return modConfig
+-  })
